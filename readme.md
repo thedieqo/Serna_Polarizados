@@ -112,3 +112,16 @@ Actualización de inventario
 Pago / Facturación
    ↓
 Historial del vehículo
+
+## Alcance de la primera versión
+
+El sistema se utilizará en las dos sedes de Serna Polarizados en Ibagué e incluirá:
+
+- Registrar clientes con nombre, documento y contacto.
+- Registrar los vehículos de cada cliente, incluyendo vehículo y placa.
+- Registrar los trabajos de cada vehículo, indicando fecha, sede, servicio realizado y valor total.
+- Consultar desde ambas sedes la información de los clientes, sus vehículos y su historial de trabajos.
+- Controlar por separado el inventario de materiales de cada sede, registrando entradas, consumos y existencias.
+- Relacionar los materiales utilizados con el trabajo correspondiente y descontarlos del inventario de la sede donde se realizó.
+
+La primera versión se concentrará en clientes, vehículos, trabajos e inventario. La gestión de pagos y facturación, la integración con Siigo y los demás módulos del planteamiento general quedan fuera de este alcance inicial.
