@@ -1,0 +1,33 @@
+flowchart TD
+    subgraph PRESENTACION["Presentación — HTML, CSS y JavaScript"]
+        P1["Pantallas de clientes y vehículos"]
+        P2["Pantallas de trabajos e historial"]
+        P3["Pantallas de materiales e inventario"]
+    end
+
+    subgraph NEGOCIO["Negocio — Python y Flask"]
+        N1["Gestión de clientes y vehículos"]
+        N2["Gestión de trabajos e historial"]
+        N3["Gestión de entradas, consumos y ajustes"]
+    end
+
+    subgraph DATOS["Acceso a datos"]
+        D1["Consultas y registros de clientes y vehículos"]
+        D2["Consultas y registros de trabajos"]
+        D3["Consultas y registros de inventario por sede"]
+    end
+
+    BD[("SQLite — Base de datos central")]
+
+    P1 --> N1
+    P2 --> N2
+    P3 --> N3
+
+    N1 --> D1
+    N2 --> D2
+    N3 --> D3
+    N3 --> D2
+
+    D1 --> BD
+    D2 --> BD
+    D3 --> BD
