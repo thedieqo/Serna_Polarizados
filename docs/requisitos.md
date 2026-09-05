@@ -154,3 +154,169 @@ Esta clasificación sustituye la propuesta inicial de P-05. El registro de esa p
 ### Siguiente actividad
 
 Escribir criterios de aceptación en formato Dado–Cuando–Entonces para las once historias Must.
+
+
+## Criterios de aceptación — Borrador para revisión
+
+Estos escenarios cubren las once historias Must.
+
+Los comportamientos ya acordados se traducen en resultados comprobables. Las validaciones adicionales indicadas al final son propuestas pendientes de aprobación del equipo.
+
+Los ejemplos usarán datos ficticios.
+
+### HU-01 — Registrar cliente
+
+Escenario: registrar un cliente
+
+Dado que el asesor dispone del nombre, documento y contacto de un cliente que no está registrado,
+Cuando guarda esos datos,
+Entonces el cliente queda registrado y disponible para consulta.
+
+### HU-02 — Consultar cliente por documento
+
+Escenario: encontrar un cliente registrado
+
+Dado que existe un cliente registrado con un documento,
+Cuando el asesor consulta ese documento,
+Entonces el sistema muestra los datos del cliente correspondiente.
+
+Escenario: consultar un documento sin coincidencias
+
+Dado que no existe un cliente con el documento consultado,
+Cuando el asesor realiza la búsqueda,
+Entonces el sistema informa que no se encontró un cliente.
+
+### HU-03 — Registrar vehículo
+
+Escenario: asociar un vehículo a un cliente
+
+Dado que existe un cliente registrado,
+Cuando el asesor registra la descripción y placa de un vehículo y lo asocia al cliente,
+Entonces el vehículo queda registrado con esa asociación.
+
+Escenario: registrar otro vehículo del mismo cliente
+
+Dado que un cliente ya tiene un vehículo registrado,
+Cuando el asesor registra otro vehículo para ese cliente,
+Entonces ambos vehículos permanecen asociados al cliente.
+
+### HU-04 — Consultar vehículo por placa
+
+Escenario: encontrar un vehículo
+
+Dado que existe un vehículo registrado con una placa,
+Cuando el asesor busca esa placa,
+Entonces el sistema muestra el vehículo y el cliente asociado.
+
+Escenario: consultar una placa sin coincidencias
+
+Dado que no existe un vehículo con la placa consultada,
+Cuando el asesor realiza la búsqueda,
+Entonces el sistema informa que no se encontró el vehículo.
+
+### HU-05 — Registrar trabajo
+
+Escenario: guardar un trabajo
+
+Dado que existe un vehículo registrado,
+Cuando el asesor registra para ese vehículo la sede, fecha, servicio y valor total de un trabajo,
+Entonces el trabajo queda asociado al vehículo y a la sede seleccionada,
+Y queda disponible en el historial del vehículo.
+
+### HU-06 — Consultar historial desde ambas sedes
+
+Escenario: consultar un trabajo realizado en la otra sede
+
+Dado que un vehículo tiene un trabajo registrado en la sede A,
+Cuando el asesor consulta el historial de ese vehículo desde la sede B,
+Entonces puede consultar ese trabajo e identificar que fue realizado en la sede A.
+
+Escenario: consultar un vehículo sin trabajos
+
+Dado que un vehículo está registrado pero no tiene trabajos,
+Cuando el asesor consulta su historial,
+Entonces el sistema indica que no hay trabajos registrados para ese vehículo.
+
+### HU-08 — Registrar material
+
+Escenario: registrar un material con su unidad
+
+Dado que el administrador conoce el nombre y la unidad de medida acordada para un material,
+Cuando registra el material,
+Entonces queda disponible para registrar entradas y consumos,
+Y su unidad de medida puede consultarse.
+
+Las unidades específicas están pendientes de definición con el instalador.
+
+### HU-09 — Registrar entrada por sede
+
+Escenario: aumentar existencias en una sola sede
+
+Dado que un material está registrado y tiene existencias conocidas en ambas sedes,
+Cuando el administrador registra una entrada de cantidad positiva en la sede A,
+Entonces las existencias de la sede A aumentan en esa cantidad,
+Y las existencias de la sede B no cambian,
+Y queda registrado el movimiento de entrada.
+
+### HU-10 — Registrar consumo por trabajo
+
+Escenario: descontar material de la sede del trabajo
+
+Dado que existe un trabajo de la sede A y hay material suficiente en esa sede,
+Cuando el instalador registra el material y la cantidad consumida en el trabajo,
+Entonces el consumo queda asociado al trabajo,
+Y las existencias de la sede A disminuyen en esa cantidad,
+Y las existencias de la sede B no cambian.
+
+Escenario propuesto: impedir un consumo superior a las existencias
+
+Dado que la cantidad solicitada supera las existencias del material en la sede del trabajo,
+Cuando el instalador intenta registrar el consumo,
+Entonces el sistema informa que no hay existencias suficientes,
+Y no registra el consumo ni modifica el inventario.
+
+### HU-11 — Consultar existencias por sede
+
+Escenario: distinguir existencias de ambas sedes
+
+Dado que un material tiene cantidades diferentes en las dos sedes,
+Cuando el administrador consulta sus existencias por sede,
+Entonces el sistema muestra la cantidad correspondiente a cada sede y su unidad de medida.
+
+### HU-13 — Corregir consumo
+
+Escenario: disminuir una cantidad consumida por error
+
+Dado que un consumo registrado para un trabajo de la sede A tiene una cantidad incorrecta,
+Cuando el administrador corrige esa cantidad por una menor,
+Entonces las existencias de la sede A aumentan por la diferencia,
+Y las existencias de la sede B no cambian,
+Y queda constancia del ajuste relacionado con el consumo.
+
+Escenario: aumentar una cantidad consumida por error
+
+Dado que un consumo registrado para un trabajo de la sede A debe corregirse por una cantidad mayor,
+Y hay existencias suficientes para cubrir la diferencia,
+Cuando el administrador confirma la corrección,
+Entonces las existencias de la sede A disminuyen por la diferencia,
+Y las existencias de la sede B no cambian,
+Y queda constancia del ajuste relacionado con el consumo.
+
+### Validaciones propuestas pendientes de aprobación
+
+Estas reglas todavía deben ser revisadas por el equipo:
+
+- No permitir documentos de clientes duplicados.
+- No permitir placas de vehículos duplicadas.
+- Exigir cantidades positivas en entradas y consumos.
+- Impedir consumos que superen las existencias de la sede.
+- Aplicar el mismo control de existencias al aumentar un consumo mediante una corrección.
+- Guardar en cada ajuste quién lo realizó, cuándo, el motivo y las cantidades anterior y nueva.
+
+### Pendientes de estos criterios
+
+- Confirmar las validaciones propuestas.
+- Definir las unidades y precisión de cantidades con el instalador.
+- Precisar cómo tratar correcciones de material equivocado o anulación completa de un consumo.
+- Revisar los escenarios con Jonathan.
+- Actualizar el estado inicial del documento después de aprobar esta revisión.
