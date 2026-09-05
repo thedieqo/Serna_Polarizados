@@ -240,3 +240,108 @@ No se realizó una segunda ejecución del prompt.
 
 Los integrantes deben abrir las fuentes, revisar las afirmaciones y registrar sus observaciones. La revisión asistida no sustituye la revisión del equipo.
 
+
+## P-04 — Proponer historias de usuario
+
+### Datos de la prueba
+
+- Fecha: 5 de septiembre de 2026.
+- Herramienta: Codex.
+- Objetivo: proponer historias de usuario para el alcance acordado.
+- Estado: ejecutado y revisado con un integrante; revisión con Jonathan pendiente.
+
+### Prompt utilizado
+
+Actúa como analista de requisitos para un proyecto académico pequeño.
+
+CONTEXTO:
+Serna Polarizados necesita un sistema para sus dos sedes de Ibagué. Ambas comparten clientes, vehículos e historial de trabajos, pero cada sede tiene inventario independiente.
+
+El alcance incluye:
+
+- Registrar y consultar clientes con nombre, documento y contacto.
+- Registrar vehículos asociados a clientes y consultarlos por placa.
+- Registrar trabajos asociados a un vehículo y una sede, con fecha, servicio y valor total.
+- Consultar el historial de trabajos desde ambas sedes.
+- Registrar materiales, entradas y consumos, y consultar existencias por sede.
+- Relacionar cada consumo con un trabajo y descontarlo del inventario de esa sede.
+
+Los perfiles identificados son administrador, asesor e instalador. Sus permisos específicos todavía están pendientes de definición.
+
+TAREA:
+Propón 12 historias de usuario para este alcance. Cada historia debe expresar una necesidad concreta y poder revisarse por separado.
+
+FORMATO:
+Lista numerada de HU-01 a HU-12. Usa en cada una:
+“Como [perfil], quiero [acción] para [beneficio]”.
+Después, incluye hasta tres dudas relevantes para revisar las historias.
+
+RESTRICCIONES:
+No generes código. No agregues pagos, facturación, agenda, QR, proveedores, alertas automáticas ni nuevas sedes. Registrar el valor de un trabajo no significa gestionar su pago. No inventes unidades de medida. La asignación de perfiles es una propuesta para validar, no una decisión confirmada de permisos. No dividas artificialmente una misma necesidad para completar las 12 historias.
+
+EJEMPLO:
+Como asesor, quiero consultar el historial de un vehículo por su placa para conocer los trabajos anteriores antes de atenderlo.
+
+### Resumen de la respuesta inicial
+
+La IA propuso estas 12 historias:
+
+- HU-01: registrar cliente.
+- HU-02: consultar cliente.
+- HU-03: registrar vehículo.
+- HU-04: consultar vehículo.
+- HU-05: registrar trabajo.
+- HU-06: consultar historial del vehículo.
+- HU-07: consultar trabajos por sede y periodo.
+- HU-08: registrar material.
+- HU-09: registrar entrada de material.
+- HU-10: registrar consumo de material.
+- HU-11: consultar existencias.
+- HU-12: consultar materiales de un trabajo.
+
+También preguntó por los permisos, las unidades de medida y la necesidad de HU-07.
+
+### Qué funcionó
+
+- Entregó 12 historias con perfil, acción y beneficio.
+- Conservó la separación de inventarios por sede.
+- Relacionó los consumos con los trabajos.
+- Presentó los perfiles como propuestas para revisar.
+- Formuló dudas que permitieron obtener decisiones del usuario.
+
+### Qué no funcionó
+
+La consulta por sede y periodo de HU-07 no era necesaria para la primera versión. La propuesta de IA necesitó una corrección de alcance.
+
+### Revisión humana y correcciones
+
+Un integrante del equipo revisó las historias y:
+
+1. Aceptó las historias excepto HU-07.
+2. Descartó HU-07 por no ser necesaria.
+3. Confirmó que asesor y administrador podrán registrar y consultar la información mencionada.
+4. Confirmó que el instalador utiliza la plataforma y aporta los datos de los materiales consumidos.
+
+Después, la IA propuso:
+
+HU-13: Como administrador, quiero corregir un consumo de material registrado por error, dejando constancia del ajuste, para que las existencias de la sede reflejen el consumo real.
+
+El usuario confirmó expresamente que el administrador debe poder hacer esa corrección.
+
+### Resultado final
+
+Quedaron 12 historias aceptadas: HU-01 a HU-06 y HU-08 a HU-13.
+
+HU-07 se conserva como descartada para mantener el registro del cambio.
+
+Las historias completas y revisadas están en:
+
+[Consultar requisitos](../requisitos.md)
+
+### Pendientes
+
+- Precisar las unidades de medida y la precisión de las cantidades: identificar al instalador como fuente no resuelve todavía esta decisión.
+- Revisar las historias con Jonathan.
+- Asignar prioridades MoSCoW.
+- Escribir criterios de aceptación Gherkin para las historias Must.
+
