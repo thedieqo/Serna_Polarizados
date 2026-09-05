@@ -107,3 +107,50 @@ Durante la revisión, un integrante del equipo:
 Resultado: 12 historias aceptadas y una descartada.
 
 La revisión con Jonathan y la evaluación por otro equipo siguen pendientes.
+
+
+## Priorización MoSCoW revisada
+
+Un integrante del equipo aprobó la siguiente clasificación el 5 de septiembre de 2026. La revisión con Jonathan sigue pendiente.
+
+### Must — Indispensables
+
+- HU-01: registrar cliente.
+- HU-02: consultar cliente por documento.
+- HU-03: registrar vehículo asociado a un cliente.
+- HU-04: consultar vehículo por placa.
+- HU-05: registrar trabajo.
+- HU-06: consultar historial del vehículo desde ambas sedes.
+- HU-08: registrar material y unidad de medida.
+- HU-09: registrar entrada de material por sede.
+- HU-10: registrar consumo y descontarlo de la sede correspondiente.
+- HU-11: consultar existencias por sede.
+- HU-13: corregir consumos erróneos dejando constancia del ajuste.
+
+Estas funciones permiten registrar y recuperar la información, completar el flujo principal, comprobar las existencias y corregir errores de consumo.
+
+### Should — Importante, después de las indispensables
+
+- HU-12: consultar materiales y cantidades consumidos en un trabajo.
+
+Puede aplazarse esta consulta detallada. La relación entre el consumo y el trabajo debe guardarse desde el principio mediante HU-10.
+
+### Could — Opcionales
+
+No se asignaron historias a esta categoría.
+
+### Won’t — Fuera de esta versión
+
+- HU-07: consultar trabajos por sede y periodo.
+
+Esta historia permanece descartada.
+
+### Cambios frente a la propuesta inicial de IA
+
+HU-02, HU-04 y HU-13 pasaron de Should a Must, con aprobación del usuario.
+
+Esta clasificación sustituye la propuesta inicial de P-05. El registro de esa prueba se conserva como evidencia del proceso.
+
+### Siguiente actividad
+
+Escribir criterios de aceptación en formato Dado–Cuando–Entonces para las once historias Must.
