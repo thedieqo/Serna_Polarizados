@@ -158,3 +158,85 @@ Esta mejora haría el prompt más preciso. Todavía no se ha probado esa nueva v
 ### Revisión humana pendiente
 
 Los dos integrantes deben leer el resultado y registrar sus observaciones. Los comentarios anteriores fueron preparados con apoyo de IA y no equivalen a la revisión de Jonathan.
+## P-03 — Comparar soluciones existentes
+
+### Datos de la prueba
+
+- Fecha: 5 de septiembre de 2026.
+- Herramienta: Codex con búsqueda web.
+- Objetivo: comparar tres sistemas mediante fuentes oficiales.
+- Estado: ejecutado; revisión conjunta del equipo pendiente.
+
+### Prompt utilizado
+
+Actúa como analista de software para un proyecto académico pequeño.
+
+CONTEXTO:
+Estamos desarrollando Serna Polarizados para dos sedes de Ibagué. El alcance incluye clientes, vehículos, trabajos realizados e inventario independiente por sede. Ambas sedes comparten el historial de trabajos. Cada consumo de material debe relacionarse con un trabajo y descontarse de la sede correspondiente.
+
+TAREA:
+Consulta fuentes oficiales de Shopmonkey, AutoLeap y Odoo y compara sus funciones relevantes para este proyecto. Al final, indica tres aprendizajes que podamos aplicar sin ampliar nuestro alcance.
+
+FORMATO:
+Una tabla con tres filas y estas columnas: Sistema, Funciones verificadas, Utilidad para Serna y Aspectos pendientes de verificar. Después, una lista de tres aprendizajes. Incluye enlaces a las fuentes utilizadas.
+
+RESTRICCIONES:
+No inventes funciones, precios ni pruebas realizadas. Distingue los datos publicados de tus interpretaciones. Si no puedes verificar algo, escribe “No verificado”. No afirmes que nuestro proyecto es superior. No añadas pagos, facturación, agenda, QR ni otras funciones al MVP.
+
+EJEMPLO:
+Aspecto pendiente de verificar: comprobar si el sistema permite registrar consumos fraccionarios de material de polarizado en metros.
+
+### Resumen de la respuesta obtenida
+
+Se consultaron fuentes oficiales. No se realizaron pruebas de funcionamiento de los sistemas.
+
+- Shopmonkey: documenta registro de clientes, asociación de vehículos, historial de servicios y herramientas de inventario relacionadas con trabajos.
+- AutoLeap: documenta seguimiento de piezas por trabajo, existencias por ubicación y gestión de inventario de varias sedes.
+- Odoo: documenta registro de contactos y organización de existencias mediante almacenes y ubicaciones.
+- Quedaron sin verificar aspectos específicos como consumos fraccionarios de película de polarizado y la configuración necesaria para reproducir todo el flujo de Serna.
+
+Los tres aprendizajes propuestos fueron:
+
+1. Relacionar cada trabajo con un vehículo y cada vehículo con su cliente.
+2. Identificar la sede afectada por cada entrada o consumo.
+3. Conservar el material y la cantidad utilizados por trabajo, definiendo antes las unidades de medida.
+
+### Fuentes consultadas
+
+- Shopmonkey, clientes y vehículos:
+  https://support.shopmonkey.io/hc/en-us/articles/38744260861204-Lists-Page
+- Shopmonkey, inventario:
+  https://www.shopmonkey.io/demo-inventory-management
+- AutoLeap, inventario:
+  https://autoleap.com/features/inventory/
+- Odoo 19, contactos:
+  https://www.odoo.com/documentation/19.0/applications/essentials/contacts.html
+- Odoo 19, organización del inventario:
+  https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/warehouses_storage/inventory_management.html
+
+### Comentarios de revisión asistida
+
+Qué funcionó:
+
+- Entregó una tabla con tres sistemas y cuatro columnas.
+- Incluyó tres aprendizajes relacionados con el alcance.
+- Utilizó fuentes oficiales y separó funciones documentadas de interpretaciones.
+- Indicó lo que no pudo verificar.
+- No comparó precios ni afirmó que Serna fuera superior.
+
+Limitaciones:
+
+- La revisión fue documental; no demuestra el funcionamiento práctico.
+- No confirmó todos los aspectos importantes para Serna, como el consumo fraccionario de materiales.
+- Las fuentes de Odoo corresponden a la versión 19; el análisis competitivo anterior citaba documentación de versiones 17 y 18.
+
+Correcciones y seguimiento:
+
+No se modificó la respuesta durante esta prueba. Queda pendiente revisar si conviene actualizar las referencias del análisis competitivo para utilizar una misma versión de Odoo.
+
+No se realizó una segunda ejecución del prompt.
+
+### Revisión humana pendiente
+
+Los integrantes deben abrir las fuentes, revisar las afirmaciones y registrar sus observaciones. La revisión asistida no sustituye la revisión del equipo.
+
