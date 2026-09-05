@@ -345,3 +345,101 @@ Las historias completas y revisadas están en:
 - Asignar prioridades MoSCoW.
 - Escribir criterios de aceptación Gherkin para las historias Must.
 
+## P-05 — Priorizar historias con MoSCoW
+
+### Datos de la prueba
+
+- Fecha: 5 de septiembre de 2026.
+- Herramienta: Codex.
+- Objetivo: proponer prioridades según la demostración principal.
+- Estado: ejecutado; priorización pendiente de revisión del equipo.
+
+### Prompt utilizado
+
+Actúa como analista de requisitos para un proyecto académico pequeño.
+
+CONTEXTO:
+Somos dos estudiantes y desarrollaremos un sistema para las dos sedes de Serna Polarizados en Ibagué. Ambas comparten clientes, vehículos e historial de trabajos, pero cada sede mantiene su propio inventario.
+
+La demostración principal debe permitir registrar un cliente y su vehículo, registrar una entrada de material, registrar un trabajo, asociarle un consumo y comprobar que solo disminuye el inventario de la sede correspondiente. El historial del vehículo debe poder consultarse desde ambas sedes.
+
+Estas son las historias aceptadas:
+
+- HU-01: registrar cliente.
+- HU-02: consultar cliente por documento.
+- HU-03: registrar vehículo asociado a un cliente.
+- HU-04: consultar vehículo por placa.
+- HU-05: registrar trabajo con vehículo, sede, fecha, servicio y valor total.
+- HU-06: consultar historial del vehículo desde ambas sedes.
+- HU-08: registrar material y su unidad de medida.
+- HU-09: registrar entrada de material por sede.
+- HU-10: registrar consumo asociado a un trabajo y descontarlo de la sede correspondiente.
+- HU-11: consultar existencias por sede.
+- HU-12: consultar materiales y cantidades consumidos en un trabajo.
+- HU-13: permitir al administrador corregir un consumo erróneo, dejando constancia del ajuste.
+
+HU-07, consultar trabajos por sede y periodo, fue descartada expresamente.
+
+TAREA:
+Propón una prioridad MoSCoW para cada historia aceptada y explica brevemente su motivo. Considera las dependencias necesarias para completar la demostración principal.
+
+FORMATO:
+Una tabla con las columnas ID, Historia, Prioridad y Justificación. Después, explica en lenguaje sencillo qué podría aplazarse y qué efecto tendría. Registra HU-07 por separado como fuera de alcance.
+
+RESTRICCIONES:
+La priorización es una propuesta pendiente de revisión del equipo. No cambies los identificadores ni agregues funciones. No reincorpores HU-07. No inventes porcentajes obligatorios para cada categoría: si una categoría queda vacía, está bien. Diferencia lo indispensable para que funcione el recorrido principal de lo que puede esperar. No generes código ni criterios Gherkin todavía.
+
+EJEMPLO:
+HU-09 | Registrar entrada de material | Must | Permite disponer de existencias para demostrar el consumo de materiales.
+
+### Resumen de la respuesta obtenida
+
+La IA propuso:
+
+- Must: HU-01, HU-03, HU-05, HU-06, HU-08, HU-09, HU-10 y HU-11.
+- Should: HU-02, HU-04, HU-12 y HU-13.
+- Could: ninguna.
+- Won’t: HU-07, previamente descartada.
+
+Justificación general:
+
+Las historias Must permiten completar el recorrido desde el registro del cliente hasta la comprobación del inventario y la consulta del historial entre sedes.
+
+Las búsquedas por documento y placa se propusieron como Should, condicionadas a que las funciones principales permitan seleccionar correctamente clientes y vehículos.
+
+La consulta detallada de materiales por trabajo se propuso como Should, manteniendo obligatoria la relación entre consumo y trabajo.
+
+La corrección de consumos se propuso como Should para la demostración académica, señalando que debería completarse antes de utilizar el sistema en una operación real.
+
+### Comentarios de revisión asistida
+
+Qué funcionó:
+
+- Clasificó las doce historias aceptadas.
+- Conservó HU-07 fuera del alcance.
+- Justificó las prioridades según la demostración.
+- No forzó el uso de todas las categorías.
+- Explicó los efectos de aplazar funciones.
+- No generó código ni criterios Gherkin.
+
+Limitaciones:
+
+- Aplazar HU-02 y HU-04 depende de una forma de selección que todavía debe detallarse.
+- La importancia de corregir consumos debe revisarse con el equipo; su prioridad no quedó confirmada por el usuario.
+- La clasificación se orientó a una demostración académica, no a una operación real completa.
+
+### Correcciones y decisiones pendientes
+
+No se modificó ni aprobó todavía la clasificación propuesta.
+
+El equipo debe decidir:
+
+1. Si las búsquedas por documento y placa deben ser Must.
+2. Si la corrección de consumos debe ser Must.
+3. Si acepta las demás prioridades.
+
+### Revisión humana pendiente
+
+La ejecución de este prompt no equivale a aprobar sus resultados.
+
+La revisión conjunta con Jonathan y la evaluación por otro equipo siguen pendientes.
