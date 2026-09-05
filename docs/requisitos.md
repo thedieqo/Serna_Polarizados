@@ -320,3 +320,67 @@ Estas reglas todavía deben ser revisadas por el equipo:
 - Precisar cómo tratar correcciones de material equivocado o anulación completa de un consumo.
 - Revisar los escenarios con Jonathan.
 - Actualizar el estado inicial del documento después de aprobar esta revisión.
+
+- ## Actualización de revisión — 5 de septiembre de 2026
+
+Un integrante del equipo aprobó las seis validaciones propuestas:
+
+1. No permitir documentos de clientes duplicados.
+2. No permitir placas de vehículos duplicadas.
+3. Exigir cantidades mayores que cero en entradas y consumos.
+4. Impedir consumos superiores a las existencias de la sede.
+5. Comprobar existencias suficientes cuando una corrección aumenta el consumo.
+6. Registrar quién realizó cada ajuste, cuándo, el motivo y las cantidades anterior y nueva.
+
+Esta aprobación sustituye el estado pendiente de esas seis validaciones en las secciones anteriores.
+
+### Escenarios adicionales de las validaciones aprobadas
+
+#### HU-01 — Documento duplicado
+
+Dado que existe un cliente con un documento registrado,
+Cuando el asesor intenta registrar otro cliente con ese mismo documento,
+Entonces el sistema informa que el documento ya existe,
+Y no crea un segundo cliente.
+
+#### HU-03 — Placa duplicada
+
+Dado que existe un vehículo con una placa registrada,
+Cuando el asesor intenta registrar otro vehículo con esa misma placa,
+Entonces el sistema informa que la placa ya existe,
+Y no crea un segundo vehículo.
+
+#### HU-09 — Cantidad de entrada inválida
+
+Dado que el administrador está registrando una entrada,
+Cuando introduce una cantidad igual o menor que cero,
+Entonces el sistema rechaza la entrada,
+Y las existencias permanecen sin cambios.
+
+#### HU-10 — Cantidad de consumo inválida
+
+Dado que el instalador está registrando un consumo,
+Cuando introduce una cantidad igual o menor que cero,
+Entonces el sistema rechaza el consumo,
+Y las existencias permanecen sin cambios.
+
+#### HU-13 — Corrección sin existencias suficientes
+
+Dado que un consumo debe aumentarse,
+Y la diferencia supera las existencias disponibles en la sede del trabajo,
+Cuando el administrador intenta confirmar la corrección,
+Entonces el sistema rechaza el ajuste,
+Y conserva el consumo y las existencias anteriores.
+
+#### HU-13 — Constancia de la corrección
+
+Dado que el administrador realiza una corrección válida e indica su motivo,
+Cuando confirma el ajuste,
+Entonces quedan registrados el consumo afectado, el administrador, la fecha y hora, el motivo y las cantidades anterior y nueva.
+
+### Pendientes que continúan abiertos
+
+- Revisar los documentos con Jonathan.
+- Definir las unidades y precisión de cantidades con el instalador.
+- Precisar cómo corregir un material equivocado o anular completamente un consumo.
+- Detallar el mecanismo de identificación de los usuarios para aplicar permisos y registrar quién realiza los ajustes.
