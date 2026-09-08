@@ -1,0 +1,53 @@
+classDiagram
+    direction TB
+
+    class Cliente {
+        nombre
+        documento
+        contacto
+    }
+
+    class Vehiculo {
+        placa
+        descripcion
+    }
+
+    class Trabajo {
+        fecha
+        servicio
+        valorTotal
+    }
+
+    class Sede {
+        identificacion
+    }
+
+    class TipoMaterial {
+        tecnologia
+        opacidad
+    }
+
+    class Pieza {
+        identificacion
+        tipoPieza
+        anchoCm
+        largoCm
+        disponibilidad
+    }
+
+    class RegistroUso {
+        identificacion
+    }
+
+    Cliente "1" -- "0..*" Vehiculo : tiene
+    Vehiculo "1" -- "0..*" Trabajo : registra
+    Sede "1" -- "0..*" Trabajo : atiende
+    Sede "1" -- "0..*" Pieza : conserva
+    TipoMaterial "1" -- "0..*" Pieza : identifica
+    Trabajo "1" -- "0..*" RegistroUso : contiene
+    Pieza "1" -- "0..*" RegistroUso : origen del uso
+    RegistroUso "0..1" -- "0..*" Pieza : produce sobrantes
+
+    note for Pieza "Puede ser un rollo o un recorte aprovechable."
+    note for Trabajo "La estructura de los detalles de instalación sigue pendiente."
+    note for RegistroUso "Los datos del corte y el diseño de correcciones siguen pendientes."
