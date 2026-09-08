@@ -579,3 +579,28 @@ Y se conserva la relación del descarte con esa pieza,
 Y no cambia el inventario de la otra sede.
 
 Este escenario cubre el descarte completo de una pieza. El tratamiento de daños parciales sigue pendiente.
+
+## Decisión sobre sobrantes — 8 de septiembre de 2026
+
+El administrador de una sede aprobó representar cada sobrante mediante un rectángulo aprovechable.
+
+- El instalador medirá el ancho y el largo aprovechables en centímetros.
+- En recortes irregulares se registrará el rectángulo utilizable, no las dimensiones exteriores que incluyan zonas faltantes o dañadas.
+- Cada sobrante conservará su identificación, material, sede y relación con la pieza de origen.
+- El sistema no calculará distribuciones de corte ni representará formas irregulares.
+- La medición será realizada por el instalador; el sistema validará los datos registrados, pero no podrá comprobar físicamente el recorte.
+- El material registrado como sobrante no podrá permanecer contado también dentro de la pieza de origen.
+
+### Criterio de aceptación
+
+Dado que un instalador obtiene un sobrante aprovechable de una pieza utilizada en un trabajo,
+Cuando registra el ancho y largo del rectángulo utilizable, ambos mayores que cero,
+Entonces el sobrante queda identificado con esas dimensiones en centímetros,
+Y conserva la relación con su material, sede y pieza de origen,
+Y su registro se realiza junto con la actualización de la pieza de origen, sin duplicar existencias.
+
+### Pendientes que continúan abiertos
+
+- Definir la precisión de las medidas en centímetros.
+- Precisar el registro del material restante en el rollo después de un corte.
+- Resolver correcciones cuando un sobrante ya fue utilizado posteriormente.
