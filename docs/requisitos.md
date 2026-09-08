@@ -487,3 +487,95 @@ No se asignan todavía prioridades definitivas a esta revisión.
 Borrador de ajuste pendiente de aprobación y de revisión con Jonathan.
 
 Con HU-14, el conjunto tendría 13 historias activas. HU-07 continúa descartada.
+
+
+## Aprobación del ajuste de inventario — 8 de septiembre de 2026
+
+El administrador de una sede, participante en el proyecto, aprobó las versiones revisadas de HU-08 a HU-13 y la nueva HU-14.
+
+Estas versiones sustituyen las descripciones anteriores de esas historias.
+
+Se confirmó que el administrador registrará el descarte de piezas dañadas.
+
+La revisión con Jonathan sigue pendiente. Esta aprobación no implica que las funciones estén implementadas o probadas.
+
+## Criterios de aceptación revisados — Inventario
+
+Estado: borrador para revisión.
+
+### HU-08 — Registrar tipo de material
+
+Dado que el administrador dispone de la tecnología y opacidad de un material,
+Cuando registra ese tipo de material,
+Entonces queda disponible para identificar los rollos y recortes correspondientes.
+
+### HU-09 — Registrar rollo recibido
+
+Dado que existe un tipo de material registrado,
+Cuando el administrador registra un rollo indicando sede, material, ancho y largo positivos en centímetros,
+Entonces el rollo queda identificado y disponible en esa sede,
+Y no se incrementa el inventario de la otra sede.
+
+Escenario: dimensiones inválidas
+
+Dado que el administrador está registrando un rollo,
+Cuando introduce un ancho o largo igual o menor que cero,
+Entonces el sistema rechaza el registro,
+Y no modifica las existencias.
+
+### HU-10 — Registrar uso de material y sobrantes
+
+Dado que existe un trabajo y una pieza disponible en la misma sede,
+Cuando el instalador registra el uso de material y los sobrantes aprovechables conforme a las reglas de corte que se definan,
+Entonces el uso queda relacionado con el trabajo y la pieza de origen,
+Y los sobrantes quedan identificados con su material, sede y dimensiones,
+Y la disponibilidad de la pieza de origen se actualiza sin duplicar el material,
+Y el inventario de la otra sede no cambia.
+
+Escenario: pieza de otra sede
+
+Dado que una pieza pertenece a una sede diferente de la del trabajo,
+Cuando se intenta utilizarla en ese trabajo,
+Entonces el sistema rechaza la operación,
+Y no modifica ninguna de las dos existencias.
+
+Escenario: fallo al guardar
+
+Dado que se está registrando el uso de una pieza,
+Cuando falla el guardado de alguno de los cambios asociados,
+Entonces no queda aplicado parcialmente el consumo, la actualización de origen ni el registro de sobrantes.
+
+Los casos de corte y validación de dimensiones requieren definir primero cómo se registrarán las piezas rectangulares y los recortes irregulares. Este criterio todavía no es suficiente para implementar toda la función.
+
+### HU-11 — Consultar material disponible
+
+Dado que existen rollos y recortes disponibles en las dos sedes,
+Cuando el administrador consulta el material de una sede,
+Entonces puede distinguir cada pieza por su identificación, tecnología, opacidad, ancho y largo,
+Y las piezas descartadas no aparecen como disponibles.
+
+### HU-12 — Consultar material utilizado en un trabajo
+
+Dado que un trabajo tiene usos de material registrados,
+Cuando el administrador consulta su detalle,
+Entonces puede identificar las piezas de origen y los registros de uso asociados a ese trabajo.
+
+### HU-13 — Corregir registro de uso
+
+Dado que el administrador selecciona un registro de uso que puede corregirse conforme a las reglas acordadas,
+Cuando confirma una corrección válida e indica el motivo,
+Entonces quedan conservados el autor, la fecha, el motivo y los datos anteriores y nuevos,
+Y se actualiza el inventario afectado sin duplicar material,
+Y los cambios se guardan juntos o no se aplica ninguno.
+
+La corrección de un registro cuyo sobrante ya fue utilizado en otro trabajo sigue pendiente de diseño. No se considera resuelta por este escenario.
+
+### HU-14 — Descartar pieza dañada
+
+Dado que existe una pieza disponible en una sede,
+Cuando el administrador registra su descarte e indica el motivo,
+Entonces la pieza deja de aparecer como disponible,
+Y se conserva la relación del descarte con esa pieza,
+Y no cambia el inventario de la otra sede.
+
+Este escenario cubre el descarte completo de una pieza. El tratamiento de daños parciales sigue pendiente.
