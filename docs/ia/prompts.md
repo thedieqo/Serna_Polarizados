@@ -1,445 +1,491 @@
-# Biblioteca de prompts — Serna Polarizados
+# Prompt Library — Serna Polarizados
 
-Este documento registra instrucciones probadas con IA, sus resultados y las observaciones de revisión.
+> English translation of the supplied Spanish document. Historical execution dates refer to the original tests, not new executions of this translation.
 
-La sesión 2 solicita al menos cinco prompts probados y comentados. Actualmente se registra una prueba.
+## Status and reading guide
 
-## P-01 — Revisar el alcance del proyecto
+**Documentation update:** September 8, 2026.
 
-### Datos de la prueba
+This library preserves five recorded tests, P-01 through P-05, performed on September 5, 2026. It includes the original prompts, the available responses or summaries, and review observations.
 
-- Fecha: 5 de septiembre de 2026.
-- Herramienta: Codex.
-- Propósito: separar reglas confirmadas de decisiones pendientes.
-- Estado: ejecutado; revisión conjunta del equipo pendiente.
+The original prompts are preserved in Spanish because that is how they were executed. They do not represent five tests in English. The English prompts subsequently executed with Gemini are documented in [pruebas-gemini.md](pruebas-gemini.md).
 
-### Prompt utilizado
+The responses, priorities and outstanding items from each test describe the project at that time. They do not replace the [current requirements](../requisitos.md). A summarized response is not presented as a complete transcript.
 
-Actúa como analista de requisitos de un proyecto académico pequeño.
+Proposed improvements are not considered executed until a new test exists. No measured token savings are claimed either.
 
-CONTEXTO:
-Somos dos estudiantes y estamos en la semana 4. Nuestro proyecto es un sistema web para las dos sedes de Serna Polarizados en Ibagué. Ambas sedes comparten información de clientes, vehículos e historial de trabajos, pero cada una tiene su propio inventario.
+## Historical test index
 
-La primera versión incluye registrar clientes y vehículos, registrar trabajos con fecha, sede, servicio y valor total, consultar el historial y registrar entradas y consumos de materiales por sede. Los consumos deben relacionarse con un trabajo.
+| ID | Purpose | Recorded tool | Date |
+| --- | --- | --- | --- |
+| P-01 | Review the scope | Codex | September 5, 2026 |
+| P-02 | Draft the vision | Codex | September 5, 2026 |
+| P-03 | Compare existing solutions | Codex with web search | September 5, 2026 |
+| P-04 | Propose user stories | Codex | September 5, 2026 |
+| P-05 | Propose MoSCoW priorities | Codex | September 5, 2026 |
 
-TAREA:
-Revisa este alcance e identifica cinco reglas de funcionamiento que ya estén confirmadas y tres decisiones que todavía debamos precisar antes de diseñar el sistema.
+## Subsequent changes to keep in mind
 
-FORMATO:
-Dos listas numeradas: “Reglas confirmadas” y “Decisiones pendientes”. Explica cada punto en una frase sencilla.
+This section updates the context without changing the historical prompts or responses:
 
-RESTRICCIONES:
-No generes código. No agregues pagos, facturación, agenda, QR ni nuevas sedes. No presentes propuestas tuyas como decisiones del negocio. No inventes unidades de medida ni permisos de los usuarios.
+- The advisor's interview and the administrator's clarifications were incorporated.
+- Recording rolls and offcuts with dimensions in centimeters was agreed. Precision and the cutting procedure remain unresolved.
+- Installation details were expanded, and HU-14 was added to discard complete damaged pieces.
+- The current document contains 13 active stories. HU-07 remains excluded.
+- HU-02 and HU-04 are currently listed as Must. HU-13 retains Must as a reference priority; HU-12 retains Should as a reference priority. HU-14's priority and the review of inventory effort remain pending.
+- Acceptance criteria now exist, although HU-05, HU-10 and HU-13 still have incomplete aspects.
+- The competitive analysis was updated on September 8 with Odoo 18 references. P-03's Odoo 19 references are preserved as part of the historical record.
 
-EJEMPLO:
-Regla confirmada: el consumo de un trabajo se descuenta únicamente del inventario de la sede donde se realizó.
-Decisión pendiente: definir cómo se corrige un consumo registrado por error.
+Joint reviews with Jonathan, evaluation by another team and subsequent validation with the advisor are not presented as completed.
 
-### Respuesta obtenida
+The records of the five tests follow. Sections titled “Outstanding items”, “Final result” or similar must be read as part of each historical test.
 
-Reglas confirmadas:
+## P-01 — Review the project scope
 
-1. El sistema cubrirá únicamente las dos sedes de Serna Polarizados en Ibagué.
-2. Ambas sedes compartirán la información de clientes, vehículos e historial de trabajos.
-3. Cada sede mantendrá su propio inventario de materiales.
-4. Cada trabajo estará asociado a un vehículo y registrará fecha, sede, servicio y valor total.
-5. Cada consumo estará relacionado con un trabajo y se descontará únicamente del inventario de la sede donde se realizó.
+### Test details
 
-Decisiones pendientes:
+- Date: September 5, 2026.
+- Tool: Codex.
+- Purpose: separate confirmed rules from pending decisions.
+- Status: executed; joint team review pending.
 
-1. Definir las unidades de medida de los materiales y cómo registrar cantidades fraccionarias.
-2. Determinar qué usuarios podrán consultar, registrar y modificar cada tipo de información.
-3. Definir cómo corregir un consumo registrado por error y ajustar las existencias correspondientes.
+### Prompt used
 
-### Observaciones de revisión asistida
+Act as a requirements analyst for a small academic project.
 
-Qué funcionó:
+CONTEXT:
+We are two students and are in week 4. Our project is a web system for the two Serna Polarizados branches in Ibagué. Both branches share customer, vehicle and job-history information, but each has its own inventory.
 
-- Entregó cinco reglas y tres decisiones pendientes.
-- Utilizó frases sencillas.
-- Conservó el alcance de dos sedes.
-- Distinguió la información compartida del inventario independiente.
-- No generó código ni incorporó módulos excluidos.
+The first version includes registering customers and vehicles, recording jobs with date, branch, service and total value, consulting the history, and recording material receipts and consumption by branch. Consumption must be linked to a job.
 
-Limitaciones:
+TASK:
+Review this scope and identify five operating rules that are already confirmed and three decisions we still need to clarify before designing the system.
 
-- El prompt no expresa directamente la relación entre trabajo y vehículo, aunque esa relación sí está acordada en el README y en la conversación.
-- Las cantidades fraccionarias se plantean para estudiar; todavía no son una regla aprobada del negocio.
+FORMAT:
+Two numbered lists: “Confirmed rules” and “Pending decisions”. Explain each point in one simple sentence.
 
-Corrección propuesta para una próxima ejecución:
+CONSTRAINTS:
+Do not generate code. Do not add payments, invoicing, scheduling, QR or new branches. Do not present your proposals as business decisions. Do not invent measurement units or user permissions.
 
-Agregar al contexto: “Cada trabajo pertenece a un vehículo y a la sede donde se realizó”. Esto permitirá reutilizar el prompt sin depender de la conversación anterior.
+EXAMPLE:
+Confirmed rule: a job's consumption is deducted only from the inventory of the branch where it was performed.
+Pending decision: define how to correct consumption recorded by mistake.
 
-Esta mejora todavía no se ha ejecutado como una segunda prueba.
+### Response obtained
 
-### Revisión humana pendiente
+Confirmed rules:
 
-Los dos integrantes deben revisar estas observaciones y registrar si aceptan la respuesta o qué modifican. No se ha registrado todavía la revisión de Jonathan ni la evaluación por otro equipo.
+1. The system will cover only the two Serna Polarizados branches in Ibagué.
+2. Both branches will share customer, vehicle and job-history information.
+3. Each branch will maintain its own material inventory.
+4. Each job will be associated with a vehicle and record date, branch, service and total value.
+5. Each consumption will be linked to a job and deducted only from the inventory of the branch where it was performed.
 
+Pending decisions:
 
-## P-02 — Redactar la visión del proyecto
+1. Define material measurement units and how to record fractional quantities.
+2. Determine which users may consult, register and modify each type of information.
+3. Define how to correct consumption recorded by mistake and adjust the corresponding stock.
 
-### Datos de la prueba
+### Assisted review observations
 
-- Fecha: 5 de septiembre de 2026.
-- Herramienta: Codex.
-- Objetivo: obtener una visión breve del proyecto.
-- Estado: ejecutado; revisión conjunta del equipo pendiente.
+What worked:
 
-### Prompt utilizado
+- Delivered five rules and three pending decisions.
+- Used simple sentences.
+- Preserved the two-branch scope.
+- Distinguished shared information from independent inventory.
+- Did not generate code or include excluded modules.
 
-Actúa como analista de software que ayuda a dos estudiantes a redactar la visión de un proyecto académico pequeño.
+Limitations:
 
-CONTEXTO:
-El proyecto es un sistema web para las dos sedes de Serna Polarizados en Ibagué. Actualmente el negocio utiliza registros manuales y archivos de Excel.
+- The prompt does not directly express the relationship between job and vehicle, although that relationship is agreed in the README and conversation.
+- Fractional quantities are raised for consideration; they are not yet an approved business rule.
 
-La primera versión incluye clientes, vehículos, trabajos realizados e inventario. Ambas sedes comparten la información de clientes, vehículos e historial de trabajos, pero cada una maneja su propio inventario.
+Proposed correction for a future execution:
 
-Un cliente puede tener varios vehículos. Cada trabajo pertenece a un vehículo y a la sede donde se realizó, y registra fecha, servicio y valor total. Cada consumo de materiales se relaciona con un trabajo y se descuenta únicamente del inventario de esa sede.
+Add to the context: “Each job belongs to a vehicle and to the branch where it was performed”. This will allow the prompt to be reused without depending on the previous conversation.
 
-Las personas involucradas son administrador, asesor, instalador y cliente. Los permisos todavía no están definidos y el cliente no tendrá un portal de autoservicio.
+This improvement has not yet been executed as a second test.
 
-TAREA:
-Redacta un borrador breve de la visión del proyecto que explique el problema, las personas involucradas, la propuesta de valor y el alcance de la primera versión.
+### Pending human review
 
-FORMATO:
-Utiliza cinco apartados: Problema, Personas involucradas, Propuesta de valor, Alcance del MVP y Exclusiones. Máximo 300 palabras en total.
+Both team members must review these observations and record whether they accept the response or what they change. Jonathan's review and evaluation by another team have not yet been recorded.
 
-RESTRICCIONES:
-No generes código ni historias de usuario. No inventes estadísticas, beneficios medidos ni permisos. No incluyas pagos, facturación, Siigo, agenda, QR, proveedores, alertas automáticas ni sedes adicionales dentro del MVP. Distingue el registro del valor de un trabajo de la gestión de su pago.
+## P-02 — Draft the project vision
 
-EJEMPLO:
-Propuesta de valor: consultar el historial de un vehículo desde cualquiera de las dos sedes y mantener separado el inventario de cada una.
+### Test details
 
-### Respuesta obtenida
+- Date: September 5, 2026.
+- Tool: Codex.
+- Objective: obtain a brief project vision.
+- Status: executed; joint team review pending.
 
-#### Problema
+### Prompt used
 
-Serna Polarizados utiliza registros manuales y archivos de Excel. El proyecto busca organizar la información de clientes, vehículos, trabajos y materiales para facilitar su consulta entre las dos sedes de Ibagué.
+Act as a software analyst helping two students draft the vision of a small academic project.
 
-#### Personas involucradas
+CONTEXT:
+The project is a web system for the two Serna Polarizados branches in Ibagué. The business currently uses manual records and Excel files.
 
-Administrador, asesor, instalador y cliente. Sus permisos y responsabilidades dentro del sistema están pendientes de definición. El cliente proporciona información, pero no tendrá un portal de autoservicio en la primera versión.
+The first version includes customers, vehicles, completed jobs and inventory. Both branches share customer, vehicle and job-history information, but each manages its own inventory.
 
-#### Propuesta de valor
+A customer may have several vehicles. Each job belongs to a vehicle and to the branch where it was performed, and records date, service and total value. Each material consumption is linked to a job and deducted only from that branch's inventory.
 
-Centralizar la información de clientes, vehículos e historial de trabajos para consultarla desde ambas sedes, manteniendo un inventario independiente por sede y relacionando los materiales consumidos con cada trabajo.
+The people involved are administrator, advisor, installer and customer. Permissions are not yet defined, and the customer will not have a self-service portal.
 
-#### Alcance del MVP
+TASK:
+Write a brief draft of the project vision explaining the problem, people involved, value proposition and first-version scope.
 
-- Registrar clientes y asociar varios vehículos a un mismo cliente.
-- Registrar trabajos vinculados a un vehículo y una sede, indicando fecha, servicio y valor total.
-- Consultar el historial de trabajos desde ambas sedes.
-- Registrar materiales, entradas, consumos y existencias por sede.
-- Asociar cada consumo con un trabajo y descontarlo únicamente del inventario de la sede donde se realizó.
+FORMAT:
+Use five sections: Problem, People involved, Value proposition, MVP scope and Exclusions. Maximum 300 words in total.
 
-El valor total describe el importe del trabajo; registrarlo no incluye gestionar ni comprobar su pago.
+CONSTRAINTS:
+Do not generate code or user stories. Do not invent statistics, measured benefits or permissions. Do not include payments, invoicing, Siigo, scheduling, QR, suppliers, automatic alerts or additional branches in the MVP. Distinguish recording a job's value from managing its payment.
 
-#### Exclusiones
+EXAMPLE:
+Value proposition: consult a vehicle's history from either branch while keeping each branch's inventory separate.
 
-La primera versión no incluye gestión de pagos, facturación, integración con Siigo, agenda de citas, registro mediante QR, gestión de proveedores, alertas automáticas ni sedes adicionales.
+### Response obtained
 
-Las unidades de medida de los materiales y los permisos de los usuarios se precisarán durante el análisis de requisitos.
+#### Problem
 
-### Comentarios de revisión asistida
+Serna Polarizados uses manual records and Excel files. The project aims to organize customer, vehicle, job and material information to facilitate consultation between the two Ibagué branches.
 
-- La respuesta incluyó los cinco apartados solicitados y no superó las 300 palabras.
-- Conservó el alcance de dos sedes con inventarios separados.
-- Distinguió registrar el valor del trabajo de gestionar su pago.
-- No inventó permisos ni resultados medidos.
-- Incluyó entradas y existencias, acordadas anteriormente pero no detalladas en este prompt.
+#### People involved
 
-### Mejora propuesta
+Administrator, advisor, installer and customer. Their permissions and responsibilities within the system remain to be defined. The customer provides information but will not have a self-service portal in the first version.
 
-Añadir al contexto: “El inventario incluye registrar materiales, entradas, consumos y consultar existencias”.
+#### Value proposition
 
-Esta mejora haría el prompt más preciso. Todavía no se ha probado esa nueva versión.
+Centralize customer, vehicle and job-history information for consultation from both branches, maintaining independent inventory per branch and linking consumed materials to each job.
 
-### Revisión humana pendiente
+#### MVP scope
 
-Los dos integrantes deben leer el resultado y registrar sus observaciones. Los comentarios anteriores fueron preparados con apoyo de IA y no equivalen a la revisión de Jonathan.
-## P-03 — Comparar soluciones existentes
+- Register customers and associate several vehicles with the same customer.
+- Record jobs linked to a vehicle and a branch, including date, service and total value.
+- Consult job history from both branches.
+- Record materials, receipts, consumption and stock by branch.
+- Link each consumption to a job and deduct it only from the inventory of the branch where it was performed.
 
-### Datos de la prueba
+The total value describes the job amount; recording it does not include managing or checking its payment.
 
-- Fecha: 5 de septiembre de 2026.
-- Herramienta: Codex con búsqueda web.
-- Objetivo: comparar tres sistemas mediante fuentes oficiales.
-- Estado: ejecutado; revisión conjunta del equipo pendiente.
+#### Exclusions
 
-### Prompt utilizado
+The first version does not include payment management, invoicing, Siigo integration, appointment scheduling, QR registration, supplier management, automatic alerts or additional branches.
 
-Actúa como analista de software para un proyecto académico pequeño.
+Material measurement units and user permissions will be clarified during requirements analysis.
 
-CONTEXTO:
-Estamos desarrollando Serna Polarizados para dos sedes de Ibagué. El alcance incluye clientes, vehículos, trabajos realizados e inventario independiente por sede. Ambas sedes comparten el historial de trabajos. Cada consumo de material debe relacionarse con un trabajo y descontarse de la sede correspondiente.
+### Assisted review comments
 
-TAREA:
-Consulta fuentes oficiales de Shopmonkey, AutoLeap y Odoo y compara sus funciones relevantes para este proyecto. Al final, indica tres aprendizajes que podamos aplicar sin ampliar nuestro alcance.
+- The response included the five requested sections and did not exceed 300 words.
+- Preserved the two-branch scope with separate inventories.
+- Distinguished recording job value from managing payment.
+- Did not invent permissions or measured results.
+- Included receipts and stock, previously agreed but not detailed in this prompt.
 
-FORMATO:
-Una tabla con tres filas y estas columnas: Sistema, Funciones verificadas, Utilidad para Serna y Aspectos pendientes de verificar. Después, una lista de tres aprendizajes. Incluye enlaces a las fuentes utilizadas.
+### Proposed improvement
 
-RESTRICCIONES:
-No inventes funciones, precios ni pruebas realizadas. Distingue los datos publicados de tus interpretaciones. Si no puedes verificar algo, escribe “No verificado”. No afirmes que nuestro proyecto es superior. No añadas pagos, facturación, agenda, QR ni otras funciones al MVP.
+Add to the context: “Inventory includes registering materials, receipts, consumption and consulting stock”.
 
-EJEMPLO:
-Aspecto pendiente de verificar: comprobar si el sistema permite registrar consumos fraccionarios de material de polarizado en metros.
+This improvement would make the prompt more precise. That new version has not yet been tested.
 
-### Resumen de la respuesta obtenida
+### Pending human review
 
-Se consultaron fuentes oficiales. No se realizaron pruebas de funcionamiento de los sistemas.
+Both team members must read the result and record their observations. The comments above were prepared with AI assistance and do not amount to Jonathan's review.
 
-- Shopmonkey: documenta registro de clientes, asociación de vehículos, historial de servicios y herramientas de inventario relacionadas con trabajos.
-- AutoLeap: documenta seguimiento de piezas por trabajo, existencias por ubicación y gestión de inventario de varias sedes.
-- Odoo: documenta registro de contactos y organización de existencias mediante almacenes y ubicaciones.
-- Quedaron sin verificar aspectos específicos como consumos fraccionarios de película de polarizado y la configuración necesaria para reproducir todo el flujo de Serna.
+## P-03 — Compare existing solutions
 
-Los tres aprendizajes propuestos fueron:
+### Test details
 
-1. Relacionar cada trabajo con un vehículo y cada vehículo con su cliente.
-2. Identificar la sede afectada por cada entrada o consumo.
-3. Conservar el material y la cantidad utilizados por trabajo, definiendo antes las unidades de medida.
+- Date: September 5, 2026.
+- Tool: Codex with web search.
+- Objective: compare three systems using official sources.
+- Status: executed; joint team review pending.
 
-### Fuentes consultadas
+### Prompt used
 
-- Shopmonkey, clientes y vehículos:
+Act as a software analyst for a small academic project.
+
+CONTEXT:
+We are developing Serna Polarizados for two branches in Ibagué. The scope includes customers, vehicles, completed jobs and independent inventory per branch. Both branches share job history. Each material consumption must be linked to a job and deducted from the corresponding branch.
+
+TASK:
+Consult official Shopmonkey, AutoLeap and Odoo sources and compare their functions relevant to this project. At the end, identify three lessons we can apply without expanding our scope.
+
+FORMAT:
+A table with three rows and these columns: System, Verified functions, Usefulness for Serna and Aspects pending verification. Then provide a list of three lessons. Include links to the sources used.
+
+CONSTRAINTS:
+Do not invent functions, prices or tests performed. Distinguish published information from your interpretations. If you cannot verify something, write “Not verified”. Do not claim our project is superior. Do not add payments, invoicing, scheduling, QR or other functions to the MVP.
+
+EXAMPLE:
+Aspect pending verification: check whether the system allows recording fractional consumption of window-film material in meters.
+
+### Summary of the response obtained
+
+Official sources were consulted. No functional tests of the systems were performed.
+
+- Shopmonkey: documents customer registration, vehicle association, service history and inventory tools related to jobs.
+- AutoLeap: documents tracking parts by job, stock by location and inventory management across multiple branches.
+- Odoo: documents contact registration and stock organization through warehouses and locations.
+- Specific aspects such as fractional window-film consumption and the configuration required to reproduce Serna's entire workflow remained unverified.
+
+The three proposed lessons were:
+
+1. Link each job to a vehicle and each vehicle to its customer.
+2. Identify the branch affected by each receipt or consumption.
+3. Preserve the material and quantity used per job, defining the measurement units first.
+
+### Sources consulted
+
+- Shopmonkey, customers and vehicles:
   https://support.shopmonkey.io/hc/en-us/articles/38744260861204-Lists-Page
-- Shopmonkey, inventario:
+- Shopmonkey, inventory:
   https://www.shopmonkey.io/demo-inventory-management
-- AutoLeap, inventario:
+- AutoLeap, inventory:
   https://autoleap.com/features/inventory/
-- Odoo 19, contactos:
+- Odoo 19, contacts:
   https://www.odoo.com/documentation/19.0/applications/essentials/contacts.html
-- Odoo 19, organización del inventario:
+- Odoo 19, inventory organization:
   https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/warehouses_storage/inventory_management.html
 
-### Comentarios de revisión asistida
+### Assisted review comments
 
-Qué funcionó:
+What worked:
 
-- Entregó una tabla con tres sistemas y cuatro columnas.
-- Incluyó tres aprendizajes relacionados con el alcance.
-- Utilizó fuentes oficiales y separó funciones documentadas de interpretaciones.
-- Indicó lo que no pudo verificar.
-- No comparó precios ni afirmó que Serna fuera superior.
+- Delivered a table with three systems and four columns.
+- Included three lessons related to the scope.
+- Used official sources and separated documented functions from interpretations.
+- Identified what could not be verified.
+- Did not compare prices or claim Serna was superior.
 
-Limitaciones:
+Limitations:
 
-- La revisión fue documental; no demuestra el funcionamiento práctico.
-- No confirmó todos los aspectos importantes para Serna, como el consumo fraccionario de materiales.
-- Las fuentes de Odoo corresponden a la versión 19; el análisis competitivo anterior citaba documentación de versiones 17 y 18.
+- The review was documentary; it does not demonstrate practical operation.
+- Did not confirm all important aspects for Serna, such as fractional material consumption.
+- The Odoo sources correspond to version 19; the earlier competitive analysis cited versions 17 and 18.
 
-Correcciones y seguimiento:
+Corrections and follow-up:
 
-No se modificó la respuesta durante esta prueba. Queda pendiente revisar si conviene actualizar las referencias del análisis competitivo para utilizar una misma versión de Odoo.
+The response was not modified during this test. Reviewing whether to update the competitive analysis references to use a single Odoo version remains pending.
 
-No se realizó una segunda ejecución del prompt.
+No second execution of the prompt was performed.
 
-### Revisión humana pendiente
+### Pending human review
 
-Los integrantes deben abrir las fuentes, revisar las afirmaciones y registrar sus observaciones. La revisión asistida no sustituye la revisión del equipo.
+The team members must open the sources, review the claims and record their observations. Assisted review does not replace team review.
 
+## P-04 — Propose user stories
 
-## P-04 — Proponer historias de usuario
+### Test details
 
-### Datos de la prueba
+- Date: September 5, 2026.
+- Tool: Codex.
+- Objective: propose user stories for the agreed scope.
+- Status: executed and reviewed with one team member; review with Jonathan pending.
 
-- Fecha: 5 de septiembre de 2026.
-- Herramienta: Codex.
-- Objetivo: proponer historias de usuario para el alcance acordado.
-- Estado: ejecutado y revisado con un integrante; revisión con Jonathan pendiente.
+### Prompt used
 
-### Prompt utilizado
+Act as a requirements analyst for a small academic project.
 
-Actúa como analista de requisitos para un proyecto académico pequeño.
+CONTEXT:
+Serna Polarizados needs a system for its two branches in Ibagué. Both share customers, vehicles and job history, but each branch has independent inventory.
 
-CONTEXTO:
-Serna Polarizados necesita un sistema para sus dos sedes de Ibagué. Ambas comparten clientes, vehículos e historial de trabajos, pero cada sede tiene inventario independiente.
+The scope includes:
 
-El alcance incluye:
+- Registering and consulting customers with name, identification document and contact information.
+- Registering vehicles associated with customers and searching for them by plate.
+- Recording jobs associated with a vehicle and a branch, with date, service and total value.
+- Consulting job history from both branches.
+- Registering materials, receipts and consumption, and consulting stock by branch.
+- Linking each consumption to a job and deducting it from that branch's inventory.
 
-- Registrar y consultar clientes con nombre, documento y contacto.
-- Registrar vehículos asociados a clientes y consultarlos por placa.
-- Registrar trabajos asociados a un vehículo y una sede, con fecha, servicio y valor total.
-- Consultar el historial de trabajos desde ambas sedes.
-- Registrar materiales, entradas y consumos, y consultar existencias por sede.
-- Relacionar cada consumo con un trabajo y descontarlo del inventario de esa sede.
+The identified profiles are administrator, advisor and installer. Their specific permissions remain to be defined.
 
-Los perfiles identificados son administrador, asesor e instalador. Sus permisos específicos todavía están pendientes de definición.
+TASK:
+Propose 12 user stories for this scope. Each story must express a specific need and be reviewable separately.
 
-TAREA:
-Propón 12 historias de usuario para este alcance. Cada historia debe expresar una necesidad concreta y poder revisarse por separado.
+FORMAT:
+A numbered list from HU-01 through HU-12. Use the following in each:
+“As a [profile], I want [action] so that [benefit]”.
+Then include up to three relevant questions for reviewing the stories.
 
-FORMATO:
-Lista numerada de HU-01 a HU-12. Usa en cada una:
-“Como [perfil], quiero [acción] para [beneficio]”.
-Después, incluye hasta tres dudas relevantes para revisar las historias.
+CONSTRAINTS:
+Do not generate code. Do not add payments, invoicing, scheduling, QR, suppliers, automatic alerts or new branches. Recording a job's value does not mean managing its payment. Do not invent measurement units. Profile assignments are proposals for validation, not confirmed permission decisions. Do not artificially split the same need to reach 12 stories.
 
-RESTRICCIONES:
-No generes código. No agregues pagos, facturación, agenda, QR, proveedores, alertas automáticas ni nuevas sedes. Registrar el valor de un trabajo no significa gestionar su pago. No inventes unidades de medida. La asignación de perfiles es una propuesta para validar, no una decisión confirmada de permisos. No dividas artificialmente una misma necesidad para completar las 12 historias.
+EXAMPLE:
+As an advisor, I want to consult a vehicle's history by its plate so that I can see previous jobs before serving the customer.
 
-EJEMPLO:
-Como asesor, quiero consultar el historial de un vehículo por su placa para conocer los trabajos anteriores antes de atenderlo.
+### Summary of the initial response
 
-### Resumen de la respuesta inicial
+The AI proposed these 12 stories:
 
-La IA propuso estas 12 historias:
+- HU-01: register a customer.
+- HU-02: consult a customer.
+- HU-03: register a vehicle.
+- HU-04: consult a vehicle.
+- HU-05: record a job.
+- HU-06: consult vehicle history.
+- HU-07: consult jobs by branch and period.
+- HU-08: register a material.
+- HU-09: record a material receipt.
+- HU-10: record material consumption.
+- HU-11: consult stock.
+- HU-12: consult a job's materials.
 
-- HU-01: registrar cliente.
-- HU-02: consultar cliente.
-- HU-03: registrar vehículo.
-- HU-04: consultar vehículo.
-- HU-05: registrar trabajo.
-- HU-06: consultar historial del vehículo.
-- HU-07: consultar trabajos por sede y periodo.
-- HU-08: registrar material.
-- HU-09: registrar entrada de material.
-- HU-10: registrar consumo de material.
-- HU-11: consultar existencias.
-- HU-12: consultar materiales de un trabajo.
+It also asked about permissions, measurement units and the need for HU-07.
 
-También preguntó por los permisos, las unidades de medida y la necesidad de HU-07.
+### What worked
 
-### Qué funcionó
+- Delivered 12 stories with profile, action and benefit.
+- Preserved inventory separation by branch.
+- Linked consumption to jobs.
+- Presented profiles as proposals for review.
+- Asked questions that elicited user decisions.
 
-- Entregó 12 historias con perfil, acción y beneficio.
-- Conservó la separación de inventarios por sede.
-- Relacionó los consumos con los trabajos.
-- Presentó los perfiles como propuestas para revisar.
-- Formuló dudas que permitieron obtener decisiones del usuario.
+### What did not work
 
-### Qué no funcionó
+HU-07's query by branch and period was not necessary for the first version. The AI proposal required a scope correction.
 
-La consulta por sede y periodo de HU-07 no era necesaria para la primera versión. La propuesta de IA necesitó una corrección de alcance.
+### Human review and corrections
 
-### Revisión humana y correcciones
+One team member reviewed the stories and:
 
-Un integrante del equipo revisó las historias y:
+1. Accepted the stories except HU-07.
+2. Excluded HU-07 because it was unnecessary.
+3. Confirmed that the advisor and administrator would be able to register and consult the information mentioned.
+4. Confirmed that the installer uses the platform and provides data about consumed materials.
 
-1. Aceptó las historias excepto HU-07.
-2. Descartó HU-07 por no ser necesaria.
-3. Confirmó que asesor y administrador podrán registrar y consultar la información mencionada.
-4. Confirmó que el instalador utiliza la plataforma y aporta los datos de los materiales consumidos.
+The AI then proposed:
 
-Después, la IA propuso:
+HU-13: As an administrator, I want to correct material consumption recorded by mistake, preserving a record of the adjustment, so that the branch's stock reflects actual consumption.
 
-HU-13: Como administrador, quiero corregir un consumo de material registrado por error, dejando constancia del ajuste, para que las existencias de la sede reflejen el consumo real.
+The user explicitly confirmed that the administrator must be able to make that correction.
 
-El usuario confirmó expresamente que el administrador debe poder hacer esa corrección.
+### Final result
 
-### Resultado final
+Twelve stories were accepted: HU-01 through HU-06 and HU-08 through HU-13.
 
-Quedaron 12 historias aceptadas: HU-01 a HU-06 y HU-08 a HU-13.
+HU-07 is preserved as excluded to maintain the change record.
 
-HU-07 se conserva como descartada para mantener el registro del cambio.
+The complete, reviewed stories are available in:
 
-Las historias completas y revisadas están en:
+[View requirements](../requisitos.md)
 
-[Consultar requisitos](../requisitos.md)
+### Outstanding items
 
-### Pendientes
+- Clarify measurement units and quantity precision: identifying the installer as the source does not yet resolve this decision.
+- Review the stories with Jonathan.
+- Assign MoSCoW priorities.
+- Write Gherkin acceptance criteria for Must stories.
 
-- Precisar las unidades de medida y la precisión de las cantidades: identificar al instalador como fuente no resuelve todavía esta decisión.
-- Revisar las historias con Jonathan.
-- Asignar prioridades MoSCoW.
-- Escribir criterios de aceptación Gherkin para las historias Must.
+## P-05 — Prioritize stories with MoSCoW
 
-## P-05 — Priorizar historias con MoSCoW
+### Test details
 
-### Datos de la prueba
+- Date: September 5, 2026.
+- Tool: Codex.
+- Objective: propose priorities based on the main demonstration.
+- Status: executed; prioritization pending team review.
 
-- Fecha: 5 de septiembre de 2026.
-- Herramienta: Codex.
-- Objetivo: proponer prioridades según la demostración principal.
-- Estado: ejecutado; priorización pendiente de revisión del equipo.
+### Prompt used
 
-### Prompt utilizado
+Act as a requirements analyst for a small academic project.
 
-Actúa como analista de requisitos para un proyecto académico pequeño.
+CONTEXT:
+We are two students and will develop a system for the two Serna Polarizados branches in Ibagué. Both share customers, vehicles and job history, but each branch maintains its own inventory.
 
-CONTEXTO:
-Somos dos estudiantes y desarrollaremos un sistema para las dos sedes de Serna Polarizados en Ibagué. Ambas comparten clientes, vehículos e historial de trabajos, pero cada sede mantiene su propio inventario.
+The main demonstration must allow registering a customer and their vehicle, recording a material receipt, recording a job, linking consumption to it, and verifying that only the corresponding branch's inventory decreases. The vehicle's history must be accessible from both branches.
 
-La demostración principal debe permitir registrar un cliente y su vehículo, registrar una entrada de material, registrar un trabajo, asociarle un consumo y comprobar que solo disminuye el inventario de la sede correspondiente. El historial del vehículo debe poder consultarse desde ambas sedes.
+These are the accepted stories:
 
-Estas son las historias aceptadas:
+- HU-01: register a customer.
+- HU-02: consult a customer by identification document.
+- HU-03: register a vehicle associated with a customer.
+- HU-04: consult a vehicle by plate.
+- HU-05: record a job with vehicle, branch, date, service and total value.
+- HU-06: consult vehicle history from both branches.
+- HU-08: register a material and its measurement unit.
+- HU-09: record a material receipt by branch.
+- HU-10: record consumption associated with a job and deduct it from the corresponding branch.
+- HU-11: consult stock by branch.
+- HU-12: consult materials and quantities consumed in a job.
+- HU-13: allow the administrator to correct erroneous consumption, preserving a record of the adjustment.
 
-- HU-01: registrar cliente.
-- HU-02: consultar cliente por documento.
-- HU-03: registrar vehículo asociado a un cliente.
-- HU-04: consultar vehículo por placa.
-- HU-05: registrar trabajo con vehículo, sede, fecha, servicio y valor total.
-- HU-06: consultar historial del vehículo desde ambas sedes.
-- HU-08: registrar material y su unidad de medida.
-- HU-09: registrar entrada de material por sede.
-- HU-10: registrar consumo asociado a un trabajo y descontarlo de la sede correspondiente.
-- HU-11: consultar existencias por sede.
-- HU-12: consultar materiales y cantidades consumidos en un trabajo.
-- HU-13: permitir al administrador corregir un consumo erróneo, dejando constancia del ajuste.
+HU-07, consulting jobs by branch and period, was explicitly excluded.
 
-HU-07, consultar trabajos por sede y periodo, fue descartada expresamente.
+TASK:
+Propose a MoSCoW priority for each accepted story and briefly explain the reason. Consider the dependencies needed to complete the main demonstration.
 
-TAREA:
-Propón una prioridad MoSCoW para cada historia aceptada y explica brevemente su motivo. Considera las dependencias necesarias para completar la demostración principal.
+FORMAT:
+A table with the columns ID, Story, Priority and Rationale. Then explain in simple language what could be postponed and its effect. Record HU-07 separately as out of scope.
 
-FORMATO:
-Una tabla con las columnas ID, Historia, Prioridad y Justificación. Después, explica en lenguaje sencillo qué podría aplazarse y qué efecto tendría. Registra HU-07 por separado como fuera de alcance.
+CONSTRAINTS:
+Prioritization is a proposal pending team review. Do not change identifiers or add functions. Do not reintroduce HU-07. Do not invent mandatory percentages for each category: it is fine if a category remains empty. Distinguish what is essential for the main flow to work from what can wait. Do not generate code or Gherkin criteria yet.
 
-RESTRICCIONES:
-La priorización es una propuesta pendiente de revisión del equipo. No cambies los identificadores ni agregues funciones. No reincorpores HU-07. No inventes porcentajes obligatorios para cada categoría: si una categoría queda vacía, está bien. Diferencia lo indispensable para que funcione el recorrido principal de lo que puede esperar. No generes código ni criterios Gherkin todavía.
+EXAMPLE:
+HU-09 | Record a material receipt | Must | Provides stock to demonstrate material consumption.
 
-EJEMPLO:
-HU-09 | Registrar entrada de material | Must | Permite disponer de existencias para demostrar el consumo de materiales.
+### Summary of the response obtained
 
-### Resumen de la respuesta obtenida
+The AI proposed:
 
-La IA propuso:
+- Must: HU-01, HU-03, HU-05, HU-06, HU-08, HU-09, HU-10 and HU-11.
+- Should: HU-02, HU-04, HU-12 and HU-13.
+- Could: none.
+- Won’t: HU-07, previously excluded.
 
-- Must: HU-01, HU-03, HU-05, HU-06, HU-08, HU-09, HU-10 y HU-11.
-- Should: HU-02, HU-04, HU-12 y HU-13.
-- Could: ninguna.
-- Won’t: HU-07, previamente descartada.
+General rationale:
 
-Justificación general:
+The Must stories allow completing the flow from customer registration through inventory verification and cross-branch history consultation.
 
-Las historias Must permiten completar el recorrido desde el registro del cliente hasta la comprobación del inventario y la consulta del historial entre sedes.
+Searches by identification document and plate were proposed as Should, provided the main functions allow customers and vehicles to be selected correctly.
 
-Las búsquedas por documento y placa se propusieron como Should, condicionadas a que las funciones principales permitan seleccionar correctamente clientes y vehículos.
+The detailed query of materials by job was proposed as Should, while keeping the relationship between consumption and job mandatory.
 
-La consulta detallada de materiales por trabajo se propuso como Should, manteniendo obligatoria la relación entre consumo y trabajo.
+Consumption correction was proposed as Should for the academic demonstration, noting that it should be completed before using the system in a real operation.
 
-La corrección de consumos se propuso como Should para la demostración académica, señalando que debería completarse antes de utilizar el sistema en una operación real.
+### Assisted review comments
 
-### Comentarios de revisión asistida
+What worked:
 
-Qué funcionó:
+- Classified the twelve accepted stories.
+- Kept HU-07 out of scope.
+- Justified priorities based on the demonstration.
+- Did not force the use of every category.
+- Explained the effects of postponing functions.
+- Did not generate code or Gherkin criteria.
 
-- Clasificó las doce historias aceptadas.
-- Conservó HU-07 fuera del alcance.
-- Justificó las prioridades según la demostración.
-- No forzó el uso de todas las categorías.
-- Explicó los efectos de aplazar funciones.
-- No generó código ni criterios Gherkin.
+Limitations:
 
-Limitaciones:
+- Postponing HU-02 and HU-04 depends on a selection mechanism that still needs to be detailed.
+- The importance of correcting consumption must be reviewed with the team; its priority was not confirmed by the user.
+- The classification targeted an academic demonstration, not a complete real operation.
 
-- Aplazar HU-02 y HU-04 depende de una forma de selección que todavía debe detallarse.
-- La importancia de corregir consumos debe revisarse con el equipo; su prioridad no quedó confirmada por el usuario.
-- La clasificación se orientó a una demostración académica, no a una operación real completa.
+### Corrections and pending decisions
 
-### Correcciones y decisiones pendientes
+The proposed classification has not yet been modified or approved.
 
-No se modificó ni aprobó todavía la clasificación propuesta.
+The team must decide:
 
-El equipo debe decidir:
+1. Whether searches by identification document and plate should be Must.
+2. Whether consumption correction should be Must.
+3. Whether it accepts the remaining priorities.
 
-1. Si las búsquedas por documento y placa deben ser Must.
-2. Si la corrección de consumos debe ser Must.
-3. Si acepta las demás prioridades.
+### Pending human review
 
-### Revisión humana pendiente
+Executing this prompt does not amount to approving its results.
 
-La ejecución de este prompt no equivale a aprobar sus resultados.
+Joint review with Jonathan and evaluation by another team remain pending.
 
-La revisión conjunta con Jonathan y la evaluación por otro equipo siguen pendientes.
+## Current follow-up
+
+- Preserve original prompts and results without replacing them with translations presented as past tests.
+- For new executions, use instructions in English and request the response in Spanish, following the instruction reported by the student.
+- Record any new version separately, along with its actual date, tool, result and corrections.
+- Review the results with Jonathan and record only reviews that actually took place.
+- Complete the prompt evaluation and exchange requested in class.
+- Consult the current requirements for the current scope and priorities.
+
+Having five records does not, by itself, establish that the entire submission has been reviewed or that a requirement for five executions in English has been met. Prompt tests are not software functionality tests either.
