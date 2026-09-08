@@ -1,347 +1,142 @@
-# Requisitos — Serna Polarizados
+# Revisión de historias con Gemini — Serna Polarizados
 
-## 1. Estado y fuentes
+## 1. Datos de la revisión
 
-Versión consolidada: 8 de septiembre de 2026.
+- Documento evaluado: `requisitos.md`, versión consolidada del 8 de septiembre de 2026, anterior a la reorganización posterior de escenarios.
+- Herramienta: Gemini, según la respuesta compartida por el integrante del proyecto.
+- Modelo específico: no registrado.
+- Fecha exacta de ejecución: pendiente de confirmar; la fecha del documento evaluado no demuestra la fecha de ejecución.
+- Evidencia: respuesta de Gemini compartida en la conversación y reproducida a continuación.
+- Prompt exacto de esta ejecución: no incluido en este archivo; pendiente de incorporar desde el registro original.
 
-Este documento reúne requisitos funcionales, necesidades de calidad, historias de usuario, prioridades y criterios de aceptación.
+Este archivo conserva la evaluación, no una copia del documento de requisitos. Los requisitos actuales se consultan en [requisitos.md](../requisitos.md).
 
-Fuentes:
+La respuesta original contiene errores señalados en la sección 3. Se conserva para mostrar qué produjo la herramienta y qué se corrigió después. No se presenta como una aprobación completa de las historias.
 
-- Entrevista con Helena, asesora de la empresa.
-- Aclaraciones y decisiones del administrador de una sede, integrante del proyecto.
-- Análisis inicial y revisión con Gemini.
-- Organización y revisión asistida con Codex.
+## 2. Respuesta original de Gemini
 
-Las decisiones del negocio indicadas como confirmadas fueron revisadas con el administrador participante. La revisión conjunta con Jonathan sigue pendiente.
+Basado estrictamente en la versión consolidada del documento de requisitos con fecha 8 de septiembre de 2026, presento la revisión de las historias de usuario frente a sus requisitos funcionales vinculados y criterios de aceptación.
 
-El documento contiene 13 historias activas. HU-07 está descartada.
+---
 
-Los criterios son especificaciones para pruebas futuras; no representan pruebas ejecutadas ni software implementado.
+### 1. Tabla de evaluación de historias de usuario
 
-Esta versión sustituye las descripciones y criterios anteriores del documento. El historial de Git conserva las versiones previas.
-
-## 2. Problema y alcance
-
-La información de clientes, vehículos e instalaciones se consulta mediante registros manuales, archivos compartidos y llamadas. Los instaladores tienen dificultades para registrar información desde sus teléfonos. No existe un registro sistemático de entradas, cortes y sobrantes de material.
-
-La primera versión cubrirá las dos sedes de Serna Polarizados en Ibagué e incluirá:
-
-- Clientes y vehículos.
-- Registro de trabajos e historial detallado.
-- Consulta compartida entre las dos sedes.
-- Inventario independiente por sede.
-- Identificación de rollos y recortes aprovechables.
-- Registro de uso de material, correcciones y descartes.
-
-Fuera de esta versión:
-
-- Cálculo de comisiones y remuneraciones.
-- Verificación o gestión de pagos.
-- Facturación e integración con Siigo.
-- Agenda de citas y registro por QR.
-- Proveedores y compras.
-- Alertas automáticas de inventario.
-- Cotización de PPF.
-- Módulo completo de garantías.
-- Sedes adicionales, incluida Bogotá.
-- Cálculo automático de cortes o representación de formas irregulares.
-
-El valor del trabajo no indica si fue pagado. El historial permite consultar antecedentes para atender garantías, pero no administra todo ese proceso.
-
-## 3. Perfiles
-
-- Asesor: registra y consulta clientes, vehículos y trabajos.
-- Instalador: registra el uso de material y los sobrantes de sus operaciones.
-- Administrador: registra y consulta información, corrige registros de uso y registra descartes de piezas dañadas.
-
-La identificación de usuarios y la matriz detallada de permisos siguen pendientes. Compartir información entre sedes no significa acceso público.
-
-## 4. Reglas confirmadas
-
-- Un cliente puede tener varios vehículos.
-- No se permiten documentos de clientes ni placas duplicados.
-- Cada trabajo pertenece a un vehículo y a una sede.
-- Clientes, vehículos e historial se comparten entre las dos sedes.
-- El inventario pertenece a una sede específica.
-- El uso de material se relaciona con el trabajo y su pieza de origen.
-- No se utiliza material de otra sede dentro de ese trabajo.
-- Las dimensiones se registran en centímetros y deben ser positivas.
-- Los sobrantes se representan mediante rectángulos aprovechables medidos por el instalador.
-- El material de un sobrante no puede seguir contado dentro de la pieza de origen.
-- El administrador puede corregir registros y debe quedar constancia de autor, fecha, motivo y datos anteriores y nuevos.
-- El administrador registra el descarte completo de piezas dañadas.
-- Una operación de inventario se guarda completa o no se aplica parcialmente.
-
-## 5. Requisitos funcionales
-
-Los identificadores siguientes corresponden a esta versión consolidada. Sustituyen la numeración provisional de los borradores de Gemini.
-
-| ID | Requisito | Origen principal |
-| --- | --- | --- |
-| RF-01 | Registrar clientes con nombre, documento y contacto, sin documentos duplicados. | Alcance y validaciones confirmadas |
-| RF-02 | Registrar vehículos con placa y descripción, asociados a un cliente, sin placas duplicadas. | Alcance y validaciones confirmadas |
-| RF-03 | Consultar clientes por documento y vehículos por placa. | Entrevista y alcance confirmado |
-| RF-04 | Registrar trabajos con vehículo, sede, fecha, servicio y valor total. | Alcance confirmado |
-| RF-05 | Registrar detalles de instalación: tecnología, opacidad, instalador y datos aplicables de retiro de película. | Entrevista y alcance confirmado; estructura detallada pendiente |
-| RF-06 | Consultar el historial del vehículo desde ambas sedes, incluyendo los detalles registrados de cada trabajo. | Entrevista y decisión confirmada |
-| RF-07 | Registrar tipos de material diferenciando tecnología y opacidad. | Entrevista y revisión del inventario |
-| RF-08 | Registrar cada rollo recibido con identificación, sede, tipo de material, ancho y largo en centímetros. | Revisión aprobada del inventario |
-| RF-09 | Registrar el uso de material asociado a un trabajo y una pieza de su misma sede. | Alcance y revisión aprobada |
-| RF-10 | Registrar sobrantes aprovechables con identificación, dimensiones y pieza de origen, evitando duplicar existencias. | Decisión confirmada sobre sobrantes |
-| RF-11 | Consultar rollos y recortes disponibles por sede, material y dimensiones. | Revisión aprobada del inventario |
-| RF-12 | Consultar las piezas y registros de uso asociados a un trabajo. | HU-12 aceptada |
-| RF-13 | Permitir al administrador corregir registros de uso conservando consistencia y constancia del ajuste. | Decisión confirmada; casos dependientes pendientes |
-| RF-14 | Permitir al administrador descartar una pieza completa dañada, indicando el motivo y retirándola de la disponibilidad. | HU-14 aprobada |
-| RF-15 | Mostrar confirmación de guardado únicamente cuando la operación se haya guardado correctamente. | Necesidad de registro fiable y diseño derivado |
-| RF-16 | Validar dimensiones positivas y disponibilidad de la pieza antes de aplicar operaciones. | Validaciones aprobadas, adaptadas al inventario por piezas |
-
-## 6. Requisitos no funcionales
-
-| ID | Necesidad | Comprobación propuesta | Estado |
+| ID | Título exacto actual | Requisitos funcionales vinculados | Hallazgo breve de revisión |
 | --- | --- | --- | --- |
-| RNF-01 | El instalador debe poder completar su registro desde un teléfono. | Ejecutar el recorrido en el teléfono y navegador acordados, comprobando lectura, acceso a campos y ausencia de desplazamiento horizontal innecesario. | Necesidad confirmada; dispositivo y condiciones pendientes |
-| RNF-02 | El flujo debe ser comprensible para instaladores con poca familiaridad tecnológica. | Realizar una prueba con un instalador y observar si identifica el trabajo, registra material y reconoce el resultado del guardado. | Necesidad derivada de entrevista; umbral de aceptación pendiente |
-| RNF-03 | Las operaciones de inventario deben ser consistentes. | Provocar un fallo durante un registro y comprobar que no queden consumos, sobrantes o cambios de origen aplicados parcialmente. | Regla del sistema confirmada |
-| RNF-04 | Los ajustes deben conservar su trazabilidad. | Consultar una corrección y comprobar autor, momento, motivo y datos anteriores y nuevos. | Confirmado |
-| RNF-05 | El acceso debe respetar los permisos del usuario. | Intentar una corrección con un perfil sin autorización y comprobar su rechazo. | Corrección exclusiva del administrador confirmada; matriz completa pendiente |
-| RNF-06 | El sistema debe funcionar en los navegadores y dispositivos acordados. | Ejecutar el recorrido principal en cada combinación seleccionada. | Propuesta técnica; combinaciones pendientes |
+| **HU-01** | Registrar cliente | RF-01 | Cubre el registro exitoso y la validación de documento duplicado. Alineada con RF-01. |
+| **HU-02** | Consultar cliente | RF-03 | Cubre la consulta por documento y el mensaje de no coincidencia. Alineada con RF-03. |
+| **HU-03** | Registrar vehículo | RF-02 | Registra vehículos vinculados a un cliente existente y valida placas duplicadas. Alineada con RF-02. |
+| **HU-04** | Consultar vehículo | RF-03 | Cubre la búsqueda por placa y la identificación del cliente asociado. Alineada con RF-03. |
+| **HU-05** | Registrar trabajo y detalles | RF-04, RF-05 | Registra trabajos y detalles de instalación. Requiere concretar la estructura/campos obligatorios de detalles y la representación de múltiples tecnologías, opacidades o instaladores. |
+| **HU-06** | Consultar historial | RF-06 | Permite consultar el historial del vehículo desde ambas sedes. Alineada con RF-06. |
+| **HU-08** | Registrar tipo de material | RF-07 | Permite registrar tecnologías y opacidades para caracterizar materiales. Alineada con RF-07. |
+| **HU-09** | Registrar rollo recibido | RF-08, RF-16 | Controla el ingreso de rollos con medidas positivas en centímetros e independización por sede. Alineada con RF-08 y RF-16. |
+| **HU-10** | Registrar uso y sobrantes | RF-09, RF-10, RF-15, RF-16 | Contempla uso, sobrantes aprovechables, validación por sede y atomicidad (RF-15). Pendiente definir la mecánica exacta del registro del corte y del restante. |
+| **HU-11** | Consultar disponibilidad | RF-11 | Muestra rollos y recortes por sede/material/dimensiones, excluyendo descartados. Alineada con RF-11. |
+| **HU-12** | Consultar material de un trabajo | RF-12 | Asocia piezas y uso a un trabajo específico. Alineada con RF-12. |
+| **HU-13** | Corregir registro de uso | RF-13 | Exclusivo del administrador con trazabilidad y atomicidad. Pendiente definir reglas específicas para sobrantes que ya han sido utilizados posteriormente. |
+| **HU-14** | Descartar pieza dañada | RF-14 | Permite al administrador retirar del inventario disponible piezas dañadas. Su prioridad se encuentra explícitamente pendiente. |
 
-No se han aprobado tiempos de respuesta, cifras de concurrencia ni tamaños mínimos de pantalla.
+---
 
-## 7. Historias de usuario y criterios
+### 2. Lista de comprobación corta (Checklist)
 
-Las prioridades previas se conservan como referencia. La revisión del esfuerzo de las historias de inventario y la prioridad de HU-14 quedan pendientes.
+* **Rol:** Cumplido. Todas las historias definen un rol claro (*Asesor*, *Instalador* o *Administrador*).
+* **Acción:** Cumplido. Cada historia expresa con precisión la funcionalidad requerida.
+* **Beneficio:** Cumplido. Se clarifica el valor de negocio de cada acción en el enunciado de la historia.
+* **Alcance:** Incompleto / Incierto en casos limítrofes. El alcance general excluye explícitamente facturación, comisiones, agendas y cálculo automático de cortes; sin embargo, existen casos de uso de inventario cuyos límites operativos no están cerrados.
+* **Criterios de aceptación comprobables:** Parcialmente cumplido. La mayoría de los escenarios son directamente verificables mediante criterios Dado/Cuando/Entonces, pero carecen de especificidad en las reglas de corte y detalles de instalación.
+* **Preguntas o puntos sin resolver:** Presentes explícitamente. Se identifican aspectos críticos no resueltos respecto al detalle de trabajos, precisión de medidas, cortes y correcciones dependientes.
 
-### HU-01 — Registrar cliente
-Prioridad: Must.
-Requisito: RF-01.
+---
 
-Como asesor, quiero registrar un cliente con nombre, documento y contacto para disponer de sus datos al atenderlo.
+### 3. Correcciones específicas y puntos no resueltos
 
-Escenario: registro correcto
-- Dado un cliente que no está registrado,
-- Cuando el asesor guarda sus datos válidos,
-- Entonces el cliente queda disponible para consulta.
+Sin modificar ninguna de las decisiones confirmadas ni reescribir prioridades o unidades de medida aprobadas (como el uso estricto de centímetros), se requieren las siguientes precisiones:
 
-Escenario: documento duplicado
-- Dado un documento ya registrado,
-- Cuando se intenta registrar otro cliente con ese documento,
-- Entonces se rechaza el registro y se informa la coincidencia.
+1. **Definición del registro de corte y material restante (HU-10 / RF-09, RF-10):**
+* Es un punto sin resolver cómo se registrará operativamente la pieza cortada y la deducción exacta del restante en la pieza de origen, dado que el documento explicita que no basta comparar áreas.
 
-### HU-02 — Consultar cliente
-Prioridad: Must.
-Requisito: RF-03.
 
-Como asesor, quiero consultar un cliente por su documento para recuperar sus datos y evitar registrarlo nuevamente.
+2. **Estructura detallada de instalación (HU-05 / RF-05):**
+* Está sin resolver la estructura de datos obligatoria para el registro de instalación, así como el mecanismo para soportar múltiples tecnologías, opacidades o instaladores en un mismo trabajo.
 
-- Dado un cliente registrado,
-- Cuando se consulta su documento,
-- Entonces aparecen sus datos.
-- Si no hay coincidencia, se informa que no se encontró el cliente.
 
-### HU-03 — Registrar vehículo
-Prioridad: Must.
-Requisito: RF-02.
+3. **Reglas de corrección para sobrantes utilizados (HU-13 / RF-13):**
+* Es un punto sin resolver cómo debe comportarse el sistema al corregir un registro de uso si el sobrante derivado de esa operación ya fue utilizado en un trabajo posterior.
 
-Como asesor, quiero registrar un vehículo y asociarlo a un cliente para identificar a quién pertenece.
 
-- Dado un cliente existente,
-- Cuando se registra una placa no repetida y la descripción del vehículo,
-- Entonces el vehículo queda asociado a ese cliente sin eliminar sus otros vehículos.
+4. **Tratamiento de daños parciales y anulaciones (HU-14 / RF-14):**
+* HU-14 solo contempla el descarte de piezas completas. Falta definir las reglas de negocio para material dañado parcialmente, anulaciones y registro de material equivocado.
 
-Escenario: placa duplicada
-- Dado un vehículo con una placa registrada,
-- Cuando se intenta registrar otro con la misma placa,
-- Entonces se rechaza el nuevo registro.
 
-### HU-04 — Consultar vehículo
-Prioridad: Must.
-Requisito: RF-03.
+5. **Precisión de las dimensiones:**
+* Aunque está confirmado que las dimensiones se registran en centímetros y deben ser positivas, permanece sin resolver el nivel de precisión decimal requerido para las medidas.
 
-Como asesor, quiero consultar un vehículo por su placa para identificar al cliente asociado antes de registrar un trabajo.
 
-- Dado un vehículo registrado,
-- Cuando se busca su placa,
-- Entonces aparecen el vehículo y su cliente.
-- Si no hay coincidencia, se informa que no se encontró el vehículo.
+6. **Prioridad de la historia HU-14:**
+* La historia HU-14 (*Descartar pieza dañada*) tiene su prioridad como **pendiente de asignación** y debe ser priorizada por el equipo.
 
-### HU-05 — Registrar trabajo y detalles
-Prioridad: Must.
-Requisitos: RF-04 y RF-05.
 
-Como asesor, quiero registrar el trabajo y sus detalles de instalación para dejar constancia de lo realizado al vehículo.
+7. **Matriz de permisos y perfiles:**
+* La matriz detallada de permisos e identificación formal de usuarios permanece sin resolver, aun cuando la exclusividad del Administrador para corregir (HU-13) y descartar (HU-14) está confirmada.
 
-- Dado un vehículo existente,
-- Cuando se registra el trabajo con sede, fecha, servicio y valor total,
-- Entonces queda asociado al vehículo y a esa sede.
-- Los detalles de tecnología, opacidad, instalador y retiro que se registren deben conservarse y aparecer en el historial.
+## 3. Revisión posterior con apoyo de Codex
 
-Pendiente: concretar cómo representar varias tecnologías, opacidades o instaladores dentro de un trabajo y qué detalles son obligatorios.
+Las siguientes observaciones son posteriores a la respuesta anterior y no se atribuyen a Gemini.
 
-### HU-06 — Consultar historial
-Prioridad: Must.
-Requisito: RF-06.
+| Punto | Qué se detectó | Corrección de interpretación |
+| --- | --- | --- |
+| HU-10: atribución de atomicidad a RF-15 | Gemini vinculó el guardado conjunto a RF-15. | La consistencia y el guardado completo corresponden a RNF-03. RF-15 exige mostrar éxito únicamente después del guardado correcto. |
+| Checklist: acción totalmente precisa | Gemini calificó como cumplida la precisión de todas las acciones. | Debe considerarse parcial: HU-05, HU-10 y HU-13 conservan procedimientos o detalles sin cerrar. |
+| Daños parciales, anulaciones y material equivocado | La respuesta agrupó estos pendientes bajo HU-14 y RF-14. | HU-14 cubre únicamente el descarte completo. Los demás casos no son funciones automáticamente aprobadas ni pertenecen todos al descarte. Su tratamiento debe decidirse según los requisitos. |
+| Historias alineadas con requisitos | La correspondencia entre una historia y su RF puede ser correcta. | Eso no demuestra que la historia tenga todos sus criterios completos, que sea estimable ni que esté implementada. |
 
-Como asesor, quiero consultar el historial de un vehículo desde ambas sedes para conocer sus atenciones anteriores.
+## 4. Checklist interpretado después de la revisión
 
-- Dado un trabajo registrado en la sede A,
-- Cuando se consulta el vehículo desde la sede B,
-- Entonces aparece el trabajo con su sede, fecha, servicio y detalles de instalación registrados.
-- Si el vehículo no tiene trabajos, se indica que su historial está vacío.
+Esta tabla resume la revisión asistida posterior; no es una segunda respuesta de Gemini.
 
-### HU-08 — Registrar tipo de material
-Prioridad de referencia: Must.
-Requisito: RF-07.
+| Aspecto | Estado | Justificación |
+| --- | --- | --- |
+| Rol | Cumple en los enunciados | Las historias identifican asesor, instalador o administrador. La matriz completa de permisos sigue pendiente. |
+| Acción | Parcial | Existen acciones reconocibles, pero HU-05, HU-10 y HU-13 necesitan precisiones. |
+| Beneficio | Cumple en los enunciados | Las historias explican para qué se necesita la acción. |
+| Alcance | Parcial | Las exclusiones generales están identificadas; algunos procedimientos de inventario siguen abiertos. |
+| Criterios verificables | Parcial | Hay escenarios de éxito y error, pero no se han cerrado todas las reglas necesarias para probar las historias. |
+| Pendientes explícitos | Cumple | Se reconocen detalles de instalación, corte, corrección, precisión, permisos y prioridad de HU-14. |
 
-Como administrador, quiero registrar tipos de material distinguiendo tecnología y opacidad para identificar los rollos y recortes.
+Este checklist no constituye una evaluación completa de INVEST. No se han demostrado la estimación ni el tamaño de todas las historias.
 
-- Dado un tipo de material que se desea registrar,
-- Cuando el administrador guarda su tecnología y opacidad,
-- Entonces queda disponible para identificar las piezas correspondientes.
+## 5. Seguimiento respecto a los requisitos actuales
 
-### HU-09 — Registrar rollo recibido
-Prioridad de referencia: Must.
-Requisitos: RF-08 y RF-16.
+Después de la evaluación se reorganizó el documento de requisitos con apoyo de Codex:
 
-Como administrador, quiero registrar cada rollo recibido con sede, material y dimensiones para conocer lo que ingresa.
+- Se separaron escenarios de consultas con y sin resultados.
+- Se explicitó la conservación de varios vehículos por cliente.
+- Se relacionó el guardado completo con RNF-03.
+- Se organizaron escenarios de validación y fallo de guardado.
+- Se conservaron visibles los pendientes de HU-05, HU-10 y HU-13.
+- HU-14 mantuvo su prioridad pendiente.
+- HU-07 permaneció descartada.
 
-- Dado un tipo de material registrado,
-- Cuando se guarda un rollo con sede y dimensiones positivas en centímetros,
-- Entonces queda identificado en esa sede y no cambia el inventario de la otra.
+Esta actualización documental no se presenta como una nueva revisión realizada por Gemini.
 
-Escenario: dimensiones inválidas
-- Dado un ancho o largo igual o menor que cero,
-- Cuando se intenta guardar el rollo,
-- Entonces se rechaza el registro sin modificar el inventario.
+## 6. Pendientes
 
-### HU-10 — Registrar uso y sobrantes
-Prioridad de referencia: Must.
-Requisitos: RF-09, RF-10, RF-15 y RF-16.
-
-Como instalador, quiero registrar la pieza utilizada y los sobrantes aprovechables de un trabajo para mantener el inventario sin duplicar material.
-
-- Dado un trabajo y una pieza disponible de la misma sede,
-- Cuando se registra una operación válida de uso y sus sobrantes,
-- Entonces se conserva la relación con el trabajo y la pieza de origen.
-- Cada sobrante queda identificado con material, sede y dimensiones aprovechables.
-- La pieza de origen se actualiza sin contar dos veces el material.
-
-Escenario: pieza de otra sede
-- Dada una pieza de una sede distinta de la del trabajo,
-- Cuando se intenta utilizar,
-- Entonces se rechaza la operación sin modificar existencias.
-
-Escenario: fallo de guardado
-- Dada una operación que modifica origen y sobrantes,
-- Cuando falla uno de sus cambios,
-- Entonces no se aplica ninguno y no se muestra confirmación de éxito.
-
-Pendiente: definir el registro exacto del corte y del material restante en el rollo. No basta comparar áreas para comprobar que una pieza cabe en otra.
-
-### HU-11 — Consultar disponibilidad
-Prioridad de referencia: Must.
-Requisito: RF-11.
-
-Como administrador, quiero consultar rollos y recortes por sede, material y dimensiones para identificar lo disponible.
-
-- Dadas piezas disponibles en ambas sedes,
-- Cuando se consulta una sede,
-- Entonces aparecen sus piezas con identificación, tecnología, opacidad, ancho y largo.
-- Las piezas descartadas no aparecen como disponibles.
-
-### HU-12 — Consultar material de un trabajo
-Prioridad de referencia: Should.
-Requisito: RF-12.
-
-Como administrador, quiero consultar las piezas y registros de uso de un trabajo para revisar su relación con el inventario.
-
-- Dado un trabajo con material utilizado,
-- Cuando se consulta su detalle,
-- Entonces se identifican las piezas de origen y registros de uso asociados.
-
-Aplazar esta consulta general no elimina la selección básica de registros necesaria para corregirlos mediante HU-13.
-
-### HU-13 — Corregir registro de uso
-Prioridad de referencia: Must.
-Requisito: RF-13.
-
-Como administrador, quiero corregir un registro de uso dejando constancia del cambio para mantener un inventario consistente.
-
-- Dado un registro que admite corrección según las reglas definidas,
-- Cuando el administrador realiza una corrección válida e indica el motivo,
-- Entonces se conservan autor, momento, motivo y datos anteriores y nuevos.
-- El inventario afectado se actualiza sin duplicaciones.
-- La operación se guarda completa o no se aplica.
-
-Escenario: usuario sin autorización
-- Dado un usuario que no es administrador,
-- Cuando intenta corregir un registro,
-- Entonces el sistema rechaza la operación.
-
-Pendiente: reglas concretas para corregir piezas y para tratar sobrantes ya utilizados. Este escenario no cierra todavía toda la historia.
-
-### HU-14 — Descartar pieza dañada
-Prioridad: pendiente de asignación.
-Requisito: RF-14.
-
-Como administrador, quiero registrar el descarte completo de una pieza dañada indicando el motivo para retirarla de la disponibilidad.
-
-- Dada una pieza disponible,
-- Cuando el administrador confirma su descarte con un motivo,
-- Entonces deja de aparecer como disponible.
-- Se conserva el registro del descarte y la identificación de la pieza.
-- El inventario de la otra sede permanece sin cambios.
-
-El tratamiento de daños parciales no está definido.
-
-## 8. Historia descartada
-
-HU-07 — Consultar trabajos por sede y periodo.
-
-Descartada expresamente por el administrador participante. Prioridad Won’t. No cuenta entre las 13 historias activas.
-
-## 9. Pendientes reales
-
-- Revisar el documento con Jonathan y validar los resultados derivados de la entrevista con Helena.
-- Precisar campos y estructura del detalle de instalación.
+- Incorporar el prompt exacto de esta ejecución y confirmar su fecha si se conserva el registro.
+- Precisar la estructura de los detalles de instalación de HU-05.
+- Definir el registro de corte y restante de HU-10.
+- Definir las correcciones de HU-13 cuando existen sobrantes utilizados posteriormente.
 - Definir la precisión de las medidas en centímetros.
-- Definir el registro del corte y del restante del rollo.
-- Definir correcciones cuando existen sobrantes utilizados posteriormente.
-- Resolver anulaciones, material equivocado y daños parciales.
-- Completar la identificación de usuarios y matriz de permisos.
-- Asignar prioridad a HU-14 y revisar el esfuerzo del inventario por piezas.
-- Acordar condiciones de prueba de los requisitos no funcionales.
-- Actualizar trazabilidad y diseño con esta versión.
+- Asignar prioridad a HU-14 y revisar el esfuerzo del inventario.
+- Completar la identificación de usuarios y los permisos detallados.
+- Revisar conjuntamente con Jonathan y validar los resultados derivados con la asesora.
 
-## 10. Resumen de cambios
+Los pendientes de negocio no se resuelven mediante una calificación favorable de la IA. Su estado vigente se mantiene en [requisitos.md](../requisitos.md).
 
-- Se incorporó la entrevista de la asesora como fuente.
-- Se amplió el detalle del historial para incluir información de instalación.
-- Se sustituyó el inventario basado solo en cantidades por identificación de rollos y recortes.
-- Se aprobaron medidas en centímetros y rectángulos aprovechables.
-- Se añadió HU-14 para descartes completos.
-- Se conservaron las exclusiones de pagos, comisiones y sedes adicionales.
-- Se separaron decisiones confirmadas de propuestas técnicas y pendientes.
+## 7. Resultado
 
-Las pruebas de prompts y sus resultados se conservan en docs/ia/prompts.md. La respuesta inicial de IA no se presenta como una decisión del negocio ni como software probado.
+Se recuperó la evaluación original de Gemini y se documentaron sus errores y las correcciones posteriores, conservando las 13 historias activas y HU-07 fuera del alcance.
 
-## Revisión posterior del resultado
+La revisión es evidencia del análisis de requisitos. No demuestra que exista software implementado, pruebas ejecutadas ni aprobación conjunta del equipo.
 
-Herramienta evaluada: Gemini.
-Documento de entrada: requisitos.md, versión consolidada del 8 de septiembre de 2026.
-
-La respuesta respetó los identificadores y significados de las 13 historias activas y mantuvo HU-14 con prioridad pendiente.
-
-### Correcciones identificadas con apoyo de Codex
-
-1. En HU-10, la integridad de la operación corresponde a RNF-03, no a RF-15. RF-15 exige mostrar éxito únicamente después del guardado correcto.
-2. La evaluación de precisión de las acciones debe considerarse parcialmente cumplida: HU-05, HU-10 y HU-13 conservan detalles pendientes.
-
-### Resultado
-
-La revisión sirve para identificar pendientes. No demuestra que las historias estén implementadas, probadas ni completamente definidas.
-
-El descarte de piezas completas está aprobado. Los daños parciales, anulaciones y cambios de material siguen pendientes; no se incorporan automáticamente como funciones adicionales.
-
-La revisión con Jonathan y la validación posterior con la asesora continúan pendientes.
