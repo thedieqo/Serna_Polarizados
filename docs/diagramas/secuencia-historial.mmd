@@ -1,0 +1,35 @@
+sequenceDiagram
+    actor Asesor
+    participant Pantalla as Pantalla de historial
+    participant Negocio as Backend Flask
+    participant Datos as Acceso a datos
+    participant BD as SQLite
+
+    Note over Asesor,Negocio: Usuario autorizado. Identificación y permisos detallados pendientes.
+
+    Asesor->>Pantalla: Introduce la placa
+    Pantalla->>Negocio: Solicita historial por placa
+    Negocio->>Datos: Busca el vehículo
+    Datos->>BD: Consulta por placa
+    BD-->>Datos: Resultado
+    Datos-->>Negocio: Vehículo encontrado o inexistente
+
+    alt El vehículo no existe
+        Negocio-->>Pantalla: Vehículo no encontrado
+        Pantalla-->>Asesor: Muestra mensaje
+    else El vehículo existe
+        Negocio->>Datos: Solicita sus trabajos de ambas sedes
+        Datos->>BD: Consulta trabajos y detalles registrados
+        BD-->>Datos: Trabajos encontrados
+        Datos-->>Negocio: Historial del vehículo
+
+        alt No tiene trabajos
+            Negocio-->>Pantalla: Historial vacío
+            Pantalla-->>Asesor: Informa que no tiene trabajos
+        else Tiene trabajos
+            Negocio-->>Pantalla: Historial con sede y detalles
+            Pantalla-->>Asesor: Muestra los trabajos anteriores
+        end
+    end
+
+    Note over Datos,BD: Esta consulta no modifica el inventario.
