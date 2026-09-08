@@ -2,79 +2,90 @@
 
 ## 1. Objetivo
 
-Comparar tres soluciones existentes para identificar funciones útiles y orientar el alcance del proyecto académico de Serna Polarizados.
+Comparar funciones publicadas de Shopmonkey, AutoLeap y Odoo para identificar aprendizajes aplicables al proyecto académico de Serna Polarizados.
 
-La comparación se concentra en clientes, vehículos, historial de trabajos e inventario para dos sedes de Ibagué.
+La comparación se concentra en clientes, vehículos, historial de trabajos e inventario independiente para las dos sedes de Ibagué.
 
-## 2. Método
+## 2. Método y límites
 
-Se consultaron páginas oficiales de Shopmonkey, AutoLeap y Odoo el 5 de septiembre de 2026.
+**Análisis inicial:** 5 de septiembre de 2026.  
+**Actualización y consulta de fuentes:** 8 de septiembre de 2026.
 
-Shopmonkey y AutoLeap son referentes especializados en talleres automotrices. Odoo es una alternativa de gestión empresarial con módulos que cubren partes de la necesidad.
+Se consultaron páginas oficiales de los tres sistemas. Para Odoo, esta revisión utiliza documentación de la versión 18.
 
-El análisis es documental: no se instalaron ni probaron los sistemas. Las observaciones sobre su adaptación a Serna son aspectos por evaluar, no fallos demostrados.
+El análisis es documental: no se instalaron ni probaron los sistemas y no se solicitaron demostraciones.
 
-## 3. Tabla comparativa
+- **Funciones documentadas:** capacidades descritas por el proveedor.
+- **Utilidad para Serna:** interpretación del equipo sobre su relación con el proyecto.
+- **No verificado:** aspecto que las fuentes consultadas no permiten confirmar para nuestra operación.
 
-| Solución | Funciones documentadas | Relación con Serna | Aspectos por verificar |
+No se evaluaron precios, planes comerciales ni soporte local. Tampoco se comprobó que alguno de los sistemas cubra exactamente el flujo de rollos, cortes y recortes definido para Serna.
+
+## 3. Comparación
+
+| Sistema | Funciones documentadas | Utilidad para Serna — interpretación | Aspectos pendientes de verificar |
 | --- | --- | --- | --- |
-| Shopmonkey | Registro de clientes y vehículos, asociación de vehículos a clientes e historial de servicios. También presenta herramientas de inventario. [1][2] | Es un referente para organizar la relación cliente–vehículo–trabajo y consultar antecedentes. | Comprobar cómo maneja materiales de polarizado medidos en metros o rollos y cómo se ajusta a la operación de las dos sedes. |
-| AutoLeap | Control de inventario, seguimiento de piezas utilizadas por trabajo y consulta de existencias entre ubicaciones. [3] | Es un referente para relacionar materiales con trabajos y distinguir existencias por sede. | Comprobar el manejo de consumos fraccionarios de películas de polarizado y su adaptación a los servicios de Serna. |
-| Odoo | Gestión de contactos y organización del inventario mediante almacenes y ubicaciones. [4][5] | Es una alternativa para centralizar clientes y representar los inventarios separados de las sedes. | Determinar qué configuración o desarrollo permitiría unir clientes, vehículos, trabajos y consumo de materiales. Las fuentes consultadas no demuestran ese flujo completo para un negocio de polarizados. |
+| Shopmonkey | Permite registrar clientes y vehículos, asociarlos y consultar su historial de servicios. Su página de inventario describe consulta de existencias, incorporación de piezas a trabajos y registro de cambios. [Clientes y vehículos](https://support.shopmonkey.io/hc/en-us/articles/38744260861204-Lists-Page) y [gestión de inventario](https://www.shopmonkey.io/demo-inventory-management). | Sirve como referencia para conectar cliente, vehículo y trabajo, y conservar información sobre el material utilizado. | **No verificado:** manejo de rollos con anchos distintos, recortes con dimensiones en centímetros y correcciones cuando un sobrante ya fue utilizado. |
+| AutoLeap | Su página de inventario describe seguimiento de existencias relacionado con trabajos y visibilidad del inventario entre ubicaciones. [Inventario de AutoLeap](https://autoleap.com/features/inventory/). | Orienta la relación entre trabajos y materiales y la consulta de disponibilidad diferenciada por sede. | **No verificado:** identificación de cada recorte, relación con su pieza de origen y prevención de duplicaciones al registrar sobrantes de película. |
+| Odoo | Documenta la creación de contactos y la organización del inventario mediante almacenes y ubicaciones. [Contactos de Odoo 18](https://www.odoo.com/documentation/18.0/applications/essentials/contacts.html) y [organización del inventario](https://www.odoo.com/documentation/18.0/applications/inventory_and_mrp/inventory/warehouses_storage/inventory_management.html). | Sirve como referencia para organizar clientes y distinguir físicamente dónde se conserva el material. | **No verificado:** configuración o desarrollo necesario para unir clientes, vehículos, instalaciones, rollos y recortes en el recorrido específico de Serna. |
 
-## 4. Aprendizajes para el proyecto
+Que un aspecto no esté verificado no significa que el sistema carezca de esa función. Significa que esta revisión no obtuvo evidencia suficiente para afirmarlo.
 
-- La información del cliente debe estar relacionada con sus vehículos y trabajos anteriores.
-- El registro de un consumo debe permitir identificar a qué trabajo corresponde.
-- Las existencias deben distinguirse por sede.
-- Compartir información entre sedes no significa mezclar sus inventarios.
-- El manejo de materiales en metros o rollos necesita reglas claras antes de programarse.
+## 4. Tres aprendizajes aplicables
 
-Estos puntos orientan el diseño; no obligan a reproducir todas las funciones de los sistemas comparados.
+1. **Relacionar clientes, vehículos y trabajos.** La información conectada permite consultar antecedentes sin reconstruir cada atención a partir de archivos separados.
+2. **Identificar la sede del inventario.** La consulta compartida de información debe conservar la separación de las piezas disponibles en cada sede.
+3. **Relacionar el uso de material con el trabajo y su origen.** En Serna, esto requiere identificar rollos y recortes y evitar contar un sobrante también dentro de la pieza de origen.
 
-## 5. Propuesta de valor de Serna
+Estos aprendizajes son interpretaciones para nuestro diseño. El registro de recortes y sus reglas procede de la entrevista y las aclaraciones del administrador, no de una función comprobada en los productos comparados.
 
-El proyecto propone un sistema académico enfocado en la operación acordada para las dos sedes de Ibagué:
+## 5. Aplicación al proyecto
+
+La primera versión mantendrá:
 
 - Clientes y vehículos compartidos.
 - Historial de trabajos consultable desde ambas sedes.
 - Inventario independiente por sede.
-- Consumos de materiales relacionados con cada trabajo.
+- Identificación de rollos y recortes.
+- Uso de material relacionado con cada trabajo.
+- Correcciones y descartes conforme a los requisitos acordados.
 
-El valor esperado está en adaptar un alcance pequeño a las necesidades identificadas del negocio.
+Las dimensiones se registrarán en centímetros. La precisión de las medidas, el procedimiento de corte y las correcciones con sobrantes utilizados siguen pendientes.
 
-No se afirma que el proyecto sea más completo, económico o eficiente que las soluciones comerciales. Esas comparaciones requerirían pruebas y datos adicionales.
+La comparación no modifica las prioridades ni agrega funciones al alcance aprobado.
 
-## 6. Decisión para la primera versión
+## 6. Propuesta de valor
 
-Mantener el alcance en clientes, vehículos, trabajos e inventario por sede.
+Serna Polarizados propone un sistema académico ajustado a las necesidades identificadas de sus dos sedes de Ibagué: consultar antecedentes de vehículos y registrar el uso de materiales manteniendo separado el inventario de cada sede.
 
-La comparación no justifica agregar pagos, facturación, agenda, compras ni otras funciones que quedaron fuera del MVP.
+No se afirma que el proyecto sea superior, más económico o más eficiente que las soluciones comerciales. No se han realizado pruebas ni mediciones que permitan esa comparación.
 
-Las unidades de medida, los consumos fraccionarios y las correcciones de inventario se precisarán durante el análisis de requisitos.
+El valor esperado deberá comprobarse durante el desarrollo y la evaluación con usuarios.
 
-## 7. Fuentes oficiales
+## 7. Exclusiones
 
-[1] [Shopmonkey: clientes, vehículos e historial de servicios](https://support.shopmonkey.io/hc/en-us/articles/38744260861204-Lists-Page).
+Este análisis no justifica incorporar pagos, comisiones, facturación, agenda, QR, proveedores, compras, alertas automáticas, cotización de PPF ni sedes adicionales.
 
-[2] [Shopmonkey: gestión de inventario](https://www.shopmonkey.io/demo-inventory-management).
-
-[3] [AutoLeap: inventario y gestión entre ubicaciones](https://autoleap.com/features/inventory/).
-
-[4] [Odoo 18: gestión de contactos](https://www.odoo.com/documentation/18.0/applications/essentials/contacts.html).
-
-[5] [Odoo 17: almacenes y almacenamiento](https://www.odoo.com/documentation/17.0/applications/inventory_and_mrp/inventory/warehouses_storage.html).
-
-Se consultaron las versiones de documentación indicadas. No se evaluaron precios, planes comerciales ni disponibilidad de soporte local.
+El alcance vigente y sus decisiones pendientes están en [requisitos.md](requisitos.md).
 
 ## 8. Uso de IA y revisión pendiente
 
-Fecha: 5 de septiembre de 2026.
+**Herramienta:** Codex, con búsqueda web.
 
-Herramienta: Codex, con búsqueda web.
+**Apoyo realizado:**
 
-Apoyo realizado: consulta de fuentes oficiales, preparación de la comparación y redacción del borrador.
+- Consulta de fuentes oficiales.
+- Preparación y actualización de la comparación.
+- Separación entre funciones publicadas e interpretaciones.
+- Actualización de las conclusiones al inventario de rollos y recortes.
+- Unificación de las referencias de Odoo en la versión 18.
 
-Criterios aplicados: separar funciones documentadas de aspectos por verificar, evitar precios sin comprobar y conservar el alcance acordado.
+Esta actualización no modifica las evidencias históricas de prompts que citaron otras versiones de documentación.
 
-Pendiente del equipo: revisar las fuentes y el contenido con Jonathan, registrar sus correcciones y realizar el intercambio y evaluación de prompts solicitado en clase. Esa revisión no se presenta como realizada.
+**Pendiente del equipo:**
+
+- Revisar las fuentes y las interpretaciones con Jonathan.
+- Registrar las observaciones y correcciones de esa revisión.
+- Completar el intercambio y evaluación de prompts solicitado en clase.
+
+Estas actividades pendientes no se presentan como realizadas.
