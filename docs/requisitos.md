@@ -384,3 +384,41 @@ Entonces quedan registrados el consumo afectado, el administrador, la fecha y ho
 - Definir las unidades y precisión de cantidades con el instalador.
 - Precisar cómo corregir un material equivocado o anular completamente un consumo.
 - Detallar el mecanismo de identificación de los usuarios para aplicar permisos y registrar quién realiza los ajustes.
+
+- ## Actualización del inventario — 8 de septiembre de 2026
+
+### Situación actual confirmada
+
+Según el administrador de una sede:
+
+- Actualmente no se registran de forma sistemática las entradas, los cortes ni los sobrantes.
+- Los rollos pueden tener distintos anchos.
+- Los sobrantes normalmente se guardan para otros trabajos.
+- Algunos sobrantes se dañan y deben desecharse.
+- Los instaladores pueden medir y registrar los sobrantes aprovechables.
+- El ancho y el largo se registrarán en centímetros.
+
+### Ajustes propuestos al sistema
+
+- Identificar cada rollo recibido por sede, tecnología, opacidad y dimensiones.
+- Identificar la pieza de material utilizada en cada trabajo.
+- Registrar los recortes aprovechables y sus dimensiones.
+- Relacionar cada recorte con el material del que proviene.
+- Registrar el descarte de material dañado y su motivo.
+- Mostrar las dimensiones de las piezas disponibles, sin reducir la disponibilidad a una cantidad total de metros.
+
+Estas funciones son una propuesta de diseño para responder a los hallazgos. El flujo exacto de cortes, recortes y descartes debe validarse antes de implementarlo.
+
+### Regla de consistencia propuesta
+
+El material debe contabilizarse una sola vez.
+
+Al registrar un corte, se debe actualizar la pieza de origen y registrar lo utilizado, los sobrantes aprovechables y el desperdicio correspondiente, sin duplicar existencias.
+
+### Pendientes de diseño
+
+- Definir la precisión de las medidas en centímetros.
+- Acordar cómo medir recortes irregulares.
+- Definir quién puede registrar y autorizar descartes.
+- Adaptar las correcciones de consumo para conservar también la consistencia de las piezas y sus dimensiones.
+- Revisar las historias y criterios anteriores que trataban el inventario únicamente como cantidades acumuladas.
