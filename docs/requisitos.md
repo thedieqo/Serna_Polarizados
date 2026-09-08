@@ -422,3 +422,68 @@ Al registrar un corte, se debe actualizar la pieza de origen y registrar lo util
 - Definir quién puede registrar y autorizar descartes.
 - Adaptar las correcciones de consumo para conservar también la consistencia de las piezas y sus dimensiones.
 - Revisar las historias y criterios anteriores que trataban el inventario únicamente como cantidades acumuladas.
+
+- ## Revisión propuesta de historias de inventario
+
+Fecha: 8 de septiembre de 2026.
+
+Esta propuesta utiliza las aclaraciones del administrador: los rollos tienen anchos diferentes, se conservan sobrantes y los instaladores pueden medirlos en centímetros.
+
+Las siguientes versiones están pendientes de aprobación. Cuando se aprueben, sustituirán las versiones anteriores de estas historias.
+
+### HU-08 — Registrar tipo de material
+
+Como administrador, quiero registrar los tipos de material distinguiendo tecnología y opacidad para identificar correctamente los rollos y recortes disponibles.
+
+### HU-09 — Registrar rollo recibido
+
+Como administrador, quiero registrar cada rollo recibido con su sede, tipo de material, ancho y largo en centímetros para conocer el material que ingresa a esa sede.
+
+### HU-10 — Registrar uso de material y sobrantes
+
+Como instalador, quiero identificar la pieza utilizada en un trabajo y registrar el material utilizado y los sobrantes aprovechables para mantener actualizado el inventario de la sede del trabajo sin contar material dos veces.
+
+Una pieza puede ser un rollo o un recorte disponible.
+
+El mecanismo exacto para registrar cortes y calcular el material restante está pendiente de diseño.
+
+### HU-11 — Consultar material disponible
+
+Como administrador, quiero consultar los rollos y recortes disponibles por sede, tecnología, opacidad y dimensiones para conocer las piezas que pueden utilizarse.
+
+### HU-12 — Consultar material utilizado en un trabajo
+
+Como administrador, quiero consultar las piezas de origen y el material utilizado en un trabajo para revisar su relación con los movimientos de inventario.
+
+### HU-13 — Corregir un registro de uso
+
+Como administrador, quiero corregir un registro de uso de material dejando constancia del motivo y de los datos anteriores y nuevos para mantener un inventario consistente.
+
+Si el sobrante afectado ya se utilizó en otro trabajo, la forma de corregirlo debe definirse antes de implementar esta función.
+
+### HU-14 — Registrar material dañado
+
+Como administrador, quiero registrar el descarte de una pieza dañada indicando el motivo para que deje de aparecer como disponible.
+
+Esta historia propone que el administrador registre el descarte. Ese permiso está pendiente de aprobación.
+
+La gestión de daños parciales dentro de una pieza queda pendiente de definición.
+
+## Efecto sobre las versiones anteriores
+
+- Las reglas de documentos y placas únicos permanecen vigentes.
+- La información de clientes, vehículos e historial sigue compartida entre las dos sedes.
+- El inventario sigue separado por sede.
+- Las medidas de ancho y largo se expresan en centímetros.
+- Las correcciones deben conservar su autor, fecha, motivo y datos anteriores y nuevos.
+- El registro de uso y su efecto en inventario deben guardarse juntos o no aplicarse.
+
+Los criterios anteriores que calculaban todo el inventario mediante una única cantidad ya no son suficientes. Deberán revisarse para contemplar piezas, dimensiones y sobrantes.
+
+No se asignan todavía prioridades definitivas a esta revisión.
+
+## Estado
+
+Borrador de ajuste pendiente de aprobación y de revisión con Jonathan.
+
+Con HU-14, el conjunto tendría 13 historias activas. HU-07 continúa descartada.
