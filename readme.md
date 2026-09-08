@@ -2,204 +2,217 @@
 
 Proyecto académico de la asignatura **Electiva CPC: Integración de la IA en el Ciclo de Vida del Software**.
 
-**Estado actual:** planeación, análisis de requisitos y diseño, correspondientes a las sesiones 1 a 4. La implementación está pendiente.
+**Estado:** análisis de requisitos y diseño inicial. La implementación está pendiente.  
+**Última actualización documental:** 8 de septiembre de 2026.
 
 ## 1. Descripción
 
-Serna Polarizados es un proyecto de sistema web para organizar la información de clientes, vehículos, trabajos realizados y materiales de las dos sedes de la empresa en Ibagué.
+Serna Polarizados es un proyecto de sistema web para organizar clientes, vehículos, trabajos realizados e inventario de las dos sedes de la empresa en Ibagué.
 
-Las dos sedes podrán consultar la misma información de clientes, vehículos e historial de trabajos. Cada sede manejará su propio inventario.
+Ambas sedes compartirán clientes, vehículos e historial de trabajos. Cada sede mantendrá su propio inventario de rollos y recortes aprovechables.
 
-El proyecto se desarrollará durante el semestre con apoyo de inteligencia artificial y revisión de los integrantes del equipo.
+El proyecto se desarrolla por dos estudiantes con apoyo de IA y revisión humana.
 
-## 2. Problemática
+## 2. Problema identificado
 
-Actualmente se utilizan registros manuales y archivos de Excel para administrar información del negocio.
+La entrevista con una asesora y las aclaraciones del administrador participante identificaron estas dificultades:
 
-Esto dificulta:
+- Información distribuida entre archivos de Excel, formularios y registros manuales.
+- Dependencia de llamadas para recuperar antecedentes de instalaciones.
+- Dificultades de los instaladores para registrar información desde sus teléfonos.
+- Falta de registro sistemático de entradas, cortes y sobrantes.
+- Poca claridad sobre las tecnologías y opacidades disponibles.
 
-- Consultar los datos de un cliente y sus vehículos.
-- Conocer los trabajos que se han realizado a un vehículo.
-- Compartir información entre las dos sedes.
-- Consultar las existencias de materiales de cada sede.
-- Relacionar los materiales utilizados con el trabajo correspondiente.
+También se identificaron problemas de pagos y comisiones. Se documentaron como contexto, pero quedaron fuera de la primera versión.
 
-El proyecto busca organizar esta información en un sistema centralizado.
+La [síntesis de la entrevista](docs/ia/entrevista-cliente.md) distingue las declaraciones de la asesora de las decisiones posteriores del administrador.
 
-## 3. Objetivo general
+## 3. Objetivo
 
-Desarrollar un sistema web para las dos sedes de Serna Polarizados en Ibagué que permita gestionar clientes, vehículos, trabajos realizados e inventario de materiales por sede.
+Desarrollar un sistema web para las dos sedes de Serna Polarizados en Ibagué que centralice la información de clientes, vehículos y trabajos, y permita controlar el inventario de cada sede relacionando las piezas utilizadas con los trabajos realizados.
 
-## 4. Objetivos específicos
-
-- Centralizar el registro de clientes y sus vehículos.
-- Registrar los trabajos realizados, asociados a un vehículo y una sede.
-- Permitir la consulta del historial de trabajos desde ambas sedes.
-- Registrar entradas y consumos de materiales en el inventario de cada sede.
-- Relacionar el consumo de materiales con los trabajos realizados.
-- Documentar y revisar el uso de IA durante las fases del proyecto.
-
-## 5. Alcance de la primera versión
-
-La primera versión, o MVP, es el conjunto de funciones que el equipo se propone construir y demostrar durante el semestre.
+## 4. Alcance de la primera versión
 
 ### Clientes y vehículos
 
 - Registrar clientes con nombre, documento y contacto.
-- Registrar los vehículos de cada cliente, incluyendo su descripción y placa.
-- Asociar varios vehículos a un mismo cliente.
-- Consultar clientes y vehículos mediante documento o placa.
+- Registrar vehículos con placa, descripción y cliente asociado.
+- Permitir varios vehículos por cliente.
+- Consultar clientes por documento y vehículos por placa.
+- Evitar documentos y placas duplicados.
 
-### Trabajos realizados
+### Trabajos e historial
 
-- Registrar la fecha, sede, vehículo, descripción del servicio y valor total del trabajo.
-- Asociar los materiales consumidos con el trabajo correspondiente.
-- Consultar el historial de trabajos de cada vehículo desde cualquiera de las dos sedes.
+- Registrar vehículo, sede, fecha, servicio y valor total.
+- Conservar los detalles registrados de tecnología, opacidad, instalador y retiro de película.
+- Consultar el historial del vehículo desde ambas sedes.
 
-El registro del valor total del trabajo no incluye la gestión de pagos ni la emisión de facturas.
+La estructura de los detalles de instalación sigue pendiente de precisar.
 
 ### Inventario por sede
 
-- Registrar los materiales y su unidad de medida.
-- Registrar entradas de materiales.
-- Registrar consumos relacionados con los trabajos.
-- Consultar las existencias de cada material por sede.
-- Conservar el historial de entradas y consumos.
+- Registrar tipos de material diferenciando tecnología y opacidad.
+- Identificar rollos recibidos con sede, material, ancho y largo.
+- Registrar el uso de material asociado a un trabajo y una pieza de origen.
+- Registrar recortes aprovechables sin duplicar existencias.
+- Consultar rollos y recortes disponibles por sede.
+- Permitir al administrador corregir registros de uso y descartar piezas completas dañadas.
 
-Las unidades y las reglas de medición se detallarán durante el análisis de requisitos.
+Las dimensiones se registrarán en centímetros. Los recortes se representarán mediante rectángulos aprovechables medidos por el instalador.
 
-## 6. Reglas de funcionamiento acordadas
+El procedimiento exacto de corte, actualización del restante y corrección sigue pendiente de definición.
 
-- El alcance inicial comprende únicamente las dos sedes de Ibagué.
-- La información de clientes, vehículos e historial de trabajos será compartida entre las dos sedes.
-- Cada sede tendrá existencias de materiales independientes.
-- Cada trabajo quedará asociado a la sede donde se realizó.
-- El consumo de materiales de un trabajo afectará únicamente al inventario de esa sede.
-- Un cliente podrá tener varios vehículos.
-- Cada trabajo quedará relacionado con el vehículo atendido.
+## 5. Reglas principales
 
-Compartir información entre sedes no significa publicarla para cualquier persona. Los permisos de consulta y modificación se definirán durante el análisis.
+- El sistema cubre únicamente las dos sedes de Ibagué.
+- Clientes, vehículos e historial se comparten entre esas sedes.
+- Cada trabajo pertenece a un vehículo y a una sede.
+- Cada pieza de material pertenece a una sede.
+- El material utilizado debe pertenecer a la sede del trabajo.
+- No se puede utilizar más material del disponible.
+- Un sobrante no puede seguir contado dentro de la pieza de origen.
+- Las correcciones conservan autor, fecha, motivo y datos anteriores y nuevos.
+- Las operaciones de inventario se guardan completas o no se aplican.
+- Compartir información entre sedes no significa hacerla pública.
 
-## 7. Fuera del alcance inicial
+Las reglas y sus comprobaciones se detallan en [requisitos.md](docs/requisitos.md).
 
-El planteamiento general del negocio contempla otras funciones que no forman parte de esta primera versión:
+## 6. Fuera del alcance
 
-- Agenda de citas, reprogramaciones y control de no asistencia.
-- Registro autónomo de clientes mediante código QR.
-- Gestión de pagos, abonos y medios de pago.
-- Facturación electrónica e integración con Siigo.
-- Gestión de gastos e informes financieros.
-- Gestión de proveedores y órdenes de compra.
+- Cálculo de comisiones y remuneraciones.
+- Gestión o verificación de pagos.
+- Facturación e integración con Siigo.
+- Agenda de citas y registro por QR.
+- Gastos e informes financieros.
+- Proveedores y compras.
 - Alertas automáticas de inventario.
-- Operación en sedes adicionales.
+- Cotización de PPF.
+- Gestión completa de garantías.
+- Sedes adicionales, incluida Bogotá.
+- Cálculo automático de cortes y representación de formas irregulares.
 
-Estas funciones podrán evaluarse después. Su presencia en la visión general del negocio no implica un compromiso de implementación durante este alcance.
+Registrar el valor del trabajo no equivale a gestionar su pago.
 
-## 8. Personas relacionadas con el sistema
+El historial podrá apoyar consultas de antecedentes para garantías, sin administrar el proceso completo.
 
-Los perfiles identificados en el planteamiento del negocio son:
+## 7. Personas involucradas
 
-- **Administrador:** supervisa la operación y el inventario.
-- **Asesor:** registra y consulta información de clientes, vehículos y trabajos.
-- **Instalador:** realiza los trabajos y aporta información sobre los materiales utilizados.
-- **Cliente:** proporciona sus datos y los de su vehículo.
+| Persona | Participación prevista |
+| --- | --- |
+| Administrador | Registrar y consultar información, corregir registros de uso y registrar descartes completos. |
+| Asesor | Registrar y consultar clientes, vehículos y trabajos. |
+| Instalador | Registrar el uso de material y los sobrantes de sus operaciones. |
+| Cliente | Proporcionar sus datos y los de su vehículo, sin portal de autoservicio. |
 
-La distribución de funciones y los permisos de acceso se precisarán en las historias de usuario. No se incluye un portal de autoservicio para clientes en la primera versión.
+La identificación de usuarios y los permisos detallados siguen pendientes. La corrección de registros de uso está reservada al administrador.
 
-## 9. Flujo principal previsto
-
-1. Buscar al cliente y su vehículo.
-2. Registrar sus datos si todavía no existen.
-3. Registrar el trabajo y la sede donde se realiza.
-4. Registrar los materiales consumidos en ese trabajo.
-5. Descontar el consumo del inventario de la sede correspondiente.
-6. Consultar el trabajo en el historial del vehículo desde cualquiera de las dos sedes.
-
-## 10. Demostración prevista del MVP
+## 8. Demostración prevista
 
 Con datos ficticios, el equipo buscará demostrar este recorrido:
 
 1. Registrar un cliente y su vehículo.
-2. Registrar existencias de un material en una sede.
+2. Registrar un tipo de material y un rollo recibido en una sede.
 3. Registrar un trabajo para el vehículo en esa sede.
-4. Asociar el consumo del material al trabajo.
-5. Comprobar la disminución de existencias en esa sede.
-6. Consultar el historial del vehículo desde la otra sede y comprobar que su inventario no cambió.
+4. Asociar el uso de material al trabajo y a su pieza de origen.
+5. Registrar los sobrantes aprovechables sin duplicar material.
+6. Comprobar que únicamente cambia el inventario de esa sede.
+7. Consultar el historial del vehículo desde la otra sede.
 
-Este recorrido servirá para mantener el alcance concreto y preparar una demostración breve del proyecto.
+El recorrido de inventario se completará cuando se defina el procedimiento de corte y registro del restante.
 
-## 11. Tecnologías elegidas
+Esta demostración está prevista; todavía no se ha ejecutado.
 
-- **Lenguaje del backend:** Python.
-- **Framework del backend:** Flask.
-- **Frontend:** HTML, CSS y JavaScript.
-- **Base de datos:** SQLite.
-- **Control de versiones:** Git.
-- **Repositorio compartido:** GitHub.
-- **Diagramas:** Mermaid.
+## 9. Tecnologías y arquitectura
 
-### Justificación
+| Elemento | Elección prevista |
+| --- | --- |
+| Backend | Python y Flask |
+| Frontend | HTML, CSS y JavaScript |
+| Base de datos | SQLite |
+| Control de versiones | Git y GitHub |
+| Arquitectura | Monolito en capas |
 
-El equipo ha utilizado Flask y SQLite en actividades académicas y tiene mayor familiaridad con HTML, CSS y JavaScript.
+La aplicación se organizará en tres capas:
 
-Flask y SQLite aparecen como ejemplo en la sesión 2. La elección del frontend corresponde a los conocimientos previos del equipo y al alcance sencillo del proyecto.
+- **Presentación:** formularios, información y mensajes.
+- **Negocio:** comprobación de permisos y reglas.
+- **Acceso a datos:** almacenamiento y consulta en SQLite.
 
-## 12. Arquitectura prevista
+Las capas forman parte de una misma aplicación.
 
-Se utilizará un **monolito en capas**, la arquitectura recomendada por defecto en la sesión 4.
+El [diseño inicial de backend y frontend](docs/diseno-back-front.md) describe las responsabilidades y pantallas propuestas. Los diagramas están pendientes de actualización y revisión.
 
-La aplicación se organizará en:
+## 10. Documentación
 
-- **Presentación:** pantallas, formularios y respuestas que recibe el usuario.
-- **Negocio:** reglas para gestionar clientes, vehículos, trabajos y materiales.
-- **Datos:** operaciones para guardar y consultar información en SQLite.
+| Documento | Contenido |
+| --- | --- |
+| [Visión](docs/vision.md) | Problema, propuesta de valor y límites del proyecto. |
+| [Requisitos](docs/requisitos.md) | Reglas, requisitos funcionales y no funcionales, historias y criterios de aceptación. |
+| [Trazabilidad](docs/trazabilidad.md) | Relación entre necesidades, requisitos, historias y comprobaciones. |
+| [Diseño de backend y frontend](docs/diseno-back-front.md) | Propuesta de pantallas, responsabilidades y relaciones de datos. |
+| [Análisis competitivo](docs/analisis-competitivo.md) | Comparación documental de soluciones existentes. |
+| [Diagrama de arquitectura](docs/diagramas/arquitectura.mmd) | Representación inicial de las capas; pendiente de revisión. |
+| [Entrevista y aclaraciones](docs/ia/entrevista-cliente.md) | Síntesis de la entrevista y decisiones posteriores. |
+| [Matriz de uso de IA](docs/ia/matriz-ia.md) | Apoyo previsto de IA y revisión del equipo. |
+| [Biblioteca de prompts](docs/ia/prompts.md) | Instrucciones utilizadas, resultados y observaciones. |
+| [Pruebas con Gemini](docs/ia/pruebas-gemini.md) | Prompts de análisis y resúmenes de resultados. |
+| [Revisión de historias con Gemini](docs/ia/revision-historias-gemini.md) | Archivo destinado a la revisión y sus correcciones; pendiente de ajustar. |
 
-Por ejemplo, al registrar un consumo, la pantalla recibirá los datos, la capa de negocio comprobará las reglas y la capa de datos guardará el movimiento.
+La existencia de un archivo no significa que su revisión esté terminada.
 
-Las capas formarán parte de una misma aplicación. Los componentes y diagramas detallados se elaborarán a partir de las historias de usuario.
+## 11. Uso de inteligencia artificial
 
-## 13. Equipo de trabajo
+Se ha utilizado IA para apoyar la delimitación del alcance, el análisis de requisitos, la redacción de historias y la propuesta de diseño.
 
-- [Tu nombre completo]
-- Jonathan [completar apellidos]
+- **Gemini:** generación y revisión de borradores de requisitos.
+- **Codex:** apoyo en organización, revisión y redacción de documentación.
 
-La asignación de los roles de producto, backend y frontend/pruebas está pendiente de acuerdo entre los integrantes.
+Los registros distinguen instrucciones, respuestas, correcciones y decisiones confirmadas. Los prompts originales se conservan como evidencia histórica; las traducciones o mejoras no se presentan como ejecutadas sin haberlas probado.
 
-Ambos participaremos en:
+La revisión de IA no sustituye la validación del negocio ni la revisión de los integrantes.
 
-- Revisión del alcance y los requisitos.
-- Validación del diseño.
-- Revisión y comprensión del código.
-- Pruebas del sistema.
-- Documentación del uso de IA.
-- Preparación de la sustentación.
+La implementación y las pruebas del software son actividades futuras.
 
-## 14. Uso de inteligencia artificial
+## 12. Estado y próximos pasos
 
-La IA se utilizará para apoyar la planeación, el análisis, el diseño y, posteriormente, la implementación, las pruebas, el despliegue y el mantenimiento.
+### Documentado
 
-El equipo revisará y corregirá las propuestas antes de incorporarlas al proyecto. Se registrarán los prompts utilizados, los resultados relevantes y las correcciones realizadas.
+- Entrevista y aclaraciones del administrador.
+- Alcance y exclusiones.
+- 16 requisitos funcionales y 6 no funcionales.
+- 13 historias activas, con HU-07 descartada.
+- Criterios de aceptación, algunos todavía parciales.
+- Trazabilidad y diseño inicial.
+- Registros de uso de IA.
 
-La matriz de uso previsto se encuentra en:
+### Pendiente
 
-[Consultar matriz de uso de IA](docs/ia/matriz-ia.md)
+- Precisar los detalles de instalación de HU-05.
+- Definir el procedimiento de corte y restante de HU-10.
+- Definir las correcciones de HU-13, incluidos los casos con sobrantes utilizados.
+- Acordar la precisión de las medidas.
+- Completar la identificación de usuarios y los permisos.
+- Asignar prioridad a HU-14 y revisar el esfuerzo de inventario.
+- Acordar condiciones de evaluación de los requisitos no funcionales.
+- Completar la revisión de evidencias de IA y documentos restantes.
+- Actualizar y revisar los diagramas.
+- Organizar el backlog y la propuesta de sprints con las dependencias actuales.
+- Revisar con Jonathan y validar los resultados derivados con la asesora.
+- Preparar la sustentación del trabajo realizado.
 
-## 15. Estado de la documentación
+Los sprints todavía no se presentan como iniciados ni completados. Las decisiones pendientes no se consideran resueltas por aparecer en un documento.
 
-Actualmente el repositorio contiene:
+## 13. Equipo
 
-- Este README con la descripción, el alcance y las decisiones iniciales.
-- La matriz de uso previsto de IA.
+Proyecto desarrollado por dos estudiantes:
 
-El trabajo pendiente de las sesiones 1 a 4 incluye:
+- Integrante que administra una sede de Serna Polarizados: nombre completo pendiente de registrar.
+- Jonathan: apellidos pendientes de registrar.
 
-- Acordar los roles del equipo.
-- Completar la visión y el análisis competitivo.
-- Construir la biblioteca de al menos cinco prompts probados y comentados.
-- Definir entre 12 y 15 historias de usuario y priorizarlas.
-- Escribir criterios de aceptación para todas las historias Must.
-- Relacionar las historias con las necesidades que les dieron origen.
-- Elaborar y revisar los diagramas de componentes por capas, clases, casos de uso y secuencia.
-- Mantener actualizada la bitácora de IA.
+La distribución de tareas se acordará entre ambos y se reflejará en la planificación.
 
-Este README presenta el proyecto y su alcance; no sustituye los entregables de requisitos y diseño.
+## 14. Alcance de esta entrega
+
+Este repositorio documenta el análisis y el diseño inicial del proyecto.
+
+No contiene todavía una aplicación implementada ni evidencia de pruebas de funcionamiento. Los criterios escritos describen cómo se comprobarán las funciones durante el desarrollo.
