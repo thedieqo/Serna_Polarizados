@@ -8,7 +8,7 @@ flowchart TD
     subgraph NEGOCIO["Negocio: Python y Flask"]
         N1["Registrar y consultar<br/>clientes y vehículos"]
         N2["Registrar trabajos<br/>y consultar historial"]
-        N3["Gestionar rollos, usos,<br/>recortes, ajustes y descartes"]
+        N3["Rollos y recortes<br/>Usos, ajustes<br/>y descartes"]
     end
 
     subgraph DATOS["Acceso a datos"]
@@ -21,7 +21,7 @@ flowchart TD
 
     P1 --> N1
     P2 --> N2
-    P2 -->|"Uso y corrección de material"| N3
+    P2 -->|"Uso y ajustes"| N3
     P3 --> N3
 
     N1 --> D1
