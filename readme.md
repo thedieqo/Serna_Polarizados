@@ -206,8 +206,8 @@ Los sprints todavía no se presentan como iniciados ni completados. Las decision
 
 Proyecto desarrollado por dos estudiantes:
 
-- Integrante que administra una sede de Serna Polarizados: nombre completo pendiente de registrar.
-- Jonathan: apellidos pendientes de registrar.
+- Integrante que administra una sede de Serna Polarizados: Diego Alberto Ñanguma Briñez.
+- Jonathan Diaz Salgado
 
 La distribución de tareas se acordará entre ambos y se reflejará en la planificación.
 
