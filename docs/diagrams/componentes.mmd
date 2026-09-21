@@ -1,0 +1,115 @@
+flowchart TD
+    %% ================= ACTORES =================
+    Admin(["Administrador<br/>corrige usos RF-13 y descarta piezas RF-14"]) 
+    Asesor(["Asesor<br/>clientes, vehículos y trabajos"])
+    Inst(["Instalador<br/>registra uso de material y sobrantes"])
+    Cliente(["Cliente"])
+    Cliente ~~~ CSIN("Sin portal de autoservicio en esta versión")
+
+    %% ================= PRESENTACIÓN =================
+    subgraph PRES["Presentación — HTML, CSS y JavaScript"]
+        direction TB
+        F1["Pantalla<br/>Clientes y vehículos<br/>(HU-01 a HU-04)"]
+        F2["Pantalla<br/>Trabajos e historial<br/>(HU-05, HU-06, HU-10, HU-12, HU-13)"]
+        F3["Pantalla<br/>Materiales e inventario<br/>(HU-08, HU-09, HU-11, HU-14)"]
+    end
+
+    %% ================= NEGOCIO — PYTHON Y FLASK =================
+    subgraph NEG["Negocio — Python y Flask"]
+        direction TB
+        subgraph CLI["Clientes y vehículos"]
+            C1["Registrar y consultar clientes<br/>RF-01, RF-03"]
+            C2["Registrar y consultar vehículos<br/>RF-02, RF-03"]
+        end
+        subgraph TRA["Trabajos e historial"]
+            T1["Registrar trabajo<br/>RF-04"]
+            T2["Detalles de instalación<br/>RF-05 — estructura pendiente"]
+            T3["Consultar historial<br/>RF-06"]
+        end
+        subgraph INV["Inventario por sede"]
+            I1["Tipos de material<br/>RF-07"]
+            I2["Rollos recibidos<br/>RF-08"]
+            I3["Uso y sobrantes<br/>RF-09, RF-10, RF-15, RF-16"]
+            I4["Disponibilidad por sede<br/>RF-11"]
+            I5["Material de un trabajo<br/>RF-12 — Should, aplazable"]
+            I6["Corrección de usos<br/>RF-13 — administrador"]
+            I7["Descarte de piezas<br/>RF-14 — administrador"]
+        end
+        subgraph TRANS["Comprobaciones transversales"]
+            V1["Control de acceso y permisos<br/>RNF-05 — mecanismo pendiente"]
+            V2["Validación de dimensiones y disponibilidad<br/>RF-16"]
+            V3["Confirmación de guardado correcto<br/>RF-15"]
+            V4["Consistencia: guardado completo o nulo<br/>RNF-03"]
+        end
+    end
+
+    %% ================= ACCESO A DATOS =================
+    subgraph DAT["Acceso a datos — Python sobre SQLite"]
+        direction TB
+        D1["Clientes y vehículos"]
+        D2["Trabajos, detalles e historial"]
+        D3["Piezas y operaciones de inventario<br/>(usos, sobrantes, correcciones, descartes)"]
+    end
+
+    BD[("SQLite<br/>Base de datos central única<br/>para las dos sedes")]
+
+    %% ================= RELACIONES PRINCIPALES =================
+    Admin --> PRES
+    Asesor --> PRES
+    Inst --> PRES
+
+    F1 --> C1
+    F1 --> C2
+    F2 --> T1
+    F2 --> T2
+    F2 --> T3
+    F2 --> I3
+    F2 --> I5
+    F2 --> I6
+    F3 --> I1
+    F3 --> I2
+    F3 --> I4
+    F3 --> I7
+
+    C1 --> D1
+    C2 --> D1
+    T1 --> D1
+    T1 --> D2
+    T2 --> D2
+    T3 --> D2
+    I1 --> D3
+    I2 --> D3
+    I3 --> D2
+    I3 --> D3
+    I4 --> D3
+    I5 --> D2
+    I5 --> D3
+    I6 --> D2
+    I6 --> D3
+    I7 --> D3
+
+    D1 --> BD
+    D2 --> BD
+    D3 --> BD
+
+    %% ================= COMPROBACIONES TRANSVERSALES =================
+    V1 -.->|"restringe"| I6
+    V1 -.->|"restringe"| I7
+    V2 -.->|"valida"| I2
+    V2 -.->|"valida"| I3
+    V3 -.->|"confirma"| I3
+    V3 -.->|"confirma"| I6
+    V4 -.->|"garantiza"| I3
+    V4 -.->|"garantiza"| I6
+    V4 -.->|"garantiza"| I7
+    V1 -. D1
+    V1 -. D2
+    V1 -. D3
+
+    %% ================= NOTAS =================
+    subgraph NOTA["Datos según las reglas confirmadas"]
+        N1["Compartidos entre sedes:<br/>clientes, vehículos e historial"]
+        N2["Identificados por sede:<br/>trabajos, piezas, usos, correcciones y descartes"]
+        N3["La regla 'el material utilizado pertenece a la sede del trabajo'<br/>se controla en la capa de negocio antes de escribir en BD"]
+    end
+    BD -.-> NOTA
