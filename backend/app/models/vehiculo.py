@@ -41,5 +41,12 @@ class Vehiculo(Base):
     # Explicación sencilla: Un vehículo pertenece a un cliente
     cliente = relationship("Cliente", back_populates="vehiculos")
 
+    # Relación con Instalacion (1:N)
+    instalaciones = relationship(
+        "Instalacion",
+        back_populates="vehiculo",
+        cascade="all, delete-orphan",
+    )
+
     def __repr__(self):
         return f"<Vehiculo(id={self.id}, placa='{self.placa}', cliente_id={self.cliente_id})>"

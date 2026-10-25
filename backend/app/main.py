@@ -4,16 +4,16 @@ Punto de entrada FastAPI - T-005
 
 Conceptos para aprender:
 - FastAPI: Framework para crear APIs REST
-- Router: Agrupa endpoints por módulo
+- Router: Agrupa endpoints relacionados
 - include_router: Registra routers en la aplicación
 
-No se ejecuta servidor ni se instalan dependencias en esta tarea.
+No se ejecutan servidores ni se instalan dependencias en esta tarea.
 """
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1 import clientes, vehiculos
+from app.api.v1 import clientes, vehiculos, instalaciones
 
 app = FastAPI(
     title="Serna Polarizados API",
@@ -35,6 +35,7 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization"],
 )
 
+
 @app.get("/")
 def root():
     """
@@ -47,3 +48,4 @@ def root():
 # Registrar routers
 app.include_router(clientes.router, prefix="/api/v1")
 app.include_router(vehiculos.router, prefix="/api/v1")
+app.include_router(instalaciones.router, prefix="/api/v1")

@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import ClientesPage from './pages/ClientesPage'
 import VehiculosPage from './pages/VehiculosPage'
+import InstalacionesPage from './pages/InstalacionesPage'
 
-type Tab = 'clientes' | 'vehiculos'
+type Tab = 'clientes' | 'vehiculos' | 'instalaciones'
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('clientes')
@@ -43,6 +44,16 @@ function App() {
             >
               Vehículos
             </button>
+            <button
+              onClick={() => setActiveTab('instalaciones')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'instalaciones'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Instalaciones
+            </button>
           </div>
         </div>
       </nav>
@@ -50,6 +61,7 @@ function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'clientes' && <ClientesPage />}
         {activeTab === 'vehiculos' && <VehiculosPage />}
+        {activeTab === 'instalaciones' && <InstalacionesPage />}
       </main>
     </div>
   )

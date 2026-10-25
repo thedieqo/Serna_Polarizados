@@ -16,3 +16,6 @@ __all__ = [
     "VehiculoCreate",
     "VehiculoRead",
 ]
+from app.schemas.instalacion import InstalacionBase, InstalacionCreate, InstalacionRead
+
+__all__.extend(["InstalacionBase", "InstalacionCreate", "InstalacionRead"])

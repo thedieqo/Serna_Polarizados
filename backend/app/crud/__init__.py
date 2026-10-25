@@ -1,3 +1,3 @@
-from app.crud import cliente, vehiculo
+from app.crud import cliente, vehiculo, instalacion
 
-__all__ = ['cliente', 'vehiculo']
+__all__ = ['cliente', 'vehiculo', 'instalacion']
