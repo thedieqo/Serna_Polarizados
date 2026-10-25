@@ -1,0 +1,10 @@
+# Serna Polarizados - Backend (FastAPI) - T-006
+# Dependencias mínimas para clientes/vehículos
+
+fastapi>=0.115.4,<0.116.0
+uvicorn[standard]>=0.32.0
+SQLAlchemy>=2.0.36,<2.1.0
+pydantic>=2.10.0,<3.0.0
+pydantic-settings>=2.6.0,<3.0.0
+python-dotenv>=1.0.1
+psycopg2-binary>=2.9.10
