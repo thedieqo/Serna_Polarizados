@@ -8,57 +8,51 @@ type Tab = 'clientes' | 'vehiculos' | 'instalaciones'
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('clientes')
 
+  const navItems = [
+    { id: 'clientes' as Tab, label: 'Clientes' },
+    { id: 'vehiculos' as Tab, label: 'Vehículos' },
+    { id: 'instalaciones' as Tab, label: 'Instalaciones' },
+  ]
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
+    <div className="min-h-screen bg-slate-50">
+      <header className="bg-white border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">Serna Polarizados</h1>
-              <span className="ml-4 text-sm text-gray-500">Sistema de Gestión</span>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-4 sm:py-6 gap-2">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-blue-800 flex items-center justify-center">
+                <span className="text-white font-bold text-sm">SP</span>
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Serna Polarizados</h1>
+                <p className="text-xs sm:text-sm text-slate-500">Sistema de Gestión de Instalaciones</p>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      <nav className="bg-white border-b border-gray-200">
+      <nav className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8">
-            <button
-              onClick={() => setActiveTab('clientes')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'clientes'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Clientes
-            </button>
-            <button
-              onClick={() => setActiveTab('vehiculos')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'vehiculos'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Vehículos
-            </button>
-            <button
-              onClick={() => setActiveTab('instalaciones')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'instalaciones'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Instalaciones
-            </button>
+          <div className="flex overflow-x-auto space-x-1 sm:space-x-2">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-all duration-200 border-b-2 ${
+                  activeTab === item.id
+                    ? 'border-blue-800 text-blue-800'
+                    : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {activeTab === 'clientes' && <ClientesPage />}
         {activeTab === 'vehiculos' && <VehiculosPage />}
         {activeTab === 'instalaciones' && <InstalacionesPage />}
