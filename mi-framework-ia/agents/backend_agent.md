@@ -1,26 +1,46 @@
-# Backend Agent
+# Backend Agent — guía propuesta en F3
 
-## Rol
-Desarrollador backend del sistema Serna Polarizados.
+> **Guía documental; ejecución no acreditada.** Orienta el trabajo de una persona o asistente. No es un agente instalado ni se ejecuta automáticamente.
 
-## Objetivo
-Apoyar la construcción de la lógica de negocio y servicios del backend.
+## Propósito
 
-## Stack
-Python + Flask + SQLite.
+Apoyar cambios pequeños y trazables en la API de Serna Polarizados, respetando las capas y los contratos existentes.
 
-## Responsabilidades
-- Gestionar clientes y vehículos.
-- Gestionar citas y servicios.
-- Gestionar asignación de instaladores.
-- Gestionar inventario y consumo de materiales.
-- Registrar pagos e historial.
-- Implementar validaciones y reglas de negocio.
-- Diseñar endpoints necesarios para el frontend.
+## Entradas
 
-## Restricciones
-- Usar arquitectura monolítica en capas.
-- Separar presentación, negocio y acceso a datos.
-- No incluir credenciales en el código.
-- No implementar funcionalidades fuera del MVP sin aprobación.
-- Generar código legible y comprobable.
+- Requisito o corrección autorizada.
+- `backend/app/main.py`, routers de `backend/app/api/v1/`, schemas, CRUD y modelos relacionados.
+- `backend/requirements.txt` y la configuración de `backend/app/core/config.py`.
+- Estado actual documentado en [`docs/trazabilidad.md`](../../docs/trazabilidad.md).
+
+## Stack y responsabilidades actuales
+
+- Stack: FastAPI, Pydantic v2, SQLAlchemy 2 y PostgreSQL.
+- Rutas: clientes, vehículos e instalaciones.
+- Persistencia: modelos `Cliente`, `Vehiculo` e `Instalacion`; CRUD básico de creación y lectura.
+- Validación: schemas Pydantic y comprobaciones simples en los routers/CRUD.
+
+Inventario, pagos, sedes, autenticación, roles, migraciones y garantías son propuestas no implementadas. No deben agregarse como si ya existieran.
+
+## Pasos de trabajo
+
+1. Confirmar el requisito y el alcance autorizado.
+2. Localizar las capas afectadas y revisar los contratos existentes.
+3. Proponer el cambio mínimo, sin ampliar módulos ni dependencias.
+4. Verificar coherencia entre router, schema, CRUD y modelo.
+5. Registrar qué quedó sin validar cuando no se ejecute la aplicación.
+
+## Salida esperada
+
+Una propuesta de cambio acotada, con archivos afectados, contratos modificados, riesgos y necesidad de revisión. No se declara funcionamiento sin ejecución o pruebas disponibles.
+
+## Límites
+
+- No inventar endpoints, entidades ni reglas.
+- No exponer credenciales ni cadenas de conexión reales.
+- No introducir migraciones, autenticación o inventario sin autorización.
+- No afirmar que la API fue probada si no se ejecutó.
+
+## Revisión humana
+
+Una persona debe revisar el requisito, el diff, los efectos sobre datos existentes y la evidencia disponible antes de aceptar el cambio.

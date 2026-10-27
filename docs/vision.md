@@ -6,6 +6,8 @@ Desarrollar un sistema web para las dos sedes de Serna Polarizados en Ibagué qu
 
 La propuesta de valor consiste en consultar los antecedentes de un vehículo desde cualquiera de las dos sedes y relacionar los trabajos con las piezas de material utilizadas, los sobrantes aprovechables y los ajustes registrados.
 
+La visión describe el resultado buscado. El repositorio contiene una implementación parcial de clientes, vehículos e instalaciones; el inventario y el historial completo todavía no existen en el código.
+
 ## 2. Situación actual y fuentes
 
 El negocio utiliza registros manuales, archivos de Excel y formularios compartidos para organizar su operación.
@@ -33,7 +35,7 @@ Fuentes:
 
 El cliente no tendrá un portal de autoservicio.
 
-La identificación de usuarios y los permisos detallados siguen pendientes. La corrección de registros de uso está reservada al administrador.
+La identificación de usuarios y los permisos detallados siguen pendientes. La corrección de registros de uso está reservada al administrador. La implementación actual no tiene autenticación ni control de roles, por lo que estas restricciones todavía no se aplican en el software.
 
 ## 4. Necesidades principales
 
@@ -57,11 +59,15 @@ La identificación de usuarios y los permisos detallados siguen pendientes. La c
 - Consultar por documento o placa.
 - Evitar documentos y placas duplicados.
 
+**Implementación observada:** modelos, esquemas, CRUD, endpoints y formularios de registro y listado. La consulta por documento o placa existe en la API y en los servicios del frontend, pero la interfaz todavía no la integra.
+
 ### Trabajos e historial
 
 - Registrar vehículo, sede, fecha, servicio y valor total.
 - Conservar detalles de tecnología, opacidad, instalador y retiro de película que correspondan.
 - Consultar el historial desde ambas sedes.
+
+**Implementación observada:** la entidad se denomina `Instalacion` y registra vehículo, fecha, tipo de servicio, opacidad, zonas, instaladores, retiro de material anterior, observaciones y estado. No incluye sede ni valor total. La API permite crear, listar y filtrar por vehículo; la interfaz registra y lista instalaciones, pero no ofrece un historial específico por vehículo.
 
 La estructura de los detalles de instalación todavía debe precisarse.
 
@@ -73,6 +79,8 @@ La estructura de los detalles de instalación todavía debe precisarse.
 - Identificar sobrantes aprovechables y conservar su relación con la pieza de origen.
 - Consultar rollos y recortes disponibles por sede.
 - Permitir al administrador corregir registros de uso y descartar piezas completas dañadas.
+
+**Implementación observada:** no implementado. Estas funciones permanecen en los requisitos y no deben presentarse como terminadas.
 
 Las dimensiones se registrarán en centímetros. Los recortes se representarán mediante rectángulos aprovechables medidos por el instalador.
 
@@ -88,6 +96,8 @@ La consulta general del material de un trabajo conserva prioridad Should. La pri
 - Las correcciones conservan autor, fecha, motivo y datos anteriores y nuevos.
 - Las operaciones de inventario se guardan completas o no se aplican.
 - Compartir información entre sedes no significa hacerla pública.
+
+Varias reglas dependen de módulos que todavía no existen. Su presencia en este documento no acredita que estén implementadas.
 
 ## 7. Límites
 
@@ -123,31 +133,36 @@ Con datos ficticios, el equipo buscará demostrar que:
 6. Se actualiza únicamente el inventario de la sede correspondiente.
 7. El historial del vehículo puede consultarse desde la otra sede.
 
+**Estado actual:** los pasos 1 y parte del registro de instalaciones existen en el código. Los pasos de sede, inventario, sobrantes, valor e historial específico no están implementados. El recorrido completo no se ha ejecutado ni probado.
+
 El recorrido de inventario se detallará cuando se defina el procedimiento de corte y registro del restante.
 
-Estos resultados ya están vinculados con historias y criterios en [requisitos.md](requisitos.md) y [trazabilidad.md](trazabilidad.md). Todavía no representan funcionalidades implementadas.
+Estos resultados ya están vinculados con historias y criterios en [requisitos.md](requisitos.md) y [trazabilidad.md](trazabilidad.md). Todavía no representan funcionalidades completas ni verificadas.
 
 ## 9. Decisiones técnicas
 
 - Proyecto académico desarrollado por dos integrantes durante el semestre.
-- Backend previsto con Python y Flask.
-- Frontend previsto con HTML, CSS y JavaScript.
-- Base de datos prevista con SQLite.
-- Arquitectura de monolito en capas: presentación, negocio y acceso a datos.
+- Backend implementado con Python y FastAPI.
+- Frontend implementado con React, TypeScript, Vite y Tailwind CSS.
+- Comunicación mediante API REST y Axios.
+- Base de datos PostgreSQL, con configuración compatible con Supabase.
+- Persistencia mediante SQLAlchemy 2 y validación con Pydantic v2.
+- Arquitectura de SPA desacoplada y backend monolítico organizado por capas: API, negocio/CRUD, modelos y acceso a datos.
 - Documentación y control de cambios en GitHub.
 - Apoyo de IA con revisión y corrección humana.
 
-El diseño de pantallas y responsabilidades se documenta en [diseno-back-front.md](diseno-back-front.md) y debe mantenerse alineado con los requisitos actuales.
+El diseño de pantallas y responsabilidades se documenta en [diseno-back-front.md](diseno-back-front.md) y debe mantenerse alineado con los requisitos actuales. El diseño previo con Flask, SQLite y HTML/CSS/JavaScript se conserva como antecedente histórico en Git y en la documentación de F0; no describe el código actual.
 
 ## 10. Estado y pendientes
 
-**Fecha de actualización:** 8 de septiembre de 2026.
+**Fecha de actualización:** 27 de octubre de 2026 (F2).
 
-El proyecto está en análisis y diseño. La implementación está pendiente.
+El proyecto cuenta con una implementación parcial: clientes, vehículos e instalaciones. El inventario, la autenticación, las migraciones y las pruebas siguen pendientes.
 
 Falta precisar:
 
 - La estructura y obligatoriedad de los detalles de instalación.
+- La incorporación de sede y valor total en la instalación.
 - La precisión de las medidas en centímetros.
 - El registro del corte y del material restante.
 - Las correcciones cuando existen sobrantes utilizados posteriormente.
@@ -155,6 +170,7 @@ Falta precisar:
 - La identificación de usuarios y los permisos detallados.
 - La prioridad de HU-14 y la revisión del esfuerzo de inventario.
 - Las condiciones de evaluación desde teléfonos y navegadores.
+- La actualización de diagramas y la ejecución de pruebas.
 
 Los casos pendientes no se incorporan automáticamente como nuevas funciones.
 

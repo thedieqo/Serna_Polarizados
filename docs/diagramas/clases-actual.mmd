@@ -1,0 +1,42 @@
+%% Modelos implementados, verificados en F3 contra backend/app/models/.
+classDiagram
+    direction TB
+
+    class Cliente {
+        +int id
+        +String nombre
+        +String documento
+        +String contacto
+    }
+
+    class Vehiculo {
+        +int id
+        +String placa
+        +String descripcion
+        +int cliente_id
+    }
+
+    class Instalacion {
+        +int id
+        +int vehiculo_id
+        +DateTime fecha
+        +String tipo_servicio
+        +String opacidad
+        +JSON zonas
+        +JSON asignaciones_instaladores
+        +Boolean retiro_material_anterior
+        +Text observaciones
+        +String estado
+        +DateTime created_at
+        +DateTime updated_at
+    }
+
+    Cliente "1" --> "0..*" Vehiculo : vehiculos
+    Vehiculo "1" --> "0..*" Instalacion : instalaciones
+
+    note for Cliente "documento es UNIQUE y NOT NULL"
+    note for Vehiculo "placa es UNIQUE y NOT NULL; cliente_id es FK NOT NULL"
+    note for Instalacion "vehiculo_id es FK NOT NULL; zonas y asignaciones_instaladores son JSON NOT NULL"
+    note for Instalacion "opacidad y observaciones son nullables"
+    note for Cliente "Relación con Vehiculo: cascade all, delete-orphan"
+    note for Vehiculo "Relación con Instalacion: cascade all, delete-orphan"

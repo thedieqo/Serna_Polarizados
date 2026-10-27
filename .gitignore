@@ -44,3 +44,5 @@ mcp.json
 .mypy_cache/
 .ruff_cache/
 .vite/
+
+HISTORIAL_PROMPTS_SERNA.md

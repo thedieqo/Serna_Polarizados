@@ -1,0 +1,44 @@
+%% Arquitectura implementada, alineada en F3 con el código existente.
+%% No representa autenticación, inventario, pagos, migraciones ni sedes.
+flowchart LR
+    subgraph FE["Frontend: React + TypeScript + Vite + Tailwind"]
+        APPTSX["App.tsx<br/>navegación por pestañas"]
+        PAGES["pages/<br/>Clientes · Vehículos · Instalaciones"]
+        COMP["components/<br/>formularios y listados"]
+        TYPES["types/<br/>contratos TypeScript"]
+    end
+
+    subgraph HTTP["Cliente HTTP"]
+        SERVICES["services/<br/>clientes · vehículos · instalaciones"]
+        AXIOS["services/api.ts<br/>Axios"]
+    end
+
+    subgraph API["Backend: FastAPI"]
+        MAIN["main.py<br/>CORS y registro de routers"]
+        ROUTES["api/v1/<br/>clientes · vehículos · instalaciones"]
+        SCHEMAS["schemas/<br/>Pydantic v2"]
+    end
+
+    subgraph APP_LAYER["Capa de aplicación"]
+        CRUD["crud/<br/>creación y consultas"]
+    end
+
+    subgraph ORM["Persistencia: SQLAlchemy"]
+        MODELS["models/<br/>Cliente · Vehiculo · Instalacion"]
+        SESSION["db/session.py<br/>engine y get_db"]
+    end
+
+    DB[("PostgreSQL<br/>DATABASE_URL")]
+
+    APPTSX --> PAGES
+    PAGES --> COMP
+    PAGES --> SERVICES
+    SERVICES --> AXIOS
+    TYPES -.-> SERVICES
+    AXIOS -->|"HTTP/JSON"| MAIN
+    MAIN --> ROUTES
+    ROUTES --> SCHEMAS
+    ROUTES --> CRUD
+    CRUD --> MODELS
+    MODELS --> SESSION
+    SESSION --> DB

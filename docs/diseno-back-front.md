@@ -1,204 +1,214 @@
-# Diseño inicial de backend y frontend — Serna Polarizados
+# Diseño de backend y frontend — Serna Polarizados
 
 ## Estado
 
-**Fecha de actualización:** 8 de septiembre de 2026.  
-**Estado:** propuesta de diseño; implementación pendiente.
+**Fecha de actualización:** 27 de octubre de 2026 (F2).
+**Estado:** diseño actualizado a partir del código existente; implementación parcial.
 
-Este documento propone pantallas, responsabilidades y relaciones de datos para el alcance definido en [requisitos.md](requisitos.md).
+Este documento describe la estructura y el recorrido de la implementación actual, y conserva como antecedente el diseño previo con Flask, SQLite y HTML/CSS/JavaScript. No presenta como terminadas las funciones que solo están en requisitos o planificación.
 
-Las reglas confirmadas proceden de ese documento. La agrupación de pantallas y la organización técnica son propuestas para su programación posterior.
+El diseño anterior se mantiene en el historial de Git y en [F0_LINEA_BASE_Y_VERIFICACIONES.md](F0_LINEA_BASE_Y_VERIFICACIONES.md). Su stack no corresponde al código actual.
 
-No representa funcionalidades implementadas ni sustituye los diagramas de diseño.
+No sustituye a [requisitos.md](requisitos.md) ni a los diagramas `.mmd`, que siguen desactualizados.
 
 ## 1. Organización general
 
-Se propone una aplicación organizada como monolito en capas:
+La aplicación se organiza como una SPA desacoplada con un backend monolítico por capas:
 
-| Capa | Tecnología prevista | Responsabilidad |
+| Capa | Tecnología actual | Responsabilidad |
 | --- | --- | --- |
-| Presentación | HTML, CSS y JavaScript | Mostrar formularios, información y mensajes; enviar las acciones del usuario al backend. |
-| Negocio | Python y Flask | Comprobar permisos y reglas, coordinar registros y decidir si una operación puede realizarse. |
-| Acceso a datos | Acceso a SQLite desde Python | Guardar y consultar información, conservando las relaciones entre registros. |
+| Presentación | React 18, TypeScript, Vite y Tailwind CSS | Mostrar formularios, listas y mensajes; enviar solicitudes HTTP al backend. |
+| Cliente HTTP | Axios | Centralizar la URL base, el tiempo de espera y el tratamiento de errores. |
+| API | FastAPI | Exponer endpoints REST, validar solicitudes y devolver códigos HTTP. |
+| Negocio y datos | CRUD con SQLAlchemy 2 | Consultar y guardar entidades; validar existencia de relaciones. |
+| Validación | Pydantic v2 | Definir contratos de entrada y salida. |
+| Persistencia | PostgreSQL / Supabase | Almacenar clientes, vehículos e instalaciones. |
 
-Las capas forman parte de una misma aplicación.
+Las capas del backend forman parte de una misma aplicación. No se usan microservicios ni colas de mensajes. El frontend y el backend se comunican por JSON sobre HTTP.
+
+```text
+React (frontend/src)
+  páginas → componentes → services → Axios
+                                  │
+                                  ▼
+FastAPI (backend/app/main.py)
+  /api/v1/clientes
+  /api/v1/vehiculos
+  /api/v1/instalaciones
+        │
+        ▼
+  routers → crud → models SQLAlchemy → PostgreSQL
+```
 
 Las validaciones del navegador ayudan al usuario, pero no sustituyen las comprobaciones del backend.
 
-## 2. Pantallas propuestas
+## 2. Estructura y pantallas implementadas
 
-Se propone agrupar las operaciones en tres pantallas principales. Los formularios de corrección y descarte se abrirían dentro del contexto correspondiente.
+### Backend
 
-| Pantalla | Información y campos principales | Acciones | Historias |
-| --- | --- | --- | --- |
-| Clientes y vehículos | Nombre, documento y contacto del cliente; placa, descripción y cliente asociado al vehículo. | Buscar cliente, registrar cliente, consultar sus vehículos, registrar vehículo y buscar por placa. | HU-01 a HU-04 |
-| Trabajos e historial | Vehículo, sede, fecha, servicio, valor total y detalles registrados de instalación; pieza utilizada y sobrantes vinculados al trabajo. | Consultar historial, registrar trabajo, registrar uso y sobrantes, identificar un registro para corregirlo. Consulta general de material aplazable. | HU-05, HU-06, HU-10, HU-12 y HU-13 |
-| Materiales e inventario | Tecnología, opacidad, identificación de pieza, sede, ancho y largo en centímetros, disponibilidad y motivo de descarte. | Registrar tipo de material, registrar rollo recibido, consultar disponibilidad y descartar una pieza completa. | HU-08, HU-09, HU-11 y HU-14 |
+```text
+backend/app/
+├── main.py              # FastAPI, CORS y registro de routers
+├── core/config.py       # Variables de entorno y configuración
+├── db/
+│   ├── base.py          # Base declarativa de SQLAlchemy
+│   └── session.py       # Engine, SessionLocal y dependencia get_db
+├── models/              # Cliente, Vehiculo, Instalacion
+├── schemas/             # Contratos Pydantic de entrada y salida
+├── crud/                # Consultas y escrituras
+└── api/v1/              # Routers de clientes, vehículos e instalaciones
+```
 
-La distribución definitiva debe revisarse con el equipo. Los campos que describen cortes, correcciones y múltiples detalles de instalación siguen pendientes.
+### Frontend
 
-### Uso desde teléfonos
+```text
+frontend/src/
+├── App.tsx              # Encabezado, navegación por pestañas y páginas
+├── pages/               # ClientesPage, VehiculosPage, InstalacionesPage
+├── components/          # Formularios y listado
+├── services/            # api.ts, clientes.ts, vehiculos.ts, instalaciones.ts
+└── types/               # Interfaces TypeScript de las entidades
+```
 
-Se propone:
+`App.tsx` usa un estado `activeTab` con `useState`. Aunque `react-router-dom` está instalado, no se usa para navegar.
 
-- Mostrar formularios con etiquetas claras.
-- Mantener visibles el vehículo, el trabajo y la sede durante el registro de material.
-- Mostrar mensajes comprensibles cuando una operación falle.
-- Confirmar el guardado solamente después de la respuesta correcta del backend.
+La navegación visible tiene tres pestañas:
 
-La facilidad de uso deberá evaluarse con un instalador. Todavía no se han acordado dispositivos ni condiciones completas de prueba.
+| Pantalla | Contenido actual | Historias relacionadas |
+| --- | --- | --- |
+| Clientes | Formulario de registro y tabla de clientes. | HU-01, HU-02 |
+| Vehículos | Formulario de registro y tabla de vehículos. | HU-03, HU-04 |
+| Instalaciones | Formulario de registro y listado de instalaciones. | HU-05, HU-06 |
+
+Estado de la búsqueda: **implementada en backend** mediante `GET /api/v1/clientes/by-documento/{documento}`, `GET /api/v1/vehiculos/by-placa/{placa}` y las funciones CRUD correspondientes; **disponible como servicio frontend** en `clientesService.getByDocumento` y `vehiculosService.getByPlaca`; **no integrada en pantalla**; **no probada funcionalmente**. Los componentes vacíos `ClienteSearch` y `VehiculoSearch`, que nunca fueron importados, se retiraron en F4 sin alterar este estado ni los requisitos RF-03, HU-02 y HU-04.
 
 ## 3. Clientes y vehículos
 
 **Historias:** HU-01, HU-02, HU-03 y HU-04.
 
-### Frontend
+### Flujo implementado
 
-- Formulario de cliente con nombre, documento y contacto.
-- Búsqueda de cliente por documento.
-- Formulario de vehículo con descripción, placa y cliente asociado.
-- Búsqueda de vehículo por placa.
-- Presentación de los vehículos asociados a un cliente.
-- Mensajes de coincidencia, ausencia de resultados o duplicación.
+1. El usuario completa el formulario de cliente.
+2. `clientesService.create` envía `POST /api/v1/clientes/`.
+3. FastAPI valida con `ClienteCreate`.
+4. El router comprueba si el documento ya existe.
+5. El CRUD guarda el cliente y devuelve `ClienteRead`.
+6. La página recarga la lista y muestra un mensaje de éxito.
 
-### Backend
+Para vehículos:
 
-- Registrar y consultar clientes.
-- Impedir documentos duplicados.
-- Registrar vehículos vinculados a clientes existentes.
-- Impedir placas duplicadas.
-- Conservar varios vehículos asociados a un mismo cliente.
-- Devolver resultados correspondientes al documento o placa consultados.
+1. El formulario solicita placa, descripción e identificador del cliente.
+2. `vehiculosService.create` envía `POST /api/v1/vehiculos/`.
+3. El router comprueba la placa duplicada.
+4. El CRUD verifica que el cliente exista.
+5. Se guarda el vehículo asociado al cliente.
+6. La página recarga la lista.
 
-## 4. Trabajos e historial
+### Endpoints
+
+| Método | Ruta | Función |
+| --- | --- | --- |
+| POST | `/api/v1/clientes/` | Crear cliente; rechaza documento duplicado con 409. |
+| GET | `/api/v1/clientes/` | Listar clientes con `skip` y `limit`. |
+| GET | `/api/v1/clientes/{cliente_id}` | Consultar cliente por ID. |
+| GET | `/api/v1/clientes/by-documento/{documento}` | Consultar cliente por documento. |
+| POST | `/api/v1/vehiculos/` | Crear vehículo; valida cliente y placa duplicada. |
+| GET | `/api/v1/vehiculos/` | Listar vehículos con `skip` y `limit`. |
+| GET | `/api/v1/vehiculos/{vehiculo_id}` | Consultar vehículo por ID. |
+| GET | `/api/v1/vehiculos/by-placa/{placa}` | Consultar vehículo por placa. |
+| GET | `/api/v1/vehiculos/by-cliente/{cliente_id}` | Listar vehículos de un cliente. |
+
+### Modelo y reglas
+
+- `Cliente`: `id`, `nombre`, `documento` único, `contacto`.
+- `Vehiculo`: `id`, `placa` única, `descripcion` opcional, `cliente_id`.
+- Un cliente puede tener varios vehículos.
+- `Cliente.vehiculos` y `Vehiculo.instalaciones` usan `cascade="all, delete-orphan"`.
+- No hay endpoints de actualización ni eliminación.
+- La búsqueda existe en la API y en los servicios; falta integrarla en la interfaz.
+
+## 4. Instalaciones e historial
 
 **Historias:** HU-05 y HU-06.
 
-### Frontend
+### Flujo implementado
 
-- Formulario con vehículo, sede, fecha, servicio y valor total.
-- Presentación de los detalles registrados de tecnología, opacidad, instalador y retiro de película.
-- Historial del vehículo con identificación de la sede de cada trabajo.
-- Mensaje cuando el vehículo no tenga trabajos registrados.
+1. El formulario carga la lista de vehículos con `GET /api/v1/vehiculos/`.
+2. El usuario selecciona vehículo, tipo de servicio, estado, fecha, opacidad global, retiro de material anterior y observaciones.
+3. El usuario agrega una o más zonas y una o más asignaciones de instaladores.
+4. `instalacionesService.create` envía `POST /api/v1/instalaciones/`.
+5. El CRUD verifica que el vehículo exista.
+6. La instalación se guarda y la lista se actualiza.
 
-### Backend
+### Endpoints
 
-- Comprobar que el vehículo y la sede existan.
-- Guardar la relación entre trabajo, vehículo y sede.
-- Conservar los detalles de instalación registrados.
-- Permitir consultar el historial desde ambas sedes de Ibagué.
-- Mantener el valor del trabajo separado de cualquier gestión de pagos.
+| Método | Ruta | Función |
+| --- | --- | --- |
+| POST | `/api/v1/instalaciones/` | Crear instalación; valida que el vehículo exista. |
+| GET | `/api/v1/instalaciones/` | Listar instalaciones; acepta `vehiculo_id` para filtrar. |
+| GET | `/api/v1/instalaciones/{instalacion_id}` | Consultar instalación por ID. |
 
-**Pendiente:** definir qué detalles son obligatorios y cómo representar varias tecnologías, opacidades o instaladores dentro de un trabajo.
+### Modelo
+
+`Instalacion` contiene:
+
+- `vehiculo_id`.
+- `fecha` con valor por defecto del servidor.
+- `tipo_servicio`: `polarizado`, `pelicula_seguridad` o `ambos`.
+- `opacidad` opcional.
+- `zonas`: lista JSON de objetos; el formulario envía `zona` y `opacidad_aplicada`.
+- `asignaciones_instaladores`: lista JSON de objetos; el formulario envía `zona` e `instalador`.
+- `retiro_material_anterior`: booleano.
+- `observaciones` opcional.
+- `estado`: `programado`, `en_proceso`, `finalizado` o `anulado`.
+- `created_at` y `updated_at`.
+
+Pydantic exige al menos una zona y una asignación. Los objetos internos de los JSON no tienen un esquema detallado.
+
+### Diferencias con los requisitos
+
+- No existe campo `sede`.
+- No existe `valor_total`.
+- No hay una entidad separada de trabajo o servicio.
+- No se registran materiales, piezas ni sobrantes.
+- El listado muestra todas las instalaciones; no hay una vista de historial por vehículo.
+- No hay actualización ni anulación mediante endpoint.
+- El estado `anulado` existe como valor, pero no hay operación específica de anulación.
 
 ## 5. Materiales, rollos y disponibilidad
 
 **Historias:** HU-08, HU-09 y HU-11.
 
-### Frontend
+No implementado.
 
-- Formulario de tipo de material con tecnología y opacidad.
-- Formulario de rollo recibido con identificación, sede, material, ancho y largo.
-- Medidas expresadas en centímetros.
-- Consulta de rollos y recortes disponibles por sede, material y dimensiones.
-- Mensajes para dimensiones inválidas o consultas sin resultados.
+El diseño previo proponía tipos de material, piezas, sede, dimensiones, disponibilidad y descarte. Esas entidades no existen en los modelos actuales. Los requisitos siguen vigentes, pero no deben presentarse como funcionalidades del código.
 
-### Backend
-
-- Registrar tipos de material.
-- Identificar cada rollo recibido y asociarlo a una sede.
-- Validar dimensiones positivas.
-- Consultar piezas disponibles sin mezclar inventarios de sedes.
-- Excluir de la disponibilidad las piezas descartadas.
-- Conservar la diferencia entre tipo de material y pieza física.
-
-Un tipo de material puede corresponder a varios rollos y recortes con dimensiones diferentes.
-
-La unidad acordada es el centímetro. La precisión admitida sigue pendiente.
+Cuando se implemente, deberá conservarse la separación entre tipo de material y pieza física, la sede de cada pieza y las dimensiones positivas.
 
 ## 6. Registro de uso y sobrantes
 
 **Historia:** HU-10.
 
-### Frontend
+No implementado.
 
-- Abrir el registro de uso dentro del trabajo correspondiente.
-- Mostrar la sede del trabajo sin permitir elegir otra para el uso.
-- Permitir identificar la pieza de origen.
-- Permitir registrar las dimensiones de los sobrantes aprovechables.
-- Mostrar el resultado del guardado.
+No existen modelos de uso, pieza, sobrante ni movimiento de inventario. Tampoco existe una transacción que actualice existencias. El procedimiento de corte y restante sigue pendiente de definición.
 
-Los campos exactos del corte y del restante se definirán antes de implementar esta operación.
-
-### Backend: recorrido previsto
-
-1. Identificar al usuario y comprobar su autorización.
-2. Recuperar el trabajo y obtener su sede.
-3. Comprobar que la pieza de origen exista, esté disponible y pertenezca a esa sede.
-4. Validar dimensiones positivas y disponibilidad conforme al procedimiento de corte que se acuerde.
-5. Preparar el registro de uso, los sobrantes y la actualización del origen.
-6. Guardar todos los cambios juntos, sin duplicar material.
-7. Confirmar el éxito únicamente si toda la operación se guardó.
-
-Si falla un cambio, no debe aplicarse ninguno.
-
-### Límites del diseño actual
-
-- No se ha definido cómo registrar exactamente el corte y el restante del rollo.
-- Comparar únicamente áreas no permite comprobar que un recorte cabe en una pieza.
-- No se implementará optimización automática de cortes.
-- Los sobrantes se representarán mediante rectángulos aprovechables medidos por el instalador.
-
-Por estos pendientes, todavía no se define una fórmula definitiva de actualización del inventario.
+El diseño previo de este recorrido se conserva como propuesta en el historial de Git; no describe el código actual.
 
 ## 7. Corrección de registros de uso
 
 **Historia:** HU-13.
 
-### Frontend
+No implementado.
 
-- Permitir identificar el registro que se va a corregir.
-- Mostrar los datos originales.
-- Solicitar los datos corregidos y el motivo.
-- Mostrar el resultado de la operación.
-
-La identificación básica del registro es necesaria aunque se aplace la consulta general de HU-12.
-
-### Backend: recorrido previsto
-
-1. Comprobar que el usuario sea administrador.
-2. Recuperar el registro de uso y las piezas relacionadas.
-3. Validar el motivo y los cambios solicitados.
-4. Comprobar si la corrección puede aplicarse según las reglas que se acuerden.
-5. Verificar disponibilidad si la corrección implica utilizar más material.
-6. Guardar el ajuste y sus efectos en inventario como una sola operación.
-7. Conservar autor, fecha, motivo y datos anteriores y nuevos.
-
-La corrección afecta únicamente al inventario de la sede correspondiente.
-
-**Pendiente:** definir el tratamiento de sobrantes utilizados posteriormente, anulaciones y material equivocado.
-
-El diseño anterior basado únicamente en restar dos cantidades no basta para resolver correcciones de rollos y recortes relacionados.
+No hay entidad de corrección, auditoría, autor, motivo ni conservación de datos anteriores y nuevos. Tampoco hay autenticación que permita comprobar el perfil del administrador.
 
 ## 8. Descarte de piezas dañadas
 
 **Historia:** HU-14.  
 **Prioridad:** pendiente de asignación.
 
-### Frontend
-
-- Seleccionar una pieza disponible.
-- Mostrar su identificación, material, sede y dimensiones.
-- Solicitar el motivo del descarte.
-- Confirmar el resultado.
-
-### Backend
-
-- Comprobar que el usuario sea administrador.
-- Validar la pieza y el motivo.
-- Registrar el descarte completo.
-- Retirar la pieza de la disponibilidad conservando su identificación y el registro del descarte.
-- Guardar la operación completa sin afectar al inventario de la otra sede.
+No implementado. No existen piezas ni registro de descarte.
 
 El tratamiento de daños parciales sigue pendiente y no se incorpora automáticamente como una función adicional.
 
@@ -207,95 +217,98 @@ El tratamiento de daños parciales sigue pendiente y no se incorpora automática
 **Historia:** HU-12.  
 **Prioridad de referencia:** Should.
 
-Se propone mostrar las piezas de origen y los registros de uso asociados al trabajo.
+No implementado. No existe relación entre instalación, uso de material y piezas.
 
-Esta consulta general puede aplazarse frente a las funciones indispensables. Las relaciones entre trabajo, uso y pieza se conservarán desde el registro inicial.
+## 10. Datos principales y relaciones implementadas
 
-Si no existe uso de material registrado, se mostrará un mensaje indicando esa situación.
+| Entidad | Datos actuales | Relaciones |
+| --- | --- | --- |
+| Cliente | `id`, `nombre`, `documento`, `contacto` | Uno a muchos con vehículos. |
+| Vehículo | `id`, `placa`, `descripcion`, `cliente_id` | Pertenece a un cliente; uno a muchos con instalaciones. |
+| Instalación | `id`, `vehiculo_id`, `fecha`, `tipo_servicio`, `opacidad`, `zonas`, `asignaciones_instaladores`, `retiro_material_anterior`, `observaciones`, `estado`, `created_at`, `updated_at` | Pertenece a un vehículo. |
 
-## 10. Datos principales y relaciones propuestas
+Relaciones:
 
-Esta lista orienta el diseño; no define todavía las tablas definitivas de la base de datos.
+```text
+Cliente 1 ─── N Vehiculo 1 ─── N Instalacion
+```
 
-| Información | Datos y relaciones principales |
-| --- | --- |
-| Cliente | Nombre, documento y contacto. Puede tener varios vehículos. |
-| Vehículo | Placa, descripción y cliente asociado. Puede tener varios trabajos. |
-| Sede | Identifica una de las dos sedes de Ibagué. Se relaciona con trabajos y piezas de inventario. |
-| Trabajo | Vehículo, sede, fecha, servicio, valor total y detalles de instalación. |
-| Tipo de material | Tecnología y opacidad. Se relaciona con rollos y recortes. |
-| Pieza | Identificación, tipo de material, sede, ancho, largo y disponibilidad. Puede ser un rollo o un recorte. |
-| Registro de uso | Relaciona un trabajo con la pieza utilizada. Los datos exactos del corte están pendientes. |
-| Sobrante | Pieza aprovechable vinculada a su origen y a la operación que la produjo. |
-| Corrección | Registro afectado, autor, fecha, motivo y datos anteriores y nuevos. |
-| Descarte | Pieza descartada y motivo, conservando el registro de la operación. |
+Restricciones observadas:
 
-La identidad del usuario deberá permitir comprobar permisos y registrar al autor de las correcciones. Su mecanismo todavía no está definido.
+- `clientes.documento` es único.
+- `vehiculos.placa` es única.
+- `vehiculos.cliente_id` es obligatorio.
+- `instalaciones.vehiculo_id` es obligatorio.
+- Las relaciones usan eliminación en cascada desde el ORM. Esto difiere de la conservación de historial propuesta en los requisitos y requiere una decisión antes de implementar borrados.
 
-Los detalles de instalación y las relaciones entre usos, sobrantes y correcciones requieren revisión antes de cerrar el modelo de datos.
+No hay migraciones Alembic ni creación automática de tablas documentada. La base de datos debe prepararse fuera de este código o mediante un mecanismo que todavía no forma parte del repositorio.
 
 ## 11. Información compartida y separada
 
-### Compartida entre las dos sedes
+### Compartida en el modelo actual
 
 - Clientes.
 - Vehículos.
-- Historial y detalles registrados de trabajos.
+- Instalaciones.
 
-### Identificada por sede
+### Separada por sede
 
-- Trabajos realizados.
-- Rollos y recortes.
-- Entradas y registros de uso.
-- Correcciones y descartes.
+No implementada. El modelo actual no tiene `sede_id` en instalaciones, piezas ni movimientos. Por tanto, el sistema todavía no puede distinguir inventario por sede ni aplicar la regla de que el material pertenece a la sede del trabajo.
 
-Compartir el historial de un trabajo no cambia la sede a la que pertenece su inventario.
+## 12. Mensajes y errores
 
-## 12. Mensajes necesarios
+### Backend
 
-- El documento ya está registrado.
-- La placa ya está registrada.
-- No se encontró el cliente o vehículo.
-- El vehículo todavía no tiene trabajos registrados.
-- Las dimensiones deben ser mayores que cero.
-- La pieza no está disponible.
-- La pieza pertenece a otra sede.
-- No hay material suficiente para la operación.
-- Debe indicar el motivo.
-- No tiene permiso para realizar esta operación.
-- No se pudo guardar la operación.
-- La operación se guardó correctamente.
+- `409` si el documento del cliente ya existe.
+- `409` si la placa del vehículo ya existe.
+- `400` si el cliente de un vehículo no existe.
+- `400` si el vehículo de una instalación no existe.
+- `404` si no se encuentra un cliente, vehículo o instalación.
+- `422` para errores de validación de Pydantic.
 
-Los mensajes son propuestas de redacción. El backend debe comprobar la condición correspondiente antes de devolver el resultado.
+### Frontend
 
-## 13. Pendientes antes de implementar
+- Mensajes de éxito después de una respuesta correcta.
+- Mensajes de error provenientes de `error.response.data.detail`.
+- Mensaje de error de conexión generado por el interceptor de Axios.
+- Estados de carga y listas vacías en clientes, vehículos e instalaciones.
 
+Los mensajes de inventario, permisos y correcciones descritos en el diseño anterior no están implementados.
+
+## 13. Pendientes antes de completar la implementación
+
+- Incorporar sede y valor total a la instalación, o decidir el modelo que los represente.
 - Precisar los detalles de instalación y sus campos obligatorios.
+- Integrar búsquedas por documento y placa en la interfaz.
+- Implementar un historial por vehículo.
 - Definir la precisión de las dimensiones en centímetros.
-- Definir el registro del corte y del restante.
+- Definir el registro del corte, el restante y los sobrantes.
 - Definir correcciones con sobrantes utilizados posteriormente.
-- Resolver el tratamiento de anulaciones, material equivocado y daños parciales.
-- Completar la identificación de usuarios y los permisos.
-- Revisar la prioridad de HU-14 y el esfuerzo de las historias de inventario.
-- Acordar dispositivos y condiciones de evaluación de uso.
-- Revisar el diseño con Jonathan.
-- Actualizar los diagramas conforme a los requisitos vigentes.
+- Resolver anulaciones, material equivocado y daños parciales.
+- Implementar autenticación, roles y permisos.
+- Agregar migraciones de base de datos.
+- Agregar pruebas automatizadas y registrar pruebas ejecutadas.
+- Actualizar los diagramas `.mmd` conforme al código actual.
+- Revisar con Jonathan y validar los requisitos con la asesora.
 
-## 14. Dependencias para la planificación posterior
+## 14. Dependencias para la implementación posterior
 
-- Registrar un vehículo requiere un cliente.
-- Registrar un trabajo requiere un vehículo y una sede.
-- Registrar un rollo requiere un tipo de material y una sede.
-- Registrar uso requiere un trabajo y una pieza disponible de esa sede.
-- Corregir requiere un registro de uso y un procedimiento de corrección definido.
-- Descartar requiere una pieza disponible.
-- Las operaciones restringidas requieren identificar al usuario y comprobar sus permisos.
+- Registrar un vehículo requiere un cliente existente.
+- Registrar una instalación requiere un vehículo existente.
+- Registrar un trabajo con sede requiere definir el modelo de sede.
+- Registrar un rollo requiere tipo de material, sede y dimensiones.
+- Registrar uso requiere trabajo, pieza disponible y reglas de corte.
+- Corregir requiere registro de uso, autor, motivo y procedimiento definido.
+- Descartar requiere una pieza disponible y un registro de descarte.
+- Aplicar permisos requiere autenticación y roles.
 
-Estas dependencias servirán para organizar el backlog y los sprints. No constituyen una asignación de fechas, responsables ni tareas realizadas.
+Estas dependencias sirven para organizar el trabajo futuro. No constituyen una asignación de fechas, responsables ni tareas realizadas.
 
 ## 15. Referencias
 
 - [Requisitos](requisitos.md).
 - [Trazabilidad](trazabilidad.md).
 - [Visión del proyecto](vision.md).
+- [Planificación](planificacion.md).
 - [Síntesis de entrevista y aclaraciones](ia/entrevista-cliente.md).
+- [Línea base y verificaciones F0](F0_LINEA_BASE_Y_VERIFICACIONES.md).

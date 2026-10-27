@@ -2,13 +2,13 @@
 
 ## 1. Contexto
 
-**Fecha de actualización:** 8 de septiembre de 2026.
+**Fecha de actualización:** 27 de octubre de 2026 (F2).
 
-Proyecto académico para las dos sedes de Serna Polarizados en Ibagué. La primera versión incluye clientes, vehículos, historial de trabajos e inventario independiente por sede, con identificación de rollos y recortes aprovechables.
+Proyecto académico para las dos sedes de Serna Polarizados en Ibagué. La primera versión documentada incluye clientes, vehículos, historial de trabajos e inventario independiente por sede, con identificación de rollos y recortes aprovechables.
 
-El proyecto está en análisis y diseño. La implementación está pendiente.
+El repositorio contiene una implementación parcial de clientes, vehículos e instalaciones. El inventario, la autenticación, las migraciones y las pruebas automatizadas siguen pendientes. La existencia de código no demuestra que la aplicación haya sido ejecutada o probada.
 
-La siguiente matriz describe cómo se utilizará la IA durante las siete fases del ciclo de vida del software. Las herramientas candidatas para fases futuras no se presentan como utilizadas.
+La matriz describe el uso de IA documentado y las herramientas candidatas para fases futuras. Las herramientas candidatas no se presentan como utilizadas.
 
 ## 2. Matriz de uso de IA
 
@@ -16,11 +16,11 @@ La siguiente matriz describe cómo se utilizará la IA durante las siete fases d
 | --- | --- | --- | --- |
 | Planeación | Ayudar a delimitar la primera versión, proponer prioridades y organizar actividades. | Codex utilizado; apoyo futuro sujeto a la tarea. | Puede ampliar el alcance o proponer plazos sin fundamento. Revisaremos las propuestas según las necesidades confirmadas y la capacidad de los dos integrantes. |
 | Análisis de requisitos | Obtener borradores de requisitos e historias a partir de la entrevista y las aclaraciones; revisar criterios de aceptación y trazabilidad. | Gemini y Codex utilizados. | Puede inventar reglas o confundir propuestas con decisiones. Contrastaremos cada resultado con las fuentes y conservaremos los pendientes de validación. |
-| Diseño | Proponer responsabilidades de las capas, pantallas, relaciones de datos y diagramas. | Codex utilizado para el diseño inicial; revisión de diagramas pendiente. | Puede omitir relaciones o asumir cómo funcionan los cortes y las correcciones. Revisaremos el diseño contra los requisitos vigentes antes de programar. |
-| Codificación | Apoyar funciones pequeñas con Python, Flask, SQLite, HTML, CSS y JavaScript. | Codex como candidato; fase pendiente. | Puede generar código incorrecto o que no comprendamos. Leeremos, explicaremos y comprobaremos cada cambio antes de incorporarlo. |
-| Pruebas | Proponer y apoyar comprobaciones de clientes, vehículos, trabajos e inventario por sede. | Codex o Gemini como candidatos; ejecución de pruebas de software pendiente. | Puede omitir errores importantes. Comprobaremos duplicados, dimensiones inválidas, piezas de otra sede, permisos y fallos de guardado, según los requisitos definidos. |
-| Despliegue | Ayudar a preparar instrucciones de instalación y configuración. | Codex como candidato; fase pendiente. | Puede sugerir configuraciones inadecuadas. Revisaremos las instrucciones y evitaremos publicar credenciales. |
-| Mantenimiento | Ayudar a analizar errores y proponer correcciones. | Codex como candidato; fase pendiente. | Puede diagnosticar sin evidencia. Reproduciremos el problema y comprobaremos la solución antes de aceptarla. |
+| Diseño | Proponer responsabilidades de las capas, pantallas, relaciones de datos y diagramas. | Codex utilizado para el diseño inicial. El diseño actual se contrastó con el código en F2. | Puede omitir relaciones o asumir cómo funcionan los cortes y las correcciones. Revisaremos el diseño contra los requisitos vigentes. |
+| Codificación | Implementar clientes, vehículos e instalaciones con Python, FastAPI, SQLAlchemy, React, TypeScript y Tailwind CSS. | El repositorio contiene código. Los documentos no registran de forma suficiente qué herramienta generó cada archivo, por lo que no se atribuye a una ejecución concreta. | Puede generar código incorrecto o que no comprendamos. Debe leerse, explicarse y comprobarse cada cambio antes de incorporarlo. |
+| Pruebas | Proponer y apoyar comprobaciones de clientes, vehículos, trabajos e inventario por sede. | Herramienta candidata; no hay pruebas automatizadas registradas. | Puede omitir errores importantes. Deben comprobarse duplicados, dimensiones inválidas, piezas de otra sede, permisos y fallos de guardado, según los requisitos definidos. |
+| Despliegue | Ayudar a preparar instrucciones de instalación y configuración. | Herramienta candidata; fase pendiente. | Puede sugerir configuraciones inadecuadas. Revisaremos las instrucciones y evitaremos publicar credenciales. |
+| Mantenimiento | Ayudar a analizar errores y proponer correcciones. | Herramienta candidata; fase pendiente. | Puede diagnosticar sin evidencia. Reproduciremos el problema y comprobaremos la solución antes de aceptarla. |
 
 Los editores de diagramas sirven para representar y revisar el diseño. Su utilización, por sí sola, no demuestra una ejecución de IA ni una conexión MCP.
 
@@ -36,7 +36,9 @@ Se ha utilizado IA para:
 - Proponer el diseño inicial de backend y frontend.
 - Actualizar documentos después de las aclaraciones sobre rollos y sobrantes.
 
-Los criterios escritos son especificaciones para pruebas futuras. No equivalen a pruebas ejecutadas ni a software funcionando.
+El código actual incluye modelos, esquemas, CRUD, endpoints y una interfaz React. La documentación no conserva, para cada archivo, el prompt exacto y la respuesta que habrían originado ese código. Esa falta de evidencia debe declararse y no atribuirse a una herramienta específica.
+
+Los criterios escritos son especificaciones para pruebas futuras. No equivalen a pruebas ejecutadas ni a software completamente funcionando. F2 tampoco ejecutó la aplicación.
 
 ## 4. Evidencias
 
@@ -45,8 +47,12 @@ Los criterios escritos son especificaciones para pruebas futuras. No equivalen a
 | [Entrevista y aclaraciones](entrevista-cliente.md) | Contexto del negocio y decisiones posteriores del administrador. |
 | [Biblioteca de prompts](prompts.md) | Instrucciones utilizadas, resultados y observaciones. |
 | [Pruebas con Gemini](pruebas-gemini.md) | Prompts de análisis y resúmenes de sus resultados. |
-| [Revisión de historias](revision-historias-gemini.md) | Archivo destinado a la evaluación de historias y sus correcciones; contenido pendiente de ajuste. |
+| [Revisión de historias](revision-historias-gemini.md) | Evaluación de historias, errores señalados y correcciones posteriores. |
 | [Requisitos vigentes](../requisitos.md) | Resultado consolidado, reglas confirmadas y decisiones pendientes. |
+| [Prompt maestro original](PROMPT_MAESTRO_ORIGINAL.md) | Extracción literal verificada del bloque entregado al equipo. |
+| [Línea base F0](../F0_LINEA_BASE_Y_VERIFICACIONES.md) | Respaldo, huellas y verificaciones de la intervención inicial. |
+| [Índice documental](../INDICE_DOCUMENTAL.md) | Clasificación, estado y registro de fases. |
+| [Trazabilidad](../trazabilidad.md) | Relación entre requisitos, historias y código observado. |
 
 Las respuestas completas de Gemini que aún no estén incorporadas siguen pendientes. No se presenta un resumen como si fuera la respuesta original completa.
 
@@ -67,4 +73,4 @@ Los prompts históricos se conservarán en su idioma original. Las traducciones 
 
 La revisión conjunta con Jonathan y la validación posterior de los requisitos derivados con la asesora siguen pendientes.
 
-Ninguna respuesta de IA se considerará, por sí sola, una decisión del negocio o una prueba de que el sistema funciona.
+Ninguna respuesta de IA se considerará, por sí sola, una decisión del negocio o una prueba de que el sistema funciona. Tampoco se afirmará que una herramienta generó el código si no existe evidencia suficiente.
