@@ -152,9 +152,11 @@ def _asignaciones(detalles: list[DetalleVidrioInput]) -> list[dict[str, str | No
 
 
 def _insert_instalacion(
-    db: Session, payload: RegistroInstalacionCreate, vehiculo_id: int
+    db: Session, payload: RegistroInstalacionCreate, vehiculo_id: int, referido=None
 ) -> tuple[int, dict]:
     desglose = desglose_registro(payload)
+    if referido:
+        desglose['cobro']['referido'] = referido
     valores = {
         "vehiculo_id": vehiculo_id,
         "tipo_servicio": "ambos" if any(d.pelicula_seguridad for d in payload.detalles) else "polarizado",
@@ -231,9 +233,16 @@ def guardar_registro(
     if cobro['total_cop'] is None or cobro['saldo_cop'] != 0:
         raise RegistroConflictError('PAGO_INCOMPLETO', 'Registra el pago completo del valor final antes de guardar')
     try:
+        referido = None
+        if payload.tipo_descuento == 'referido':
+            from app.services.referidos import consultar_referido
+            referido = consultar_referido(db, payload.referido_placa, bloquear=True,
+                                          documento_receptor=payload.cliente.documento)
+            if not referido['disponible']:
+                raise RegistroConflictError('REFERIDO_NO_DISPONIBLE', referido['motivo'])
         cliente_id, cliente_reutilizado = _resolve_cliente(db, payload)
         vehiculo_id, vehiculo_reutilizado = _resolve_vehiculo(db, payload, cliente_id)
-        instalacion_id, desglose = _insert_instalacion(db, payload, vehiculo_id)
+        instalacion_id, desglose = _insert_instalacion(db, payload, vehiculo_id, referido)
         detalles_guardados = _insert_detalles(db, instalacion_id, payload.detalles)
         db.flush()
     except RegistroConflictError:

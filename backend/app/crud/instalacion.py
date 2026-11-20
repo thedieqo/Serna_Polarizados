@@ -170,6 +170,8 @@ def get_detalle(db: Session, instalacion_id: int) -> Optional[InstalacionDetalle
             "precio_total_cop": getattr(fila, "precio_total_cop", None),
         }
     )
+    from app.services.referidos import consultar_referido
+    datos['referido'] = consultar_referido(db, fila.vehiculo.placa)
     return InstalacionDetalleRead(**datos)
 
 

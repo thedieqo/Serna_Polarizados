@@ -16,6 +16,7 @@ export default function CobroResumen({ desglose }: { desglose?: DesglosePrecios 
         <div><dt>Por registrar en pagos</dt><dd>{cop(cobro.saldo_cop)}</dd></div>
       </dl>
       <ul className="mt-3 space-y-2">{cobro.pagos.map((p, i) => <li key={i}>{mediosPago[p.medio]}: <strong>{cop(p.monto_cop)}</strong>{p.referencia && ` · Ref. ${p.referencia}`}</li>)}</ul>
+      {cobro.referido && <p className="mt-3">Referido: {cobro.referido.nombre} · Placa {cobro.referido.placa}</p>}
       <p className="mt-3">Comisión del administrador (2 % del valor final): {cop(cobro.comision_admin_cop)}</p>
     </section>}
     {!!desglose.mano_obra?.length && <section className="border-t border-gray-200 pt-4">

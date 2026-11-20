@@ -50,7 +50,7 @@ def read_schema_status():
 
 
 @router.post("/preview", response_model=RegistroInstalacionPreview)
-def preview_registro(payload: RegistroInstalacionCreate):
+def preview_registro(payload: RegistroInstalacionCreate, db: Session = Depends(get_db)):
     preview = build_preview(payload)
     estado = get_schema_status()
     preview.guardado_habilitado = estado["save_enabled"]
@@ -62,6 +62,13 @@ def preview_registro(payload: RegistroInstalacionCreate):
     elif cobro['saldo_cop'] != 0:
         preview.guardado_habilitado = False
         preview.motivos.append(f"Falta registrar ${cobro['saldo_cop']:,} COP en medios de pago")
+    if payload.tipo_descuento == 'referido':
+        from app.services.referidos import consultar_referido
+        referido = consultar_referido(db, payload.referido_placa, documento_receptor=payload.cliente.documento)
+        preview.desglose.cobro['referido'] = referido
+        if not referido['disponible']:
+            preview.guardado_habilitado = False
+            preview.motivos.append(referido['motivo'])
     return preview
 
 
@@ -93,6 +100,12 @@ def read_historial(
     db: Session = Depends(get_db),
 ):
     return crud.instalacion.get_historial(db, q=q, skip=skip, limit=limit)
+
+
+@router.get("/referidos/{placa}")
+def read_referido(placa: str, db: Session = Depends(get_db)):
+    from app.services.referidos import consultar_referido
+    return consultar_referido(db, placa)
 
 
 @router.get("/ventas/resumen")

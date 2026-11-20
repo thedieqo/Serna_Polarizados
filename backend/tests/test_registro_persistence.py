@@ -161,9 +161,9 @@ class RegistroPersistenceTests(TestCase):
         from app.crud.instalacion import get_detalle
         from app.services.ventas import resumen_ventas
         data = _payload()
-        data.update(fecha='2026-11-20T15:00:00Z', descuento_cop=50000,
+        data.update(fecha='2026-11-20T15:00:00Z', tipo_descuento='agenda',
                     motivo_descuento='Convenio', pagos=[
-                        {'medio':'efectivo','monto_cop':400000},
+                        {'medio':'efectivo','monto_cop':305000},
                         {'medio':'transferencia','monto_cop':1000000}])
         resultado = self._guardar(data)
         with self.Session() as db:
@@ -171,12 +171,12 @@ class RegistroPersistenceTests(TestCase):
             self.assertEqual(detalle.cliente_telefono, '3001234567')
             self.assertEqual(detalle.cliente_email, 'prop@example.com')
             self.assertEqual(detalle.vehiculo_marca, 'Toyota')
-            self.assertEqual(detalle.precio_total_cop, 1400000)
-            self.assertEqual(detalle.desglose_precios['cobro']['pagado_cop'], 1400000)
+            self.assertEqual(detalle.precio_total_cop, 1305000)
+            self.assertEqual(detalle.desglose_precios['cobro']['pagado_cop'], 1305000)
             self.assertEqual(detalle.desglose_precios['garantia']['anos'], 15)
             reporte = resumen_ventas(db, 2026, 11, 'segunda')
-            self.assertEqual(reporte['totales']['ventas_cop'], 1400000)
-            self.assertEqual(reporte['totales']['administrador_cop'], 28000)
+            self.assertEqual(reporte['totales']['ventas_cop'], 1305000)
+            self.assertEqual(reporte['totales']['administrador_cop'], 26100)
             self.assertEqual(reporte['totales']['instaladores_cop'], 75000)
 
     def test_pago_parcial_no_crea_cliente_vehiculo_ni_instalacion(self):

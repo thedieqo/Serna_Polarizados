@@ -57,6 +57,8 @@ export interface RegistroInstalacionCreate {
   observaciones?: string | null;
   estado?: 'programado';
   detalles: DetalleVidrioInput[];
+  tipo_descuento?: 'ninguno' | 'referido' | 'agenda' | 'especial';
+  referido_placa?: string | null;
   descuento_cop?: number;
   motivo_descuento?: string | null;
   pagos?: PagoInput[];
@@ -77,7 +79,11 @@ export interface PagoInput {
   monto_cop: number;
   referencia?: string | null;
 }
+export interface Referido {
+  disponible: boolean; placa: string; nombre?: string; motivo: string; usado_en?: string;
+}
 export interface Cobro {
+  referido?: Referido;
   subtotal_cop: number | null;
   descuento_cop: number;
   motivo_descuento: string | null;
@@ -149,6 +155,7 @@ export interface HistorialResponse {
 }
 
 export interface InstalacionDetalle extends HistorialInstalacion {
+  referido?: Referido;
   cliente_email?: string | null;
   cliente_telefono?: string | null;
   tipo_factura?: string | null;

@@ -20,7 +20,7 @@ from app.core.config import settings
 app = FastAPI(
     title="Serna Polarizados API",
     description="Sistema de gestión de instalaciones, clientes, vehículos e inventario",
-    version="0.2.0",
+    version="0.3.0",
 )
 
 # Configuración CORS para permitir frontend local

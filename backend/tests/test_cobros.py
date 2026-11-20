@@ -9,13 +9,13 @@ from test_registro_persistence import _payload
 class CobrosTests(TestCase):
     def test_pago_dividido_descuento_comision_y_garantia(self):
         data = _payload()
-        data.update(descuento_cop=50000, motivo_descuento='Convenio', fecha='2028-02-29T15:00:00Z', pagos=[
+        data.update(tipo_descuento='agenda', motivo_descuento='Convenio', fecha='2028-02-29T15:00:00Z', pagos=[
             {'medio': 'sistecredito', 'monto_cop': 1000000},
-            {'medio': 'efectivo', 'monto_cop': 400000}])
+            {'medio': 'efectivo', 'monto_cop': 305000}])
         result = desglose_registro(RegistroInstalacionCreate(**data))
-        self.assertEqual(result['total_cop'], 1400000)
+        self.assertEqual(result['total_cop'], 1305000)
         self.assertEqual(result['cobro']['saldo_cop'], 0)
-        self.assertEqual(result['cobro']['comision_admin_cop'], 28000)
+        self.assertEqual(result['cobro']['comision_admin_cop'], 26100)
         self.assertEqual(sum(i['valor_cop'] for i in result['mano_obra']), 75000)
         self.assertEqual(result['garantia']['hasta'], '2043-02-28')
 

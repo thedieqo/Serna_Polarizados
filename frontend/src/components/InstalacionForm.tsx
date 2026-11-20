@@ -3,12 +3,15 @@ import type { FormEvent } from 'react'
 import type { CatalogosResponse } from '../types/catalogos'
 import type {
   DetalleVidrioInput,
+  Referido,
   RegistroInstalacionCreate,
   RegistroInstalacionPreview,
   RegistroInstalacionResult,
 } from '../types/instalacion'
 import CobroResumen, { mediosPago } from './CobroResumen'
 import { instalacionesService } from '../services/instalaciones'
+import api from '../services/api'
+import { cobroEnVivo } from '../lib/cobroEnVivo'
 import { motivoBloqueoGuardado } from '../lib/estadoGuardado'
 
 function emptyDetalle(): DetalleVidrioInput {
@@ -53,9 +56,11 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
     marca: '',
     descripcion: '',
   })
-  const [pagos, setPagos] = useState([{ medio: 'efectivo', monto: '', referencia: '' }])
-  const [aplicaDescuento, setAplicaDescuento] = useState(false)
-  const [descuento, setDescuento] = useState('')
+  const [pagos, setPagos] = useState([{ medio: 'efectivo', monto: '' }])
+  const [tipoDescuento, setTipoDescuento] = useState<'ninguno' | 'referido' | 'agenda' | 'especial'>('ninguno')
+  const [placaReferido, setPlacaReferido] = useState('')
+  const [referido, setReferido] = useState<Referido | null>(null)
+  const [consultandoReferido, setConsultandoReferido] = useState(false)
   const [motivoDescuento, setMotivoDescuento] = useState('')
   const [tipoFactura, setTipoFactura] = useState('normal')
   const [fecha, setFecha] = useState('')
@@ -69,6 +74,21 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
   const [guardando, setGuardando] = useState(false)
   const [resultado, setResultado] = useState<RegistroInstalacionResult | null>(null)
   const guardandoRef = useRef(false)
+
+  const cobroActual = cobroEnVivo(detalles, catalogos?.tarifas, tipoDescuento, pagos.map(p => Number(p.monto || 0)))
+  useEffect(() => {
+    let activo = true
+    setReferido(null)
+    if (tipoDescuento !== 'referido' || !placaReferido.trim()) { setConsultandoReferido(false); return }
+    setConsultandoReferido(true)
+    const timer = setTimeout(() => {
+      api.get<Referido>(`/instalaciones/referidos/${encodeURIComponent(placaReferido.trim())}`)
+        .then(r => { if (activo) setReferido(r.data) })
+        .catch(() => { if (activo) setReferido({disponible:false, placa:placaReferido, motivo:'No se pudo verificar el referido. Revisa la conexión.'}) })
+        .finally(() => { if (activo) setConsultandoReferido(false) })
+    }, 400)
+    return () => { activo = false; clearTimeout(timer) }
+  }, [tipoDescuento, placaReferido])
 
   useEffect(() => {
     let activo = true
@@ -157,9 +177,10 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
       descripcion: vehiculo.descripcion || null,
     },
     tipo_factura: tipoFactura,
-    descuento_cop: aplicaDescuento ? Number(descuento || 0) : 0,
-    motivo_descuento: aplicaDescuento ? motivoDescuento : null,
-    pagos: pagos.filter(p => Number(p.monto) > 0).map(p => ({ medio: p.medio, monto_cop: Number(p.monto), referencia: p.referencia || null })),
+    tipo_descuento: tipoDescuento,
+    referido_placa: tipoDescuento === 'referido' ? placaReferido : null,
+    motivo_descuento: tipoDescuento === 'especial' ? motivoDescuento : null,
+    pagos: pagos.filter(p => Number(p.monto) > 0).map(p => ({ medio: p.medio, monto_cop: Number(p.monto) })),
     fecha: fecha ? new Date(fecha).toISOString() : null,
     retiro_material_anterior: retiroMaterial,
     observaciones: observaciones || null,
@@ -486,18 +507,32 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
         <section className="border-t border-gray-200 pt-6 space-y-4">
           <h4 className="text-sm font-semibold text-gray-900">Pago y facturación</h4>
           <p className="text-sm text-gray-500">Combina medios de pago. La suma debe cubrir el valor final para guardar. Los importes se registran en pesos colombianos.</p>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={aplicaDescuento} onChange={e => setAplicaDescuento(e.target.checked)} />Aplicar descuento</label>
-          {aplicaDescuento && <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <label className="text-sm">Descuento en COP<input type="number" min="0" step="1" required value={descuento} onChange={e => setDescuento(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" /></label>
-            <label className="text-sm">Motivo del descuento<input required value={motivoDescuento} onChange={e => setMotivoDescuento(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" maxLength={250} /></label>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={tipoDescuento !== 'ninguno'} onChange={e => setTipoDescuento(e.target.checked ? 'referido' : 'ninguno')} />Aplicar descuento</label>
+          {tipoDescuento !== 'ninguno' && <div className="space-y-3">
+            <label className="block text-sm">Tipo de descuento<select value={tipoDescuento} onChange={e => setTipoDescuento(e.target.value as typeof tipoDescuento)} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"><option value="referido">Referido · 5 %</option><option value="agenda">Agenda · 10 %</option><option value="especial">Fecha especial · 15 %</option></select></label>
+            <p className="text-xs text-gray-500">Se aplica un solo descuento sobre el subtotal.</p>
+            {tipoDescuento === 'referido' && <div>
+              <label className="text-sm">Placa de quien refiere<input required maxLength={20} value={placaReferido} onChange={e => setPlacaReferido(e.target.value.toUpperCase())} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" /></label>
+              <p role="status" className="text-sm mt-2">{consultandoReferido ? 'Verificando placa…' : referido ? `${referido.nombre ? referido.nombre + ' · ' : ''}${referido.motivo}` : 'Ingresa una placa con una instalación previa de polarizado.'}</p>
+              <p className="text-xs text-gray-500 mt-1">Un referido por cliente. Se consume al guardar la instalación, no al consultar.</p>
+            </div>}
+            {tipoDescuento === 'especial' && <label className="block text-sm">Ocasión de la promoción<input required maxLength={250} value={motivoDescuento} onChange={e => setMotivoDescuento(e.target.value)} placeholder="Ejemplo: Navidad" className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" /></label>}
           </div>}
-          {pagos.map((p, i) => <div key={i} className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <div className="rounded-lg border border-gray-300 p-4 grid grid-cols-1 sm:grid-cols-3 gap-3" aria-live="polite">
+            <div><p className="text-sm">Total de la instalación</p><strong>{formatearCOP(cobroActual.completo ? cobroActual.subtotal : null)}</strong></div>
+            <div><p className="text-sm">Descuento</p><strong>{formatearCOP(cobroActual.completo ? cobroActual.descuento : null)}</strong></div>
+            <div><p className="text-sm">Total a pagar</p><strong>{formatearCOP(cobroActual.completo ? cobroActual.total : null)}</strong></div>
+            <div><p className="text-sm">Pagos registrados</p><strong>{formatearCOP(cobroActual.pagado)}</strong></div>
+            <div><p className="text-sm">{cobroActual.saldo < 0 ? 'Exceso en pagos' : 'Falta por pagar'}</p><strong>{formatearCOP(cobroActual.completo ? Math.abs(cobroActual.saldo) : null)}</strong></div>
+          </div>
+          {tipoDescuento === 'referido' && !referido?.disponible && <p className="text-xs text-gray-500">El total con 5 % está sujeto a validar el referido al guardar.</p>}
+          {pagos.map((p, i) => <div key={i} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <label className="text-sm">Medio de pago<select value={p.medio} onChange={e => setPagos(prev => prev.map((v, n) => n === i ? { ...v, medio: e.target.value } : v))} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2">{Object.entries(mediosPago).map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select></label>
             <label className="text-sm">Monto en COP<input type="number" min="0" max="1000000000" step="1" value={p.monto} onChange={e => setPagos(prev => prev.map((v, n) => n === i ? { ...v, monto: e.target.value } : v))} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" /></label>
-            <label className="text-sm">Referencia (opcional)<input maxLength={120} value={p.referencia} onChange={e => setPagos(prev => prev.map((v, n) => n === i ? { ...v, referencia: e.target.value } : v))} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" /></label>
             <button type="button" disabled={pagos.length === 1} onClick={() => { setPagos(prev => prev.filter((_, n) => n !== i)); limpiarResumen() }} className="text-sm text-red-800 disabled:opacity-50">Quitar pago</button>
+            <p className="text-sm sm:col-span-3">Después de este pago: {formatearCOP(cobroActual.completo ? Math.max(0, cobroActual.total - pagos.slice(0, i + 1).reduce((sum, pago) => sum + Number(pago.monto || 0), 0)) : null)} por cubrir.</p>
           </div>)}
-          <button type="button" disabled={pagos.length >= 20} onClick={() => { setPagos(prev => [...prev, { medio: 'transferencia', monto: '', referencia: '' }]); limpiarResumen() }} className="text-sm text-blue-700">+ Agregar medio de pago</button>
+          <button type="button" disabled={pagos.length >= 20} onClick={() => { setPagos(prev => [...prev, { medio: 'transferencia', monto: '' }]); limpiarResumen() }} className="text-sm text-blue-700">+ Agregar medio de pago</button>
             <div>
               <label className="block text-sm font-medium text-gray-700">Tipo de factura</label>
               <select

@@ -81,6 +81,7 @@ class VidrioInstaladoRead(BaseModel):
 
 
 class InstalacionDetalleRead(InstalacionHistorialItem):
+    referido: dict | None = None
     cliente_email: Optional[str] = None
     cliente_telefono: Optional[str] = None
     tipo_factura: Optional[str] = None

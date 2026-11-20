@@ -253,6 +253,7 @@ export default function InstalacionList() {
             ) : <p className="mt-2 text-sm text-gray-600">Sin desglose por vidrio en este registro.</p>}
           </div>
 
+          {detalle.referido && <section className="mt-4 rounded-lg border border-gray-300 p-4"><h4 className="font-semibold">Descuento de referidos · 5 %</h4><p className="text-sm mt-2">Código: {detalle.referido.placa} · {detalle.referido.disponible ? 'Disponible' : 'No disponible'}</p><p className="text-sm mt-1">{detalle.referido.motivo}</p></section>}
           <CobroResumen desglose={detalle.desglose_precios} />
           <div className="mt-4">
             <h4 className="text-sm font-semibold text-gray-900">Desglose de precios</h4>

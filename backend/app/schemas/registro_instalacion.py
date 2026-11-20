@@ -213,6 +213,8 @@ class RegistroInstalacionCreate(InputModel):
     observaciones: str | None = None
     estado: Literal["programado"] = "programado"
     detalles: list[DetalleVidrioInput] = Field(min_length=1)
+    tipo_descuento: Literal['ninguno', 'referido', 'agenda', 'especial'] = 'ninguno'
+    referido_placa: str | None = Field(default=None, max_length=20)
     descuento_cop: int = Field(default=0, ge=0, le=1000000000, strict=True)
     motivo_descuento: str | None = Field(default=None, max_length=250)
     pagos: list[PagoInput] = Field(default_factory=list, max_length=20)
@@ -251,7 +253,13 @@ class RegistroInstalacionCreate(InputModel):
         if paneles_solares and paneles_solares != set(PANELES_SUNROOF_DOBLE):
             raise ValueError("El techo solar doble requiere panel delantero y trasero")
 
-        calcular_cobro(calcular_desglose(self.detalles)['total_cop'], self.descuento_cop, self.motivo_descuento, self.pagos)
+        if self.tipo_descuento == 'referido' and not self.referido_placa:
+            raise ValueError('Indica la placa de quien refiere')
+        if self.tipo_descuento != 'referido' and self.referido_placa:
+            raise ValueError('La placa de referido solo corresponde al descuento del 5 %')
+        if self.tipo_descuento == 'especial' and not self.motivo_descuento:
+            raise ValueError('Indica la ocasión de la promoción especial')
+        cobro_registro(self)
         return self
 
 
@@ -275,9 +283,22 @@ class RegistroInstalacionPreview(BaseModel):
     motivos: list[str]
 
 
+def cobro_registro(payload):
+    subtotal = calcular_desglose(payload.detalles)['total_cop']
+    porcentaje = {'ninguno':0, 'referido':5, 'agenda':10, 'especial':15}[payload.tipo_descuento]
+    descuento = (subtotal * porcentaje + 50) // 100 if subtotal is not None else 0
+    if payload.descuento_cop not in (0, descuento):
+        raise ValueError('El descuento se calcula automáticamente según el tipo seleccionado')
+    motivo = {'ninguno':None, 'referido':'Referido (5 %)', 'agenda':'Agenda (10 %)',
+              'especial':f'Fecha especial (15 %): {payload.motivo_descuento or ""}'}[payload.tipo_descuento]
+    cobro = calcular_cobro(subtotal, descuento, motivo, payload.pagos)
+    cobro.update(tipo_descuento=payload.tipo_descuento, porcentaje_descuento=porcentaje)
+    return cobro
+
+
 def desglose_registro(payload: RegistroInstalacionCreate) -> dict:
     desglose = calcular_desglose(payload.detalles)
-    desglose['cobro'] = calcular_cobro(desglose['total_cop'], payload.descuento_cop, payload.motivo_descuento, payload.pagos)
+    desglose['cobro'] = cobro_registro(payload)
     desglose['total_cop'] = desglose['cobro']['total_cop']
     desglose['mano_obra'] = liquidar_instaladores(payload.detalles)
     desglose['garantia'] = garantia_instalacion(payload.fecha, payload.detalles)
