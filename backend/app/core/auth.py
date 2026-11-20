@@ -1,0 +1,101 @@
+from fastapi import Depends, Header, HTTPException, status
+
+from app.core.config import Settings, get_settings
+from app.core.token_verifier import (
+    TokenVerificationError,
+    VerifiedIdentity,
+    get_token_verifier,
+)
+
+
+def auth_ready(settings: Settings) -> bool:
+    return bool(
+        settings.SUPABASE_URL
+        and settings.SUPABASE_PUBLISHABLE_KEY
+        and settings.admin_emails
+    )
+
+
+AUTH_READY = auth_ready(get_settings())
+
+
+def write_enabled(settings: Settings) -> bool:
+    return bool(getattr(settings, "REGISTRO_WRITE_ENABLED", False) and auth_ready(settings))
+
+
+def require_write_access(settings: Settings = Depends(get_settings)) -> None:
+    if write_enabled(settings):
+        return
+    raise HTTPException(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        detail={
+            "code": "ESCRITURA_NO_HABILITADA",
+            "message": "El guardado estará disponible tras aplicar la migración y conectar autenticación real",
+        },
+    )
+
+
+async def get_current_identity(
+    authorization: str | None = Header(default=None),
+    verifier=Depends(get_token_verifier),
+    settings: Settings = Depends(get_settings),
+) -> VerifiedIdentity:
+    if not authorization or not authorization.lower().startswith("bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"code": "AUTENTICACION_REQUERIDA", "message": "Se requiere una sesión válida"},
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    token = authorization[7:].strip()
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"code": "AUTENTICACION_REQUERIDA", "message": "Se requiere una sesión válida"},
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if not auth_ready(settings) or verifier is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"code": "AUTENTICACION_NO_CONFIGURADA", "message": "La autenticación no está configurada"},
+        )
+    try:
+        return verifier.verify(token)
+    except TokenVerificationError as exc:
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"code": exc.code, "message": exc.message},
+            headers={"WWW-Authenticate": "Bearer"} if exc.status_code == 401 else None,
+        ) from exc
+
+
+async def require_admin_identity(
+    identity: VerifiedIdentity = Depends(get_current_identity),
+    settings: Settings = Depends(get_settings),
+) -> str:
+    if not identity.email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "CORREO_NO_VERIFICADO", "message": "El correo de la sesión no está verificado"},
+        )
+    if identity.email not in settings.admin_emails:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "USUARIO_NO_AUTORIZADO", "message": "Esta identidad no está autorizada"},
+        )
+    return identity.email
+
+
+async def get_session_status(
+    identity: VerifiedIdentity = Depends(get_current_identity),
+    settings: Settings = Depends(get_settings),
+) -> dict:
+    authorized = identity.email_verified and identity.email in settings.admin_emails
+    return {
+        "authenticated": True,
+        "email": identity.email,
+        "email_verified": identity.email_verified,
+        "authorized": authorized,
+        "authorization_code": None if authorized else (
+            "CORREO_NO_VERIFICADO" if not identity.email_verified else "USUARIO_NO_AUTORIZADO"
+        ),
+    }

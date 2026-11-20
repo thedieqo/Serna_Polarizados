@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: serna-polarizados-api
+    runtime: python
+    branch: produccion
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: FRONTEND_ORIGINS
+        sync: false
+      - key: REGISTRO_WRITE_ENABLED
+        value: 'true'
+      - key: DEBUG
+        value: 'False'

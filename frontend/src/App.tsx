@@ -1,18 +1,24 @@
 import { useState } from 'react'
-import ClientesPage from './pages/ClientesPage'
-import VehiculosPage from './pages/VehiculosPage'
+import InstalacionForm from './components/InstalacionForm'
 import InstalacionesPage from './pages/InstalacionesPage'
+import LoginScreen from './components/LoginScreen'
+import { AuthProvider, useAuth } from './context/AuthContext'
 
-type Tab = 'clientes' | 'vehiculos' | 'instalaciones'
+type Tab = 'nueva' | 'registro' | 'inventario'
 
-function App() {
-  const [activeTab, setActiveTab] = useState<Tab>('clientes')
+const navItems: Array<{ id: Tab; label: string }> = [
+  { id: 'nueva', label: 'Nueva instalación' },
+  { id: 'registro', label: 'Registro de instalaciones' },
+  { id: 'inventario', label: 'Inventario' },
+]
 
-  const navItems = [
-    { id: 'clientes' as Tab, label: 'Clientes' },
-    { id: 'vehiculos' as Tab, label: 'Vehículos' },
-    { id: 'instalaciones' as Tab, label: 'Instalaciones' },
-  ]
+function AppShell() {
+  const [activeTab, setActiveTab] = useState<Tab>('nueva')
+  const { loading, authorized, email, signOut } = useAuth()
+
+  if (loading || !authorized) {
+    return <LoginScreen />
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -27,6 +33,16 @@ function App() {
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Serna Polarizados</h1>
                 <p className="text-xs sm:text-sm text-slate-500">Sistema de Gestión de Instalaciones</p>
               </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-slate-600">{email}</span>
+              <button
+                type="button"
+                onClick={() => void signOut()}
+                className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Cerrar sesión
+              </button>
             </div>
           </div>
         </div>
@@ -53,12 +69,23 @@ function App() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {activeTab === 'clientes' && <ClientesPage />}
-        {activeTab === 'vehiculos' && <VehiculosPage />}
-        {activeTab === 'instalaciones' && <InstalacionesPage />}
+        {activeTab === 'nueva' && <InstalacionForm />}
+        {activeTab === 'registro' && <InstalacionesPage />}
+        {activeTab === 'inventario' && (
+          <div className="bg-white shadow rounded-lg p-10 text-center">
+            <h2 className="text-xl font-semibold text-gray-900">Inventario</h2>
+            <p className="text-sm text-gray-500 mt-2">Próximamente</p>
+          </div>
+        )}
       </main>
     </div>
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppShell />
+    </AuthProvider>
+  )
+}

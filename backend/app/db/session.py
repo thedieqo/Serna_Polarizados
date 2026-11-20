@@ -14,9 +14,8 @@ La conexión real se probará en tareas futuras con autorización.
 """
 
 from sqlalchemy import create_engine
-from sqlalchemy.engine import URL
+from sqlalchemy.engine import URL, make_url
 from sqlalchemy.orm import sessionmaker
-from urllib.parse import urlparse
 
 from app.core.config import settings
 
@@ -42,23 +41,26 @@ def _build_engine():
 
     # Fallback: parsear DATABASE_URL existente y reconstruir con URL.create
     try:
-        parsed = urlparse(settings.DATABASE_URL)
-        if parsed.scheme in ("postgresql", "postgres"):
-            database = parsed.path.lstrip("/") if parsed.path else None
-            url = URL.create(
-                drivername="postgresql",
-                username=parsed.username,
-                password=parsed.password,
-                host=parsed.hostname,
-                port=parsed.port,
-                database=database,
-            )
-            return create_engine(url, pool_pre_ping=True)
+        parsed = make_url(settings.DATABASE_URL)
     except Exception:
-        pass
+        raise RuntimeError(
+            "No se pudo interpretar DATABASE_URL; revise la configuración de conexión"
+        ) from None
 
-    # Último recurso: usar la URI tal como viene
-    return create_engine(settings.DATABASE_URL, pool_pre_ping=True)
+    if parsed.drivername in ("postgres", "postgresql"):
+        url = URL.create(
+            drivername="postgresql",
+            username=parsed.username,
+            password=parsed.password,
+            host=parsed.host,
+            port=parsed.port,
+            database=parsed.database,
+            query=dict(parsed.query),
+        )
+    else:
+        url = parsed
+
+    return create_engine(url, pool_pre_ping=True)
 
 
 # Crear engine de SQLAlchemy

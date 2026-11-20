@@ -48,3 +48,39 @@ class InstalacionRead(InstalacionBase):
     updated_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class InstalacionHistorialItem(BaseModel):
+    id: int
+    fecha: datetime
+    estado: str
+    tipo_servicio: str
+    cliente_documento: str
+    cliente_nombre: str
+    vehiculo_placa: str
+    vehiculo_marca: Optional[str] = None
+    vehiculo_descripcion: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class HistorialResponse(BaseModel):
+    items: list[InstalacionHistorialItem]
+    total: int
+    skip: int
+    limit: int
+    q: Optional[str] = None
+
+
+class InstalacionDetalleRead(InstalacionHistorialItem):
+    retiro_material_anterior: bool
+    observaciones: Optional[str] = None
+    tecnologias: list[str]
+    vidrios: list[str]
+    opacidades: list[str]
+    instaladores: list[str]
+    desglose_precios: Optional[dict[str, Any]] = None
+    tarifas_aplicadas: Optional[dict[str, Any]] = None
+    moneda: Optional[str] = None
+    precio_estado: Optional[str] = None
+    precio_total_cop: Optional[int] = None

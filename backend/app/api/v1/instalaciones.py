@@ -5,15 +5,124 @@ Endpoints API v1 para Instalaciones - T-008.2.6
 Endpoints para gestión de instalaciones
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
+from app.core.auth import require_admin_identity, require_write_access
+from app.core.catalogs import catalogos_response
+from app.core.config import settings
+from app.db.schema_status import get_schema_status
 from app.db.session import get_db
-from app.schemas.instalacion import InstalacionCreate, InstalacionRead
+from app.schemas.garantia import NovedadGarantiaCreate, NovedadGarantiaRead
+from app.schemas.instalacion import (
+    HistorialResponse,
+    InstalacionCreate,
+    InstalacionDetalleRead,
+    InstalacionRead,
+)
+from app.schemas.registro_instalacion import (
+    CatalogosResponse,
+    RegistroInstalacionCreate,
+    RegistroInstalacionPreview,
+    RegistroInstalacionResult,
+    SchemaStatusResponse,
+    build_preview,
+)
+from app.services.garantias import GarantiaError, guardar_novedad
+from app.services.registro_instalacion import (
+    RegistroConflictError,
+    guardar_registro,
+)
 from app import crud
 
 router = APIRouter(prefix="/instalaciones", tags=["Instalaciones"])
+
+
+@router.get("/catalogos", response_model=CatalogosResponse)
+def read_catalogos():
+    return catalogos_response()
+
+
+@router.get("/schema-status", response_model=SchemaStatusResponse)
+def read_schema_status():
+    return get_schema_status()
+
+
+@router.post("/preview", response_model=RegistroInstalacionPreview)
+def preview_registro(payload: RegistroInstalacionCreate):
+    preview = build_preview(payload)
+    estado = get_schema_status()
+    preview.guardado_habilitado = estado["save_enabled"]
+    preview.motivos = estado["reasons"]
+    return preview
+
+
+@router.post(
+    "/registro",
+    response_model=RegistroInstalacionResult,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_registro(
+    payload: RegistroInstalacionCreate,
+    db: Session = Depends(get_db),
+    administrador: str = Depends(require_admin_identity),
+):
+    require_write_access(settings)
+    try:
+        return guardar_registro(db, payload)
+    except RegistroConflictError as exc:
+        detail = {"code": exc.code, "message": exc.message}
+        if exc.fields:
+            detail["fields"] = exc.fields
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=detail) from exc
+
+
+@router.get("/historial", response_model=HistorialResponse)
+def read_historial(
+    q: Optional[str] = Query(default=None, max_length=100),
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    return crud.instalacion.get_historial(db, q=q, skip=skip, limit=limit)
+
+
+@router.get("/{instalacion_id}/detalle", response_model=InstalacionDetalleRead)
+def read_detalle(instalacion_id: int, db: Session = Depends(get_db)):
+    detalle = crud.instalacion.get_detalle(db, instalacion_id=instalacion_id)
+    if detalle is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Instalación no encontrada",
+        )
+    return detalle
+
+
+@router.post(
+    "/{instalacion_id}/novedades",
+    response_model=NovedadGarantiaRead,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_novedad_garantia(
+    instalacion_id: int,
+    payload: NovedadGarantiaCreate,
+    db: Session = Depends(get_db),
+    administrador: str = Depends(require_admin_identity),
+):
+    require_write_access(settings)
+    if payload.instalacion_id != instalacion_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La instalación del cuerpo no coincide con la ruta",
+        )
+    try:
+        return guardar_novedad(db, payload, administrador)
+    except GarantiaError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": exc.code, "message": exc.message},
+        ) from exc
 
 
 @router.post("/", response_model=InstalacionRead, status_code=status.HTTP_201_CREATED)

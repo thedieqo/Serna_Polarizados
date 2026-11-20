@@ -10,10 +10,12 @@ Conceptos para aprender:
 No se ejecutan servidores ni se instalan dependencias en esta tarea.
 """
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1 import clientes, vehiculos, instalaciones
+from app.api.v1 import auth, clientes, instalaciones, vehiculos
+from app.core.auth import require_admin_identity
+from app.core.config import settings
 
 app = FastAPI(
     title="Serna Polarizados API",
@@ -23,8 +25,9 @@ app = FastAPI(
 
 # Configuración CORS para permitir frontend local
 origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    origin.strip()
+    for origin in settings.FRONTEND_ORIGINS.split(",")
+    if origin.strip()
 ]
 
 app.add_middleware(
@@ -37,15 +40,17 @@ app.add_middleware(
 
 
 @app.get("/")
+@app.get("/health")
 def root():
     """
-    Endpoint raíz para verificar que la API está configurada
-    Explicación sencilla: Ruta de prueba
+    Comprobación de salud sin datos personales.
     """
-    return {"message": "Serna Polarizados API - T-005"}
+    return {"status": "ok", "service": "Serna Polarizados API"}
 
 
-# Registrar routers
-app.include_router(clientes.router, prefix="/api/v1")
-app.include_router(vehiculos.router, prefix="/api/v1")
-app.include_router(instalaciones.router, prefix="/api/v1")
+# La sesión solo devuelve la identidad propia; el resto de rutas exige administrador verificado.
+app.include_router(auth.router, prefix="/api/v1")
+protegido = [Depends(require_admin_identity)]
+app.include_router(clientes.router, prefix="/api/v1", dependencies=protegido)
+app.include_router(vehiculos.router, prefix="/api/v1", dependencies=protegido)
+app.include_router(instalaciones.router, prefix="/api/v1", dependencies=protegido)

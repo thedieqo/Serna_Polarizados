@@ -37,12 +37,38 @@ class Settings(BaseSettings):
     APP_VERSION: str = "0.1.0"
     DEBUG: bool = True
 
+    ADMIN_EMAILS: str = ""
+    REGISTRO_WRITE_ENABLED: bool = False
+    FRONTEND_ORIGINS: str = (
+        "http://localhost:5173,http://127.0.0.1:5173,"
+        "http://localhost:5174,http://127.0.0.1:5174"
+    )
+
+    SUPABASE_URL: Optional[str] = None
+    SUPABASE_PUBLISHABLE_KEY: Optional[str] = None
+    SUPABASE_JWKS_URL: Optional[str] = None
+    SUPABASE_JWT_ISSUER: Optional[str] = None
+    SUPABASE_JWT_AUDIENCE: str = "authenticated"
+    SUPABASE_VERIFY_MODE: str = "jwks"
+
+    @property
+    def admin_emails(self) -> frozenset[str]:
+        return frozenset(
+            email.strip().lower()
+            for email in self.ADMIN_EMAILS.split(",")
+            if email.strip()
+        )
+
     model_config = SettingsConfigDict(
         env_file=str(Path(__file__).resolve().parent.parent.parent / ".env"),
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
     )
+
+
+def get_settings() -> Settings:
+    return settings
 
 
 # Instancia única de configuración (Singleton)
