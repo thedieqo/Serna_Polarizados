@@ -77,17 +77,16 @@ class PricingTests(TestCase):
         )
         self.assertIn("par/sección", desglose["conceptos"][2]["detalle"])
 
-    def test_casos_pendientes_no_muestran_total_definitivo(self):
-        desglose = calcular_desglose(
-            [
-                FakeDetalle("parabrisas", "ultra_hd"),
-                FakeDetalle("sunroof_doble", "ceramic_ir", "delantero"),
-                FakeDetalle("sunroof_doble", "ceramic_ir", "trasero"),
-            ]
-        )
-        self.assertEqual(desglose["estado"], "pendiente")
-        self.assertIsNone(desglose["total_cop"])
-        self.assertEqual(desglose["etiqueta_total"], PRECIO_PENDIENTE)
+    def test_sunroof_sencillo_y_doble_tarifa_por_panel(self):
+        for tecnologia, precio in TARIFAS_TECNOLOGIA_COP.items():
+            with self.subTest(tecnologia=tecnologia):
+                simple = calcular_desglose([FakeDetalle('sunroof_simple', tecnologia)])
+                doble = calcular_desglose([
+                    FakeDetalle('sunroof_doble', tecnologia, 'delantero'),
+                    FakeDetalle('sunroof_doble', tecnologia, 'trasero')])
+                self.assertEqual(simple['total_cop'], precio)
+                self.assertEqual(doble['total_cop'], 2 * precio)
+                self.assertEqual(doble['estado'], 'definido')
 
     def test_preview_usa_desglose_del_backend(self):
         payload = RegistroInstalacionCreate(**registro_data())

@@ -11,7 +11,7 @@ TARIFAS_TECNOLOGIA_COP = {
     "ceramic_ir": 550000,
 }
 
-SECCION_UNICA = frozenset({"parabrisas", "luneta", "panoramico_trasero"})
+SECCION_UNICA = frozenset({"parabrisas", "luneta", "panoramico_trasero", "sunroof_simple", "sunroof_doble"})
 SECCION_PAR = frozenset({"laterales_delanteros", "laterales_traseros"})
 
 INCREMENTO_SEGURIDAD_LATERALES_COP = 100000
@@ -19,7 +19,6 @@ INCREMENTO_SEGURIDAD_LATERALES_COP = 100000
 REGLAS_PENDIENTES = (
     "Precio de un lateral individual",
     "Tratamiento de fijos",
-    "Sunroof doble",
     "Cálculo de pares con tecnologías diferentes",
 )
 
@@ -62,7 +61,7 @@ def desglose_para_detalle(detalle) -> dict:
         tarifa = TARIFAS_TECNOLOGIA_COP[tecnologia_id]
         return {
             "concepto": concepto,
-            "detalle": "1 sección confirmada",
+            "detalle": "1 panel; tarifa de un parabrisas" if vidrio_id.startswith("sunroof") else "1 sección confirmada",
             "secciones": 1,
             "tarifa_unitaria_cop": tarifa,
             "importe_cop": tarifa,

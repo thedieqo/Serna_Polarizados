@@ -188,13 +188,15 @@ class RegistroPersistenceTests(TestCase):
         for tabla in (clientes, vehiculos, instalaciones):
             self.assertEqual(self._count(tabla), 0)
 
-    def test_precio_pendiente_no_permite_guardar(self):
+    def test_sunroof_doble_pagado_guarda_dos_paneles_y_dos_honorarios(self):
         data = _payload()
-        data['pagos'] = []
-        data['detalles'] = [dict(data['detalles'][0], vidrio_id='sunroof_simple')]
-        with self.assertRaises(RegistroConflictError):
-            self._guardar(data)
-        self.assertEqual(self._count(instalaciones), 0)
+        data['pagos'] = [{'medio':'tarjeta_credito','monto_cop':700000}]
+        data['detalles'] = [dict(data['detalles'][0], vidrio_id='sunroof_doble', panel=panel)
+                            for panel in ('delantero','trasero')]
+        resultado = self._guardar(data)
+        self.assertEqual(resultado.desglose.total_cop, 700000)
+        self.assertEqual(resultado.detalles_guardados, 2)
+        self.assertEqual(sum(m['valor_cop'] for m in resultado.desglose.mano_obra),50000)
 
     def test_guarda_registro_completo_y_respeta_columnas_historicas(self):
         resultado = self._guardar()
