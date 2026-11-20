@@ -1,0 +1,5 @@
+# Entorno independiente: no instalar en backend/.venv.
+mcp==2.3.0
+SQLAlchemy>=2.0.36,<2.1
+pydantic-settings>=2.6,<3
+psycopg2-binary>=2.9.10
