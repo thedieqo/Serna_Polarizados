@@ -117,6 +117,33 @@ def get_historial(
     )
 
 
+def _detalles_vidrios(instalacion: Instalacion) -> list[dict]:
+    def valor(item, *claves):
+        return next((str(item[c]) for c in claves if item.get(c) not in (None, "")), None)
+
+    detalles = []
+    for zona in instalacion.zonas or []:
+        if not isinstance(zona, dict):
+            continue
+        vidrio = valor(zona, "vidrio", "zona", "nombre")
+        panel = valor(zona, "panel")
+        asignaciones = [
+            a for a in instalacion.asignaciones_instaladores or []
+            if isinstance(a, dict)
+            and vidrio is not None
+            and valor(a, "vidrio", "zona", "nombre") == vidrio
+            and valor(a, "panel") == panel
+        ]
+        detalles.append({
+            "vidrio": vidrio,
+            "panel": panel,
+            "tecnologia": valor(zona, "tecnologia", "tecnologia_label"),
+            "opacidad": valor(zona, "opacidad", "opacidad_aplicada"),
+            "instaladores": _valores(asignaciones, ("instalador", "instalador_label")),
+        })
+    return detalles
+
+
 def get_detalle(db: Session, instalacion_id: int) -> Optional[InstalacionDetalleRead]:
     fila = _historial_query(db).filter(Instalacion.id == instalacion_id).first()
     if fila is None:
@@ -124,6 +151,8 @@ def get_detalle(db: Session, instalacion_id: int) -> Optional[InstalacionDetalle
     datos = _base_historial(fila)
     datos.update(
         {
+            "cliente_email": fila.vehiculo.cliente.email,
+            "detalles_vidrios": _detalles_vidrios(fila),
             "retiro_material_anterior": fila.retiro_material_anterior,
             "observaciones": fila.observaciones,
             "tecnologias": _valores(fila.zonas, ("tecnologia", "tecnologia_label")),

@@ -7,9 +7,7 @@ export default function LoginScreen() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white border border-slate-200 shadow-sm rounded-lg p-8">
         <div className="flex items-center gap-3 mb-6">
-          <div className="h-10 w-10 rounded-lg bg-blue-800 flex items-center justify-center">
-            <span className="text-white font-bold text-sm">SP</span>
-          </div>
+          <img src="/serna-logo.jpg" alt="Logotipo Serna Polarizados" className="h-10 w-10 rounded-lg object-contain shrink-0" />
           <div>
             <h1 className="text-xl font-bold text-slate-900">Serna Polarizados</h1>
             <p className="text-xs text-slate-500">Acceso de administradores</p>

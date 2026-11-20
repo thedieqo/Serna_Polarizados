@@ -26,9 +26,7 @@ function AppShell() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-4 sm:py-6 gap-2">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-blue-800 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">SP</span>
-              </div>
+              <img src="/serna-logo.jpg" alt="Logotipo Serna Polarizados" className="h-10 w-10 rounded-lg object-contain shrink-0" />
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Serna Polarizados</h1>
                 <p className="text-xs sm:text-sm text-slate-500">Sistema de Gestión de Instalaciones</p>

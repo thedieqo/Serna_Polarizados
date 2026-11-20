@@ -209,6 +209,12 @@ export default function InstalacionList() {
           </div>
 
           <dl className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+            <div><dt className="font-medium text-gray-700">Nombre del propietario</dt><dd>{detalle.cliente_nombre}</dd></div>
+            <div><dt className="font-medium text-gray-700">Cédula</dt><dd>{detalle.cliente_documento}</dd></div>
+            <div><dt className="font-medium text-gray-700">Placa</dt><dd>{detalle.vehiculo_placa}</dd></div>
+            <div><dt className="font-medium text-gray-700">Correo electrónico</dt><dd>{detalle.cliente_email || 'No registrado'}</dd></div>
+            <div><dt className="font-medium text-gray-700">Servicio instalado</dt><dd>{({ polarizado: 'Polarizado', pelicula_seguridad: 'Película de seguridad', ambos: 'Polarizado y película de seguridad' } as Record<string, string>)[detalle.tipo_servicio] || detalle.tipo_servicio}</dd></div>
+            <div><dt className="font-medium text-gray-700">Valor de la instalación</dt><dd>{detalle.precio_total_cop != null ? formatearCOP(detalle.precio_total_cop) : detalle.desglose_precios ? detalle.desglose_precios.etiqueta_total : 'No registrado en esta instalación histórica'}</dd></div>
             <div><dt className="font-medium text-gray-700">Fecha</dt><dd>{formatearFecha(detalle.fecha)}</dd></div>
             <div><dt className="font-medium text-gray-700">Vehículo</dt><dd>{detalle.vehiculo_marca || '-'} {detalle.vehiculo_descripcion || ''}</dd></div>
             <div><dt className="font-medium text-gray-700">Vidrios</dt><dd>{lista(detalle.vidrios)}</dd></div>
@@ -218,6 +224,30 @@ export default function InstalacionList() {
             <div><dt className="font-medium text-gray-700">Retiro de material</dt><dd>{detalle.retiro_material_anterior ? 'Sí' : 'No'}</dd></div>
             <div><dt className="font-medium text-gray-700">Observaciones</dt><dd>{detalle.observaciones || '-'}</dd></div>
           </dl>
+
+          <div className="mt-4">
+            <h4 className="text-sm font-semibold text-gray-900">Detalles de la instalación por vidrio</h4>
+            {detalle.detalles_vidrios?.length ? (
+              <div className="overflow-x-auto mt-2">
+                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                  <thead className="bg-gray-50"><tr>
+                    {['Vidrio', 'Panel', 'Tecnología instalada', 'Opacidad', 'Instalador'].map(label => <th key={label} className="px-3 py-2 text-left font-medium text-gray-600">{label}</th>)}
+                  </tr></thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {detalle.detalles_vidrios.map((vidrio, indice) => (
+                      <tr key={indice}>
+                        <td className="px-3 py-2">{vidrio.vidrio || 'No registrado'}</td>
+                        <td className="px-3 py-2">{vidrio.panel || '—'}</td>
+                        <td className="px-3 py-2">{vidrio.tecnologia || 'No registrada'}</td>
+                        <td className="px-3 py-2">{vidrio.opacidad ? (vidrio.opacidad.includes('%') ? vidrio.opacidad : `${vidrio.opacidad} %`) : 'No registrada'}</td>
+                        <td className="px-3 py-2">{vidrio.instaladores.join(', ') || 'Sin asignación por vidrio registrada'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : <p className="mt-2 text-sm text-gray-600">Sin desglose por vidrio en este registro.</p>}
+          </div>
 
           <div className="mt-4">
             <h4 className="text-sm font-semibold text-gray-900">Desglose de precios</h4>

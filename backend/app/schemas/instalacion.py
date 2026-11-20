@@ -72,7 +72,17 @@ class HistorialResponse(BaseModel):
     q: Optional[str] = None
 
 
+class VidrioInstaladoRead(BaseModel):
+    vidrio: Optional[str] = None
+    panel: Optional[str] = None
+    tecnologia: Optional[str] = None
+    opacidad: Optional[str] = None
+    instaladores: list[str] = Field(default_factory=list)
+
+
 class InstalacionDetalleRead(InstalacionHistorialItem):
+    cliente_email: Optional[str] = None
+    detalles_vidrios: list[VidrioInstaladoRead] = Field(default_factory=list)
     retiro_material_anterior: bool
     observaciones: Optional[str] = None
     tecnologias: list[str]

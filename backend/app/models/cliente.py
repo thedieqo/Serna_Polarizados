@@ -34,6 +34,7 @@ class Cliente(Base):
     nombre = Column(String, nullable=False)
     documento = Column(String, unique=True, nullable=False, index=True)
     contacto = Column(String, nullable=False)
+    email = Column(String, nullable=True)
 
     # Relación con Vehiculo (1:N)
     # Explicación sencilla: Un cliente tiene muchos vehículos

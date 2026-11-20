@@ -126,6 +126,14 @@ export interface HistorialResponse {
 }
 
 export interface InstalacionDetalle extends HistorialInstalacion {
+  cliente_email?: string | null;
+  detalles_vidrios?: Array<{
+    vidrio: string | null;
+    panel: string | null;
+    tecnologia: string | null;
+    opacidad: string | null;
+    instaladores: string[];
+  }>;
   retiro_material_anterior: boolean;
   observaciones?: string | null;
   tecnologias: string[];

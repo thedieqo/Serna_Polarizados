@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import type { CatalogosResponse, SchemaStatusResponse } from '../types/catalogos'
+import type { CatalogosResponse } from '../types/catalogos'
 import type {
   DetalleVidrioInput,
   RegistroInstalacionCreate,
@@ -8,6 +8,7 @@ import type {
   RegistroInstalacionResult,
 } from '../types/instalacion'
 import { instalacionesService } from '../services/instalaciones'
+import { motivoBloqueoGuardado } from '../lib/estadoGuardado'
 
 function emptyDetalle(): DetalleVidrioInput {
   return {
@@ -20,8 +21,9 @@ function emptyDetalle(): DetalleVidrioInput {
 }
 
 function getErrorMessage(err: any): string {
-  const detail = err?.response?.data?.detail
+  const detail = err?.response?.data?.detail ?? err?.detail
   if (typeof detail === 'string') return detail
+  if (typeof detail?.message === 'string') return detail.message
   if (Array.isArray(detail)) {
     return detail.map((item: any) => item.msg || JSON.stringify(item)).join('; ')
   }
@@ -39,7 +41,6 @@ function formatearCOP(valor: number | null): string {
 
 export default function InstalacionForm({ onCancel }: { onCancel?: () => void }) {
   const [catalogos, setCatalogos] = useState<CatalogosResponse | null>(null)
-  const [schemaStatus, setSchemaStatus] = useState<SchemaStatusResponse | null>(null)
   const [cliente, setCliente] = useState({
     documento: '',
     nombre: '',
@@ -68,9 +69,8 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
     let activo = true
 
     const cargar = async () => {
-      const [catalogosResult, schemaResult] = await Promise.allSettled([
+      const [catalogosResult] = await Promise.allSettled([
         instalacionesService.getCatalogos(),
-        instalacionesService.getSchemaStatus(),
       ])
 
       if (!activo) return
@@ -91,10 +91,6 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
         setError(getErrorMessage(catalogosResult.reason))
       }
 
-      if (schemaResult.status === 'fulfilled') {
-        setSchemaStatus(schemaResult.value)
-      }
-
       setLoadingCatalogos(false)
     }
 
@@ -112,7 +108,7 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
       catalogos.instaladores.length &&
       catalogos.tipos_factura.length,
   )
-  const campoDeshabilitado = !catalogosListos || loadingPreview
+  const campoDeshabilitado = !catalogosListos || loadingPreview || guardando
 
   const panelesPara = (vidrioId: string): string[] =>
     catalogos?.vidrios.find((vidrio) => vidrio.id === vidrioId)?.paneles || []
@@ -168,6 +164,11 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
+    if (guardandoRef.current || loadingPreview) return
+    if (resultado) {
+      setError('Esta instalación ya está guardada. Modifica el formulario para registrar otra.')
+      return
+    }
     setError(null)
     limpiarResumen()
 
@@ -192,8 +193,7 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
     if (
       guardandoRef.current ||
       resultado ||
-      !preview?.guardado_habilitado ||
-      !schemaStatus?.save_enabled
+      Boolean(razonesGuardado)
     ) {
       return
     }
@@ -210,7 +210,7 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
     }
   }
 
-  const razonesGuardado = schemaStatus?.reasons.join(', ') || 'validación pendiente'
+  const razonesGuardado = motivoBloqueoGuardado(preview, loadingPreview, guardando, Boolean(resultado))
 
   return (
     <div className="bg-white shadow rounded-lg p-6">
@@ -242,13 +242,8 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
         </div>
       )}
 
-      {schemaStatus && !schemaStatus.save_enabled && (
-        <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
-          <p className="text-sm text-amber-800">Guardado deshabilitado: {razonesGuardado}</p>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+      <form onSubmit={handleSubmit} onChange={limpiarResumen} className="mt-6 space-y-6">
+        <fieldset disabled={loadingPreview || guardando} className="space-y-6">
         <section>
           <h4 className="text-sm font-semibold text-gray-900 mb-3">Propietario</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -493,7 +488,7 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
         <div className="flex flex-col sm:flex-row gap-3 border-t border-gray-200 pt-6">
           <button
             type="submit"
-            disabled={campoDeshabilitado}
+            disabled={campoDeshabilitado || Boolean(resultado)}
             className="inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 disabled:opacity-50"
           >
             {loadingPreview ? 'Generando resumen...' : 'Generar resumen'}
@@ -501,18 +496,19 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
           <button
             type="button"
             onClick={handleGuardar}
-            disabled={
-              !preview?.guardado_habilitado ||
-              !schemaStatus?.save_enabled ||
-              guardando ||
-              Boolean(resultado)
-            }
-            title={razonesGuardado}
+            disabled={Boolean(razonesGuardado)}
+            title={razonesGuardado || 'Guardar instalación'}
+            aria-describedby="estado-guardado"
             className="inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {guardando ? 'Guardando...' : resultado ? 'Guardado' : 'Guardar instalación'}
           </button>
         </div>
+        <p id="estado-guardado" role="status" className="text-sm text-slate-600">
+          {razonesGuardado || 'Resumen validado. Puedes guardar la instalación.'}
+        </p>
+        {error && <p role="alert" className="text-sm text-red-800">{error}</p>}
+        </fieldset>
       </form>
 
       {preview && (
@@ -598,9 +594,7 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
             <p>Tecnologías: {preview.tecnologias_utilizadas.join(', ')}</p>
             <p>
               Guardado:{' '}
-              {preview.guardado_habilitado
-                ? 'habilitado'
-                : `deshabilitado (${preview.motivos.join(', ')})`}
+              {razonesGuardado || 'habilitado'}
             </p>
           </div>
         </div>

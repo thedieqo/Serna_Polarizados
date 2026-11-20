@@ -24,7 +24,7 @@ class HistorialTests(TestCase):
 
         with self.Session() as db:
             cliente_uno = Cliente(
-                nombre="Propietario Uno", documento="CC-111", contacto="3001111111"
+                nombre="Propietario Uno", documento="CC-111", contacto="3001111111", email="prueba@example.com"
             )
             cliente_dos = Cliente(
                 nombre="Propietario Dos", documento="CC-222", contacto="3002222222"
@@ -119,6 +119,40 @@ class HistorialTests(TestCase):
         self.assertEqual(detalle.opacidades, ["5 %"])
         self.assertEqual(detalle.instaladores, ["Joseth Mora"])
         self.assertIsNone(detalle.desglose_precios)
+
+    def test_detalle_incluye_correo_y_no_inventa_datos_historicos(self):
+        with self.Session() as db:
+            detalle = read_detalle(instalacion_id=1, db=db)
+        self.assertEqual(detalle.cliente_email, "prueba@example.com")
+        self.assertIsNone(detalle.precio_total_cop)
+        self.assertIsNone(detalle.detalles_vidrios[0].tecnologia)
+        self.assertEqual(detalle.detalles_vidrios[0].instaladores, ["Daniel"])
+
+    def test_detalle_conserva_asociacion_de_panel_tecnologia_opacidad_e_instalador(self):
+        with self.Session() as db:
+            fila = db.get(Instalacion, 2)
+            fila.zonas = [
+                {"vidrio": "Techo", "panel": "Delantero", "tecnologia": "Ultra HD", "opacidad": "5 %"},
+                {"vidrio": "Techo", "panel": "Trasero", "tecnologia": "Ceramic IR", "opacidad": "20 %"},
+            ]
+            fila.asignaciones_instaladores = [
+                {"vidrio": "Techo", "panel": "Trasero", "instalador": "Daniel"},
+                {"vidrio": "Techo", "panel": "Delantero", "instalador": "Joseth"},
+            ]
+            fila.precio_total_cop = 500000
+            db.commit()
+            detalle = read_detalle(instalacion_id=2, db=db)
+        self.assertEqual(detalle.precio_total_cop, 500000)
+        self.assertEqual(detalle.detalles_vidrios[0].instaladores, ["Joseth"])
+        self.assertEqual(detalle.detalles_vidrios[1].instaladores, ["Daniel"])
+        self.assertEqual(detalle.detalles_vidrios[1].tecnologia, "Ceramic IR")
+        self.assertEqual(detalle.detalles_vidrios[1].opacidad, "20 %")
+
+    def test_asignacion_sin_vidrio_no_se_atribuye_arbitrariamente(self):
+        with self.Session() as db:
+            detalle = read_detalle(instalacion_id=2, db=db)
+        self.assertEqual(detalle.detalles_vidrios[0].instaladores, [])
+        self.assertEqual(detalle.instaladores, ["Joseth Mora"])
 
 
 if __name__ == "__main__":
