@@ -155,18 +155,7 @@ def create_novedad_garantia(
 
 @router.post("/", response_model=InstalacionRead, status_code=status.HTTP_201_CREATED)
 def create_instalacion(instalacion: InstalacionCreate, db: Session = Depends(get_db)):
-    try:
-        return crud.instalacion.create_instalacion(db=db, instalacion=instalacion)
-    except ValueError as e:
-        if str(e) == "Vehículo no existe":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="El vehículo asociado no existe",
-            )
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Error en los datos de la instalación",
-        )
+    raise HTTPException(status_code=410, detail='Utiliza el formulario de nueva instalación para registrar pagos y consumo de material.')
 
 
 @router.get("/", response_model=List[InstalacionRead])

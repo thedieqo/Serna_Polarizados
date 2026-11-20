@@ -7,7 +7,7 @@ from sqlalchemy.schema import CreateSchema
 from app.db.session import engine
 from app.core.sedes import SEDES
 
-TABLES = ['clientes','vehiculos','instalaciones','instalacion_detalles','instalacion_novedades',
+TABLES = ['inventario', 'inventario_movimientos', 'clientes','vehiculos','instalaciones','instalacion_detalles','instalacion_novedades',
           'catalogo_instaladores','catalogo_opacidades_polarizado','catalogo_tecnologias_polarizado',
           'catalogo_tipos_factura','catalogo_vidrios_polarizado']
 

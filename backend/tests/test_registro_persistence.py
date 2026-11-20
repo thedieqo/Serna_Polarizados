@@ -78,6 +78,8 @@ def _payload() -> dict:
 
 
 def _seed_catalogos(db: Session) -> None:
+    from app.services.inventario import inicializar
+    inicializar(db)
     db.execute(
         insert(catalogo_tecnologias_polarizado),
         [
@@ -156,6 +158,22 @@ class RegistroPersistenceTests(TestCase):
     def _count(self, tabla) -> int:
         with self.Session() as db:
             return db.execute(select(func.count()).select_from(tabla)).scalar_one()
+
+    def test_material_insuficiente_revierte_instalacion_y_cliente(self):
+        from sqlalchemy import update
+        from app.db.registro_tables import inventario, inventario_movimientos
+        with self.Session() as db:
+            db.execute(update(inventario).where(inventario.c.sku == 'ultra_hd:35:polarizado').values(disponible_cm=1))
+            db.commit()
+        with self.assertRaises(RegistroConflictError) as exc:
+            self._guardar()
+        self.assertEqual(exc.exception.code, 'MATERIAL_INSUFICIENTE')
+        self.assertEqual(self._count(instalaciones), 0)
+        self.assertEqual(self._count(clientes), 0)
+        self.assertEqual(self._count(vehiculos), 0)
+        with self.Session() as db:
+            self.assertEqual(db.execute(select(inventario.c.disponible_cm).where(inventario.c.sku == 'ceramic_ir:20:polarizado')).scalar_one(), 20000)
+            self.assertEqual(db.execute(select(func.count()).select_from(inventario_movimientos).where(inventario_movimientos.c.instalacion_id.is_not(None))).scalar_one(), 0)
 
     def test_pago_y_detalle_se_conservan_al_volver_a_consultar(self):
         from app.crud.instalacion import get_detalle

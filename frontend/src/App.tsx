@@ -1,4 +1,5 @@
 import { sedes } from './lib/sedes'
+import InventarioPage from './pages/InventarioPage'
 import { useState } from 'react'
 import InstalacionForm from './components/InstalacionForm'
 import VentasPage from './pages/VentasPage'
@@ -73,12 +74,7 @@ function AppShell() {
         {activeTab === 'nueva' && <InstalacionForm />}
         {activeTab === 'ventas' && <VentasPage />}
         {activeTab === 'registro' && <InstalacionesPage />}
-        {activeTab === 'inventario' && (
-          <div className="bg-white shadow rounded-lg p-10 text-center">
-            <h2 className="text-xl font-semibold text-gray-900">Inventario</h2>
-            <p className="text-sm text-gray-500 mt-2">Próximamente</p>
-          </div>
-        )}
+        {activeTab === 'inventario' && <InventarioPage />}
       </main>
     </div>
   )

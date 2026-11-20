@@ -1,4 +1,6 @@
 EXPECTED_TABLES = (
+    "inventario",
+    "inventario_movimientos",
     "catalogo_instaladores",
     "catalogo_opacidades_polarizado",
     "catalogo_tecnologias_polarizado",

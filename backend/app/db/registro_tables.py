@@ -165,3 +165,24 @@ Index(
     instalacion_novedades.c.instalacion_id,
     instalacion_novedades.c.fecha_atencion.desc(),
 )
+
+from sqlalchemy import CheckConstraint, UniqueConstraint
+inventario = Table(
+    'inventario', metadata,
+    Column('sku', String, primary_key=True),
+    Column('tecnologia_id', String, nullable=False),
+    Column('opacidad_id', String, nullable=False),
+    Column('material', String, nullable=False),
+    Column('disponible_cm', Integer, nullable=False),
+    CheckConstraint('disponible_cm >= 0', name='inventario_no_negativo'),
+)
+inventario_movimientos = Table(
+    'inventario_movimientos', metadata,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('sku', String, ForeignKey('inventario.sku'), nullable=False),
+    Column('instalacion_id', Integer, ForeignKey('instalaciones.id'), nullable=True),
+    Column('cantidad_cm', Integer, nullable=False),
+    Column('motivo', String, nullable=False),
+    Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
+    UniqueConstraint('instalacion_id', 'sku', name='inventario_consumo_instalacion_unico'),
+)
