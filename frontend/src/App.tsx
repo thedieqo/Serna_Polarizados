@@ -1,3 +1,4 @@
+import { sedes } from './lib/sedes'
 import { useState } from 'react'
 import InstalacionForm from './components/InstalacionForm'
 import VentasPage from './pages/VentasPage'
@@ -31,7 +32,7 @@ function AppShell() {
               <img src="/serna-logo.jpg" alt="Logotipo Serna Polarizados" className="h-10 w-10 rounded-lg object-contain shrink-0" />
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Serna Polarizados</h1>
-                <p className="text-xs sm:text-sm text-slate-500">Sistema de Gestión de Instalaciones</p>
+                <p className="text-xs sm:text-sm text-slate-500">{sedes.find(s => s.id === sessionStorage.getItem('serna-sede'))?.nombre} · Gestión de instalaciones</p>
               </div>
             </div>
             <div className="flex items-center gap-3">

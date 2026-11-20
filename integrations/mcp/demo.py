@@ -28,7 +28,7 @@ async def demostrar(real, carpeta):
         print('Herramientas descubiertas:', ', '.join(t.name for t in herramientas.tools))
         ahora = datetime.now(ZoneInfo('America/Bogota'))
         llamadas = [('consultar_ventas_mes', {'anio':ahora.year,'mes':ahora.month}),
-                    ('buscar_instalaciones', {'limite':3})]
+                    ('buscar_instalaciones', {'limite':3}), ('auditar_instalaciones', {})]
         if not real: llamadas.append(('consultar_instalacion', {'codigo':'SP1'}))
         for nombre, argumentos in llamadas:
             resultado = await cliente.call_tool(nombre, argumentos)
@@ -36,6 +36,9 @@ async def demostrar(real, carpeta):
             if resultado.is_error:
                 raise RuntimeError('La consulta MCP falló. Revisa la configuración local.')
             print(json.dumps(resultado.structured_content,ensure_ascii=False,indent=2,default=str))
+            if nombre == 'auditar_instalaciones':
+                from report import mostrar
+                mostrar(resultado.structured_content)
     print('\nDemostración completada: no se modificaron datos reales.')
 
 

@@ -31,7 +31,7 @@ class MCPTests(unittest.IsolatedAsyncioTestCase):
     async def test_descubrimiento_mcp_y_herramientas_solo_lectura(self):
         async with self.cliente() as client:
             herramientas=(await client.list_tools()).tools
-            self.assertEqual({t.name for t in herramientas},{'consultar_ventas_mes','buscar_instalaciones','consultar_instalacion'})
+            self.assertEqual({t.name for t in herramientas},{'consultar_ventas_mes','buscar_instalaciones','consultar_instalacion','auditar_instalaciones'})
             self.assertTrue(all(t.annotations.read_only_hint for t in herramientas))
             self.assertTrue(client.protocol_version)
             recursos=await client.list_resources()

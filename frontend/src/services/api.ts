@@ -15,6 +15,7 @@ const api = axios.create({
 })
 
 api.interceptors.request.use(async (config) => {
+  config.headers['X-Sede'] = sessionStorage.getItem('serna-sede') || ''
   if (supabase) {
     const { data } = await supabase.auth.getSession()
     if (data.session?.access_token) {

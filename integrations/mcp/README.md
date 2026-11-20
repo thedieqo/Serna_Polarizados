@@ -90,3 +90,15 @@ Las pruebas verifican descubrimiento y llamadas MCP, resultados financieros, omi
 “Implementamos MCP, un protocolo que permite que un cliente descubra y use herramientas de nuestro sistema. Nuestro servidor ofrece consultas de ventas mensuales, búsqueda de instalaciones y detalle de una instalación. En la demostración, el cliente negocia la conexión, descubre esas herramientas y recibe resultados estructurados. Reutilizamos las reglas del negocio y ejecutamos las consultas en modo de solo lectura. La integración funciona en un módulo independiente, por lo que la plataforma web sigue operando normalmente.”
 
 Implementación basada en el [SDK oficial de Python](https://github.com/modelcontextprotocol/python-sdk) y su [documentación del cliente](https://py.sdk.modelcontextprotocol.io/client/).
+
+## Auditoría y skill de cierre
+
+Ahora hay cuatro herramientas: `auditar_instalaciones` revisa una página de hasta 200 instalaciones. Comprueba suma de pagos frente al valor final, total pagado, comisión del 2 %, saldo cero y datos faltantes. Devuelve códigos SP, fecha de revisión y hallazgos; `siguiente_desplazamiento` permite continuar. No certifica seguridad ni registra quién modificó los datos.
+
+La demostración abre un informe HTML local en el navegador. El informe conserva una fotografía de esa revisión; no se actualiza automáticamente. Para regenerarlo ejecuta de nuevo `demo.command`. Por defecto son datos ficticios. `demo.py --real` revisa los datos configurados en el equipo. Los informes se guardan en la carpeta temporal del sistema, no en GitHub.
+
+El skill `.agents/skills/cierre-serna/SKILL.md` contiene el procedimiento para preparar el cierre con MCP. En un cliente Codex que abra este repositorio puede invocarse como `$cierre-serna`; requiere conectar el servidor MCP siguiendo la configuración anterior. El skill es una guía para el asistente: no corre solo ni es una pestaña de la web. La demo ejecuta las herramientas y la auditoría; no simula la ejecución de un asistente siguiendo el skill.
+
+### Datos reales por sede
+
+Configura `SERNA_MCP_SEDE=el-carmen` (o el identificador de otra sede) para ejecutar `demo.py --real` o el servidor local. Es obligatorio; la demo ficticia no lo requiere. El informe indica la sede consultada. Consulta `docs/SEDES.md` para el alcance del acceso local.

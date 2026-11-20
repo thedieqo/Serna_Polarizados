@@ -1,6 +1,7 @@
 from fastapi import Depends, Header, HTTPException, status
 
 from app.core.config import Settings, get_settings
+from app.core.sedes import SEDES, permitidas
 from app.core.token_verifier import (
     TokenVerificationError,
     VerifiedIdentity,
@@ -77,7 +78,7 @@ async def require_admin_identity(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": "CORREO_NO_VERIFICADO", "message": "El correo de la sesión no está verificado"},
         )
-    if identity.email not in settings.admin_emails:
+    if not permitidas(identity.email, settings):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": "USUARIO_NO_AUTORIZADO", "message": "Esta identidad no está autorizada"},
@@ -86,10 +87,11 @@ async def require_admin_identity(
 
 
 async def get_session_status(
+    x_sede: str | None = Header(default=None),
     identity: VerifiedIdentity = Depends(get_current_identity),
     settings: Settings = Depends(get_settings),
 ) -> dict:
-    authorized = identity.email_verified and identity.email in settings.admin_emails
+    authorized = identity.email_verified and x_sede in permitidas(identity.email, settings)
     return {
         "authenticated": True,
         "email": identity.email,
@@ -99,3 +101,15 @@ async def get_session_status(
             "CORREO_NO_VERIFICADO" if not identity.email_verified else "USUARIO_NO_AUTORIZADO"
         ),
     }
+
+
+async def require_sede(
+    x_sede: str | None = Header(default=None),
+    identity: VerifiedIdentity = Depends(get_current_identity),
+    settings: Settings = Depends(get_settings),
+) -> str:
+    if x_sede not in SEDES:
+        raise HTTPException(400, detail={'code':'SEDE_REQUERIDA', 'message':'Selecciona una sede válida'})
+    if not identity.email_verified or x_sede not in permitidas(identity.email, settings):
+        raise HTTPException(403, detail={'code':'SEDE_NO_AUTORIZADA', 'message':'Tu correo no tiene acceso a esta sede'})
+    return x_sede

@@ -71,11 +71,16 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 # Dependencia para obtener sesión de BD en FastAPI
-def get_db():
+from fastapi import Depends
+from app.core.auth import require_sede
+from app.core.sedes import SEDES
+
+
+def get_db(sede: str = Depends(require_sede)):
     """
     Generador de sesión para usar como dependencia en FastAPI
     """
-    db = SessionLocal()
+    db = SessionLocal(bind=engine.execution_options(schema_translate_map={None: SEDES[sede]['schema']}))
     try:
         yield db
     finally:

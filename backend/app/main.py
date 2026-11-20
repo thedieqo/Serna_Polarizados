@@ -14,7 +14,7 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import auth, clientes, instalaciones, vehiculos
-from app.core.auth import require_admin_identity
+from app.core.auth import require_admin_identity, require_sede
 from app.core.config import settings
 
 app = FastAPI(
@@ -35,7 +35,7 @@ app.add_middleware(
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_headers=["Content-Type", "Authorization", "X-Sede"],
 )
 
 
@@ -50,7 +50,7 @@ def root():
 
 # La sesión solo devuelve la identidad propia; el resto de rutas exige administrador verificado.
 app.include_router(auth.router, prefix="/api/v1")
-protegido = [Depends(require_admin_identity)]
+protegido = [Depends(require_admin_identity), Depends(require_sede)]
 app.include_router(clientes.router, prefix="/api/v1", dependencies=protegido)
 app.include_router(vehiculos.router, prefix="/api/v1", dependencies=protegido)
 app.include_router(instalaciones.router, prefix="/api/v1", dependencies=protegido)

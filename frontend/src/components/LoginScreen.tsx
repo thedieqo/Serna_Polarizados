@@ -1,7 +1,11 @@
+import { useState } from 'react'
+import { sedes } from '../lib/sedes'
 import { useAuth } from '../context/AuthContext'
 
 export default function LoginScreen() {
   const { loading, configured, session, email, authorized, error, signIn, signOut } = useAuth()
+
+  const [sede, setSede] = useState(sessionStorage.getItem('serna-sede') || '')
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
@@ -39,6 +43,13 @@ export default function LoginScreen() {
               </div>
             )}
 
+            <label className="block text-sm mb-4">Sede
+              <select className="mt-2 w-full rounded-md border p-3 bg-white" value={sede}
+                onChange={e => { setSede(e.target.value); sessionStorage.setItem('serna-sede', e.target.value); if (session) window.location.reload() }}>
+                <option value="">Selecciona tu sede</option>
+                {sedes.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
+              </select>
+            </label>
             {session ? (
               <div className="space-y-4">
                 <p className="text-sm text-slate-600">
@@ -56,7 +67,7 @@ export default function LoginScreen() {
               <button
                 type="button"
                 onClick={() => void signIn()}
-                disabled={!configured}
+                disabled={!configured || !sede}
                 className="w-full rounded-md bg-blue-800 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-900 disabled:cursor-not-allowed disabled:bg-slate-400"
               >
                 Continuar con Google

@@ -28,7 +28,7 @@ _engine = None
 
 
 def fuente():
-    return 'demostración: datos ficticios' if os.getenv('SERNA_MCP_MODE') == 'demo' else 'base de datos real de Serna Polarizados'
+    return 'demostración: datos ficticios' if os.getenv('SERNA_MCP_MODE') == 'demo' else 'base real de Serna: ' + os.getenv('SERNA_MCP_SEDE', 'sin sede')
 
 
 @contextmanager
@@ -44,7 +44,11 @@ def lectura():
             _engine = create_engine('sqlite:///' + str(Path(ruta).resolve()))
         else:
             from app.db.session import engine
-            _engine = engine
+            from app.core.sedes import SEDES
+            sede = os.getenv('SERNA_MCP_SEDE')
+            if sede not in SEDES:
+                raise ToolError('Configura SERNA_MCP_SEDE con una sede válida antes de consultar datos reales.')
+            _engine = engine.execution_options(schema_translate_map={None: SEDES[sede]['schema']})
     try:
         with Session(_engine) as db:
             if _engine.dialect.name == 'postgresql':
@@ -112,6 +116,25 @@ def consultar_instalacion(codigo: Annotated[str, Field(pattern=r'^SP[1-9][0-9]{0
             'pagos':[{'medio':p['medio'],'monto_cop':p['monto_cop']} for p in cobro.get('pagos',[])],
             'comision_administrador_cop':cobro.get('comision_admin_cop'),
             'mano_obra':desglose.get('mano_obra',[]), 'garantia':desglose.get('garantia')}
+
+
+@mcp.tool(annotations=READ_ONLY, structured_output=True)
+def auditar_instalaciones(limite: Annotated[int, Field(ge=1, le=200)] = 100,
+                         desplazamiento: Annotated[int, Field(ge=0, le=10000)] = 0) -> dict[str, Any]:
+    """Revisa una página de instalaciones: pagos completos, comisión del 2% y datos financieros faltantes. No corrige registros."""
+    from audit import revisar
+    with lectura() as db:
+        historial = get_historial(db, q='', skip=desplazamiento, limit=limite)
+        hallazgos = []
+        for item in historial.items:
+            detalle = get_detalle(db, item.id)
+            hallazgos.extend(revisar(f'SP{item.id}', detalle.precio_total_cop, detalle.desglose_precios))
+    from datetime import datetime, timezone
+    return {'fuente': fuente(), 'ejecutado_en': datetime.now(timezone.utc).isoformat(),
+            'alcance': 'Consistencia financiera; no es auditoría de ciberseguridad ni bitácora de cambios.',
+            'revisados': len(historial.items), 'total_registros': historial.total,
+            'siguiente_desplazamiento': desplazamiento + len(historial.items) if desplazamiento + len(historial.items) < historial.total else None,
+            'hallazgos': hallazgos, 'cantidad_hallazgos': len(hallazgos)}
 
 
 @mcp.resource('serna://ayuda')
