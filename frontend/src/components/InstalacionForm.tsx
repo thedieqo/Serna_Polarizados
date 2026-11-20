@@ -29,6 +29,7 @@ function getErrorMessage(err: any): string {
   if (typeof detail === 'string') return detail
   if (typeof detail?.message === 'string') return detail.message
   if (Array.isArray(detail)) {
+    if (detail.some((item: any) => item.type === 'extra_forbidden')) return 'El servidor no reconoce los campos nuevos de este formulario. Actualiza el servidor y vuelve a generar el resumen. Tus datos siguen en pantalla.'
     return detail.map((item: any) => item.msg || JSON.stringify(item)).join('; ')
   }
   return err?.message || 'Error inesperado'

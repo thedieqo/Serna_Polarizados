@@ -111,7 +111,9 @@ def read_referido(placa: str, db: Session = Depends(get_db)):
 @router.get("/ventas/resumen")
 def read_ventas(anio: int = Query(ge=2000, le=2100), mes: int = Query(ge=1, le=12), corte: str = Query(default="mes", pattern="^(mes|primera|segunda)$"), db: Session = Depends(get_db)):
     from app.services.ventas import resumen_ventas
-    return resumen_ventas(db, anio, mes, corte)
+    reporte = resumen_ventas(db, anio, mes, corte)
+    reporte['acumulado_mes'] = resumen_ventas(db, anio, mes, 'mes', acumulado=True)
+    return reporte
 
 
 @router.get("/{instalacion_id}/detalle", response_model=InstalacionDetalleRead)

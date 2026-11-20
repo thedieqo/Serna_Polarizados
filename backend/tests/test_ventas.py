@@ -54,6 +54,23 @@ class VentasTests(TestCase):
         for key in mes['totales']:
             self.assertEqual(mes['totales'][key], primera['totales'][key]+segunda['totales'][key])
 
+    def test_ganado_mensual_excluye_futuras_anuladas_y_otros_meses(self):
+        for fecha in ['2026-10-31T15:00:00', '2026-11-01T15:00:00',
+                      '2026-11-16T15:00:00', '2026-11-20T16:00:00',
+                      '2026-11-20T18:00:00', '2026-11-30T15:00:00']:
+            self.venta(fecha)
+        self.venta('2026-11-18T15:00:00', estado='anulado')
+        ahora = datetime(2026,11,20,17,0,tzinfo=timezone.utc)
+        acumulado = resumen_ventas(self.db,2026,11,'mes',acumulado=True,ahora=ahora)
+        self.assertEqual(acumulado['cantidad'],3)
+        self.assertEqual(acumulado['totales']['ventas_cop'],600000)
+        self.assertEqual(acumulado['totales']['administrador_cop'],12000)
+        self.assertEqual(acumulado['instaladores'][0]['total_cop'],75000)
+        self.assertEqual(acumulado['instaladores'][0]['instalaciones'],3)
+        self.assertEqual(acumulado['actualizado_en'],ahora)
+        completo = resumen_ventas(self.db,2026,11,'mes')
+        self.assertEqual(completo['cantidad'],5)
+
     def test_fin_de_mes_31_y_febrero_bisiesto(self):
         self.venta('2026-08-01T04:59:59')
         self.assertEqual(resumen_ventas(self.db,2026,7,'segunda')['cantidad'],1)
