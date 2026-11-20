@@ -2,7 +2,7 @@ from app.core.catalogs import label_for
 
 PRECIO_PENDIENTE = "Precio pendiente de definir"
 MONEDA = "COP"
-VERSION_TARIFAS = "2026-11-18"
+VERSION_TARIFAS = "2026-11-20"
 
 TARIFAS_TECNOLOGIA_COP = {
     "high_definition_premium": 250000,
@@ -17,7 +17,6 @@ SECCION_PAR = frozenset({"laterales_delanteros", "laterales_traseros"})
 INCREMENTO_SEGURIDAD_LATERALES_COP = 100000
 
 REGLAS_PENDIENTES = (
-    "Unidad del incremento de película de seguridad en laterales",
     "Precio de un lateral individual",
     "Tratamiento de fijos",
     "Sunroof doble",
@@ -38,7 +37,7 @@ def catalogo_tarifas() -> dict:
             for tecnologia_id, precio in TARIFAS_TECNOLOGIA_COP.items()
         ],
         "incremento_seguridad_laterales_cop": INCREMENTO_SEGURIDAD_LATERALES_COP,
-        "incremento_seguridad_laterales_unidad": PRECIO_PENDIENTE,
+        "incremento_seguridad_laterales_unidad": "Por pareja; $200.000 por los cuatro laterales",
         "reglas_pendientes": list(REGLAS_PENDIENTES),
     }
 
@@ -99,7 +98,25 @@ def desglose_para_detalle(detalle) -> dict:
 
 
 def calcular_desglose(detalles) -> dict:
-    conceptos = [desglose_para_detalle(detalle) for detalle in detalles]
+    conceptos = []
+    agrupados = []
+    for detalle in detalles:
+        item = desglose_para_detalle(detalle)
+        if getattr(detalle, 'pelicula_seguridad', False):
+            item['importe_cop'] += INCREMENTO_SEGURIDAD_LATERALES_COP
+            item['detalle'] += '; película de seguridad +$100.000 por pareja'
+        if getattr(detalle, 'grupo', None) == 'cuatro_laterales':
+            agrupados.append(item)
+        else:
+            conceptos.append(item)
+    if agrupados:
+        conceptos.append({
+            'concepto': 'Cuatro laterales',
+            'detalle': ' + '.join(f"{i['concepto']} ({i['detalle']})" for i in agrupados),
+            'secciones': 2, 'tarifa_unitaria_cop': None,
+            'importe_cop': sum(i['importe_cop'] for i in agrupados),
+            'estado': 'definido', 'motivo_pendiente': None,
+        })
     pendiente = any(item["estado"] == "pendiente" for item in conceptos)
     total = None if pendiente else sum(item["importe_cop"] for item in conceptos)
     return {
@@ -112,7 +129,7 @@ def calcular_desglose(detalles) -> dict:
     }
 
 
-def tarifas_aplicadas(desglose: dict) -> dict:
+def tarifas_aplicadas(desglose: dict, detalles=None) -> dict:
     usadas = sorted(
         {
             item["tarifa_unitaria_cop"]
@@ -123,12 +140,12 @@ def tarifas_aplicadas(desglose: dict) -> dict:
     por_tecnologia = {
         tecnologia_id: precio
         for tecnologia_id, precio in TARIFAS_TECNOLOGIA_COP.items()
-        if precio in usadas
+        if ((tecnologia_id in {d.tecnologia_id for d in detalles}) if detalles is not None else (precio in usadas))
     }
     return {
         "moneda": MONEDA,
         "version": VERSION_TARIFAS,
         "por_tecnologia": por_tecnologia,
         "incremento_seguridad_laterales_cop": INCREMENTO_SEGURIDAD_LATERALES_COP,
-        "incremento_seguridad_laterales_unidad": PRECIO_PENDIENTE,
+        "incremento_seguridad_laterales_unidad": "Por pareja; $200.000 por los cuatro laterales",
     }

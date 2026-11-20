@@ -44,6 +44,8 @@ export interface DetalleVidrioInput {
   tecnologia_id: string;
   opacidad_id: string;
   instalador_id: string;
+  pelicula_seguridad?: boolean;
+  grupo?: "cuatro_laterales" | null;
 }
 
 export interface RegistroInstalacionCreate {
@@ -55,6 +57,9 @@ export interface RegistroInstalacionCreate {
   observaciones?: string | null;
   estado?: 'programado';
   detalles: DetalleVidrioInput[];
+  descuento_cop?: number;
+  motivo_descuento?: string | null;
+  pagos?: PagoInput[];
 }
 
 export interface DesgloseConcepto {
@@ -67,7 +72,25 @@ export interface DesgloseConcepto {
   motivo_pendiente: string | null;
 }
 
+export interface PagoInput {
+  medio: string;
+  monto_cop: number;
+  referencia?: string | null;
+}
+export interface Cobro {
+  subtotal_cop: number | null;
+  descuento_cop: number;
+  motivo_descuento: string | null;
+  total_cop: number | null;
+  pagado_cop: number;
+  saldo_cop: number | null;
+  comision_admin_cop: number | null;
+  pagos: PagoInput[];
+}
 export interface DesglosePrecios {
+  cobro?: Cobro | null;
+  mano_obra?: Array<{ instalador: string; vidrio: string; panel: string | null; valor_cop: number }>;
+  garantia?: { anos: number; desde: string; hasta: string } | null;
   moneda: 'COP';
   version: string;
   estado: 'definido' | 'pendiente';
@@ -127,6 +150,8 @@ export interface HistorialResponse {
 
 export interface InstalacionDetalle extends HistorialInstalacion {
   cliente_email?: string | null;
+  cliente_telefono?: string | null;
+  tipo_factura?: string | null;
   detalles_vidrios?: Array<{
     vidrio: string | null;
     panel: string | null;

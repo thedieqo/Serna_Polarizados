@@ -152,6 +152,8 @@ def get_detalle(db: Session, instalacion_id: int) -> Optional[InstalacionDetalle
     datos.update(
         {
             "cliente_email": fila.vehiculo.cliente.email,
+            "cliente_telefono": fila.vehiculo.cliente.telefono or fila.vehiculo.cliente.contacto,
+            "tipo_factura": fila.tipo_factura,
             "detalles_vidrios": _detalles_vidrios(fila),
             "retiro_material_anterior": fila.retiro_material_anterior,
             "observaciones": fila.observaciones,

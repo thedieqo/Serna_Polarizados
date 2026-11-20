@@ -7,6 +7,7 @@ import type {
   RegistroInstalacionPreview,
   RegistroInstalacionResult,
 } from '../types/instalacion'
+import CobroResumen, { mediosPago } from './CobroResumen'
 import { instalacionesService } from '../services/instalaciones'
 import { motivoBloqueoGuardado } from '../lib/estadoGuardado'
 
@@ -52,6 +53,10 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
     marca: '',
     descripcion: '',
   })
+  const [pagos, setPagos] = useState([{ medio: 'efectivo', monto: '', referencia: '' }])
+  const [aplicaDescuento, setAplicaDescuento] = useState(false)
+  const [descuento, setDescuento] = useState('')
+  const [motivoDescuento, setMotivoDescuento] = useState('')
   const [tipoFactura, setTipoFactura] = useState('normal')
   const [fecha, setFecha] = useState('')
   const [retiroMaterial, setRetiroMaterial] = useState(false)
@@ -152,14 +157,16 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
       descripcion: vehiculo.descripcion || null,
     },
     tipo_factura: tipoFactura,
+    descuento_cop: aplicaDescuento ? Number(descuento || 0) : 0,
+    motivo_descuento: aplicaDescuento ? motivoDescuento : null,
+    pagos: pagos.filter(p => Number(p.monto) > 0).map(p => ({ medio: p.medio, monto_cop: Number(p.monto), referencia: p.referencia || null })),
     fecha: fecha ? new Date(fecha).toISOString() : null,
     retiro_material_anterior: retiroMaterial,
     observaciones: observaciones || null,
     estado: 'programado',
-    detalles: detalles.map((detalle) => ({
-      ...detalle,
-      panel: detalle.panel || null,
-    })),
+    detalles: detalles.flatMap<DetalleVidrioInput>((detalle) => detalle.vidrio_id === 'cuatro_laterales'
+      ? ['laterales_delanteros', 'laterales_traseros'].map(vidrio => ({ ...detalle, vidrio_id: vidrio, panel: null, grupo: 'cuatro_laterales' as const }))
+      : [{ ...detalle, panel: detalle.panel || null, grupo: null }]),
   })
 
   const handleSubmit = async (event: FormEvent) => {
@@ -282,21 +289,7 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Tipo de factura</label>
-              <select
-                required
-                disabled={campoDeshabilitado}
-                value={tipoFactura}
-                onChange={(e) => setTipoFactura(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border disabled:bg-gray-100"
-              >
-                <option value="">Seleccionar tipo</option>
-                {catalogos?.tipos_factura.map((tipo) => (
-                  <option key={tipo.id} value={tipo.id}>{tipo.label}</option>
-                ))}
-              </select>
-            </div>
+
           </div>
         </section>
 
@@ -358,10 +351,11 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
                     required
                     disabled={campoDeshabilitado}
                     value={detalle.vidrio_id}
-                    onChange={(e) => updateDetalle(indice, { vidrio_id: e.target.value, panel: null })}
+                    onChange={(e) => updateDetalle(indice, { vidrio_id: e.target.value, panel: null, pelicula_seguridad: false })}
                     className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border disabled:bg-gray-100"
                   >
                     <option value="">Vidrio</option>
+                    <option value="cuatro_laterales">Cuatro laterales</option>
                     {catalogos?.vidrios.map((vidrio) => (
                       <option key={vidrio.id} value={vidrio.id}>{vidrio.label}</option>
                     ))}
@@ -381,7 +375,11 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
                       ))}
                     </select>
                   ) : (
-                    <div className="hidden md:block" />
+                    ['cuatro_laterales', 'laterales_delanteros', 'laterales_traseros'].includes(detalle.vidrio_id) ?
+                    <select aria-label="Película de seguridad" value={detalle.pelicula_seguridad ? 'si' : 'no'} onChange={e => updateDetalle(indice, { pelicula_seguridad: e.target.value === 'si' })} className="rounded-md border border-gray-300 px-3 py-2 text-sm">
+                      <option value="no">Sin película de seguridad</option>
+                      <option value="si">Con película (+{detalle.vidrio_id === 'cuatro_laterales' ? '$200.000' : '$100.000'})</option>
+                    </select> : <div className="hidden md:block" />
                   )}
 
                   <select
@@ -483,6 +481,40 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
             />
           </div>
+        </section>
+
+        <section className="border-t border-gray-200 pt-6 space-y-4">
+          <h4 className="text-sm font-semibold text-gray-900">Pago y facturación</h4>
+          <p className="text-sm text-gray-500">Combina medios de pago. La suma debe cubrir el valor final para guardar. Los importes se registran en pesos colombianos.</p>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={aplicaDescuento} onChange={e => setAplicaDescuento(e.target.checked)} />Aplicar descuento</label>
+          {aplicaDescuento && <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label className="text-sm">Descuento en COP<input type="number" min="0" step="1" required value={descuento} onChange={e => setDescuento(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" /></label>
+            <label className="text-sm">Motivo del descuento<input required value={motivoDescuento} onChange={e => setMotivoDescuento(e.target.value)} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" maxLength={250} /></label>
+          </div>}
+          {pagos.map((p, i) => <div key={i} className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <label className="text-sm">Medio de pago<select value={p.medio} onChange={e => setPagos(prev => prev.map((v, n) => n === i ? { ...v, medio: e.target.value } : v))} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2">{Object.entries(mediosPago).map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select></label>
+            <label className="text-sm">Monto en COP<input type="number" min="0" max="1000000000" step="1" value={p.monto} onChange={e => setPagos(prev => prev.map((v, n) => n === i ? { ...v, monto: e.target.value } : v))} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" /></label>
+            <label className="text-sm">Referencia (opcional)<input maxLength={120} value={p.referencia} onChange={e => setPagos(prev => prev.map((v, n) => n === i ? { ...v, referencia: e.target.value } : v))} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2" /></label>
+            <button type="button" disabled={pagos.length === 1} onClick={() => { setPagos(prev => prev.filter((_, n) => n !== i)); limpiarResumen() }} className="text-sm text-red-800 disabled:opacity-50">Quitar pago</button>
+          </div>)}
+          <button type="button" disabled={pagos.length >= 20} onClick={() => { setPagos(prev => [...prev, { medio: 'transferencia', monto: '', referencia: '' }]); limpiarResumen() }} className="text-sm text-blue-700">+ Agregar medio de pago</button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Tipo de factura</label>
+              <select
+                required
+                disabled={campoDeshabilitado}
+                value={tipoFactura}
+                onChange={(e) => setTipoFactura(e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border disabled:bg-gray-100"
+              >
+                <option value="">Seleccionar tipo</option>
+                {catalogos?.tipos_factura.map((tipo) => (
+                  <option key={tipo.id} value={tipo.id}>{tipo.label}</option>
+                ))}
+              </select>
+            </div>
+          <p className="text-xs text-gray-500">Se registra el tipo de factura solicitado. La emisión electrónica se realiza por fuera de esta aplicación.</p>
+          <p className="text-sm text-slate-600">Garantía de las tecnologías instaladas: 15 años desde la fecha de instalación.</p>
         </section>
 
         <div className="flex flex-col sm:flex-row gap-3 border-t border-gray-200 pt-6">
@@ -590,6 +622,7 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
             </p>
           </div>
 
+          <CobroResumen desglose={preview.desglose} />
           <div className="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-md text-sm text-slate-700">
             <p>Tecnologías: {preview.tecnologias_utilizadas.join(', ')}</p>
             <p>
@@ -604,7 +637,7 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
         <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-md text-sm text-green-900">
           <p className="font-semibold">Instalación guardada correctamente.</p>
           <p>
-            ID de instalación: {resultado.instalacion_id} · Vidrios guardados:{' '}
+            Código de instalación: SP{resultado.instalacion_id} · Vidrios guardados:{' '}
             {resultado.detalles_guardados}
           </p>
           <p>

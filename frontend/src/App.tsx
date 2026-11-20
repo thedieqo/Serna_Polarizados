@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import InstalacionForm from './components/InstalacionForm'
+import VentasPage from './pages/VentasPage'
 import InstalacionesPage from './pages/InstalacionesPage'
 import LoginScreen from './components/LoginScreen'
 import { AuthProvider, useAuth } from './context/AuthContext'
 
-type Tab = 'nueva' | 'registro' | 'inventario'
+type Tab = 'nueva' | 'registro' | 'inventario' | 'ventas'
 
 const navItems: Array<{ id: Tab; label: string }> = [
   { id: 'nueva', label: 'Nueva instalación' },
   { id: 'registro', label: 'Registro de instalaciones' },
+  { id: 'ventas', label: 'Ventas y liquidación' },
   { id: 'inventario', label: 'Inventario' },
 ]
 
@@ -68,6 +70,7 @@ function AppShell() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {activeTab === 'nueva' && <InstalacionForm />}
+        {activeTab === 'ventas' && <VentasPage />}
         {activeTab === 'registro' && <InstalacionesPage />}
         {activeTab === 'inventario' && (
           <div className="bg-white shadow rounded-lg p-10 text-center">

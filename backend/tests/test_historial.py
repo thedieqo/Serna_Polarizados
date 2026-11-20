@@ -140,8 +140,15 @@ class HistorialTests(TestCase):
                 {"vidrio": "Techo", "panel": "Delantero", "instalador": "Joseth"},
             ]
             fila.precio_total_cop = 500000
+            fila.vehiculo.marca = "Mazda"
+            fila.vehiculo.cliente.telefono = "3001234567"
+            fila.tipo_factura = "electronica"
             db.commit()
+            db.expunge_all()
             detalle = read_detalle(instalacion_id=2, db=db)
+        self.assertEqual(detalle.vehiculo_marca, "Mazda")
+        self.assertEqual(detalle.cliente_telefono, "3001234567")
+        self.assertEqual(detalle.tipo_factura, "electronica")
         self.assertEqual(detalle.precio_total_cop, 500000)
         self.assertEqual(detalle.detalles_vidrios[0].instaladores, ["Joseth"])
         self.assertEqual(detalle.detalles_vidrios[1].instaladores, ["Daniel"])

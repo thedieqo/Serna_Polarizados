@@ -50,6 +50,7 @@ def _payload() -> dict:
         "retiro_material_anterior": True,
         "observaciones": "Instalación de prueba",
         "estado": "programado",
+        "pagos": [{"medio": "efectivo", "monto_cop": 1450000}],
         "detalles": [
             {
                 "vidrio_id": "parabrisas",
@@ -59,15 +60,15 @@ def _payload() -> dict:
                 "instalador_id": "daniel_mira",
             },
             {
-                "vidrio_id": "sunroof_doble",
-                "panel": "delantero",
+                "vidrio_id": "laterales_delanteros",
+                "panel": None,
                 "tecnologia_id": "ceramic_ir",
                 "opacidad_id": "20",
                 "instalador_id": "joseth_mora",
             },
             {
-                "vidrio_id": "sunroof_doble",
-                "panel": "trasero",
+                "vidrio_id": "laterales_traseros",
+                "panel": None,
                 "tecnologia_id": "ceramic_ir",
                 "opacidad_id": "20",
                 "instalador_id": "joseth_mora",
@@ -113,6 +114,8 @@ def _seed_catalogos(db: Session) -> None:
         [
             {"id": "parabrisas", "label": "Parabrisas"},
             {"id": "sunroof_doble", "label": "Techo solar doble"},
+            {"id": "laterales_delanteros", "label": "Laterales delanteros"},
+            {"id": "laterales_traseros", "label": "Laterales traseros"},
         ],
     )
     db.commit()
@@ -154,14 +157,53 @@ class RegistroPersistenceTests(TestCase):
         with self.Session() as db:
             return db.execute(select(func.count()).select_from(tabla)).scalar_one()
 
+    def test_pago_y_detalle_se_conservan_al_volver_a_consultar(self):
+        from app.crud.instalacion import get_detalle
+        from app.services.ventas import resumen_ventas
+        data = _payload()
+        data.update(fecha='2026-11-20T15:00:00Z', descuento_cop=50000,
+                    motivo_descuento='Convenio', pagos=[
+                        {'medio':'efectivo','monto_cop':400000},
+                        {'medio':'transferencia','monto_cop':1000000}])
+        resultado = self._guardar(data)
+        with self.Session() as db:
+            detalle = get_detalle(db, resultado.instalacion_id)
+            self.assertEqual(detalle.cliente_telefono, '3001234567')
+            self.assertEqual(detalle.cliente_email, 'prop@example.com')
+            self.assertEqual(detalle.vehiculo_marca, 'Toyota')
+            self.assertEqual(detalle.precio_total_cop, 1400000)
+            self.assertEqual(detalle.desglose_precios['cobro']['pagado_cop'], 1400000)
+            self.assertEqual(detalle.desglose_precios['garantia']['anos'], 15)
+            reporte = resumen_ventas(db, 2026, 11, 'segunda')
+            self.assertEqual(reporte['totales']['ventas_cop'], 1400000)
+            self.assertEqual(reporte['totales']['administrador_cop'], 28000)
+            self.assertEqual(reporte['totales']['instaladores_cop'], 75000)
+
+    def test_pago_parcial_no_crea_cliente_vehiculo_ni_instalacion(self):
+        data = _payload()
+        data['pagos'][0]['monto_cop'] = 100000
+        with self.assertRaises(RegistroConflictError) as error:
+            self._guardar(data)
+        self.assertEqual(error.exception.code, 'PAGO_INCOMPLETO')
+        for tabla in (clientes, vehiculos, instalaciones):
+            self.assertEqual(self._count(tabla), 0)
+
+    def test_precio_pendiente_no_permite_guardar(self):
+        data = _payload()
+        data['pagos'] = []
+        data['detalles'] = [dict(data['detalles'][0], vidrio_id='sunroof_simple')]
+        with self.assertRaises(RegistroConflictError):
+            self._guardar(data)
+        self.assertEqual(self._count(instalaciones), 0)
+
     def test_guarda_registro_completo_y_respeta_columnas_historicas(self):
         resultado = self._guardar()
 
         self.assertEqual(resultado.cliente_reutilizado, False)
         self.assertEqual(resultado.vehiculo_reutilizado, False)
         self.assertEqual(resultado.detalles_guardados, 3)
-        self.assertEqual(resultado.desglose.estado, "pendiente")
-        self.assertIsNone(resultado.desglose.total_cop)
+        self.assertEqual(resultado.desglose.estado, "definido")
+        self.assertEqual(resultado.desglose.total_cop, 1450000)
         self.assertEqual(self._count(clientes), 1)
         self.assertEqual(self._count(vehiculos), 1)
         self.assertEqual(self._count(instalaciones), 1)
@@ -173,17 +215,17 @@ class RegistroPersistenceTests(TestCase):
             self.assertEqual(instalacion["tipo_factura"], "electronica")
             self.assertEqual(instalacion["estado"], "programado")
             self.assertEqual(instalacion["zonas"][0]["vidrio"], "Parabrisas")
-            self.assertEqual(instalacion["zonas"][2]["panel"], "Trasero")
+            self.assertEqual(instalacion["zonas"][2]["vidrio"], "Laterales traseros")
             self.assertEqual(
                 instalacion["asignaciones_instaladores"][0]["instalador"],
                 "Daniel Mira",
             )
             self.assertEqual(instalacion["moneda"], "COP")
-            self.assertEqual(instalacion["precio_estado"], "pendiente")
-            self.assertIsNone(instalacion["precio_total_cop"])
-            self.assertEqual(instalacion["desglose_precios"]["estado"], "pendiente")
+            self.assertEqual(instalacion["precio_estado"], "definido")
+            self.assertEqual(instalacion["precio_total_cop"], 1450000)
+            self.assertEqual(instalacion["desglose_precios"]["estado"], "definido")
             self.assertEqual(
-                instalacion["tarifas_aplicadas"]["version"], "2026-11-18"
+                instalacion["tarifas_aplicadas"]["version"], "2026-11-20"
             )
 
     def test_reutiliza_cliente_y_vehiculo_por_documento_y_placa(self):

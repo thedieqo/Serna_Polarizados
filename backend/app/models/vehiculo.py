@@ -32,6 +32,7 @@ class Vehiculo(Base):
     # Campos del vehículo
     placa = Column(String, unique=True, nullable=False, index=True)
     descripcion = Column(String, nullable=True)
+    marca = Column(String, nullable=True)
 
     # Clave foránea hacia Cliente
     # Explicación sencilla: Esta columna guarda el id del cliente al que pertenece

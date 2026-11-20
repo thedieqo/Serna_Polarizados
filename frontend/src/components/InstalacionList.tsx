@@ -1,3 +1,4 @@
+import CobroResumen from './CobroResumen'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { instalacionesService } from '../services/instalaciones'
@@ -129,7 +130,7 @@ export default function InstalacionList() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Documento</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Placa</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Servicio</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Detalle</th>
                 </tr>
@@ -137,12 +138,12 @@ export default function InstalacionList() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {(historial?.items || []).map((instalacion) => (
                   <tr key={instalacion.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm text-gray-900">{instalacion.id}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">SP{instalacion.id}</td>
                     <td className="px-4 py-3 text-sm text-gray-900">{instalacion.cliente_nombre}</td>
                     <td className="px-4 py-3 text-sm text-gray-900">{instalacion.cliente_documento}</td>
                     <td className="px-4 py-3 text-sm text-gray-900">{instalacion.vehiculo_placa}</td>
                     <td className="px-4 py-3 text-sm text-gray-900">{formatearFecha(instalacion.fecha)}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{instalacion.estado}</td>
+
                     <td className="px-4 py-3 text-sm text-gray-900">{instalacion.tipo_servicio}</td>
                     <td className="px-4 py-3 text-sm">
                       <button
@@ -194,7 +195,7 @@ export default function InstalacionList() {
         <div className="border-t border-gray-200 p-4 bg-slate-50">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Detalle de instalación #{detalle.id}</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Detalle de instalación SP{detalle.id}</h3>
               <p className="text-sm text-gray-500 mt-1">
                 {detalle.cliente_nombre} · {detalle.cliente_documento} · {detalle.vehiculo_placa}
               </p>
@@ -213,10 +214,13 @@ export default function InstalacionList() {
             <div><dt className="font-medium text-gray-700">Cédula</dt><dd>{detalle.cliente_documento}</dd></div>
             <div><dt className="font-medium text-gray-700">Placa</dt><dd>{detalle.vehiculo_placa}</dd></div>
             <div><dt className="font-medium text-gray-700">Correo electrónico</dt><dd>{detalle.cliente_email || 'No registrado'}</dd></div>
+            <div><dt className="font-medium text-gray-700">Teléfono</dt><dd>{detalle.cliente_telefono || 'No registrado'}</dd></div>
+            <div><dt className="font-medium text-gray-700">Descripción / color</dt><dd>{detalle.vehiculo_descripcion || 'No registrado'}</dd></div>
+            <div><dt className="font-medium text-gray-700">Tipo de factura</dt><dd>{detalle.tipo_factura === 'electronica' ? 'Electrónica' : detalle.tipo_factura === 'normal' ? 'Normal' : 'No registrado'}</dd></div>
             <div><dt className="font-medium text-gray-700">Servicio instalado</dt><dd>{({ polarizado: 'Polarizado', pelicula_seguridad: 'Película de seguridad', ambos: 'Polarizado y película de seguridad' } as Record<string, string>)[detalle.tipo_servicio] || detalle.tipo_servicio}</dd></div>
             <div><dt className="font-medium text-gray-700">Valor de la instalación</dt><dd>{detalle.precio_total_cop != null ? formatearCOP(detalle.precio_total_cop) : detalle.desglose_precios ? detalle.desglose_precios.etiqueta_total : 'No registrado en esta instalación histórica'}</dd></div>
             <div><dt className="font-medium text-gray-700">Fecha</dt><dd>{formatearFecha(detalle.fecha)}</dd></div>
-            <div><dt className="font-medium text-gray-700">Vehículo</dt><dd>{detalle.vehiculo_marca || '-'} {detalle.vehiculo_descripcion || ''}</dd></div>
+            <div><dt className="font-medium text-gray-700">Vehículo</dt><dd>{detalle.vehiculo_marca || 'Marca no registrada'}</dd></div>
             <div><dt className="font-medium text-gray-700">Vidrios</dt><dd>{lista(detalle.vidrios)}</dd></div>
             <div><dt className="font-medium text-gray-700">Tecnologías</dt><dd>{lista(detalle.tecnologias)}</dd></div>
             <div><dt className="font-medium text-gray-700">Opacidades</dt><dd>{lista(detalle.opacidades)}</dd></div>
@@ -249,6 +253,7 @@ export default function InstalacionList() {
             ) : <p className="mt-2 text-sm text-gray-600">Sin desglose por vidrio en este registro.</p>}
           </div>
 
+          <CobroResumen desglose={detalle.desglose_precios} />
           <div className="mt-4">
             <h4 className="text-sm font-semibold text-gray-900">Desglose de precios</h4>
             {detalle.desglose_precios ? (

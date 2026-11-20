@@ -26,6 +26,13 @@ class Instalacion(Base):
     observaciones = Column(Text, nullable=True)
     estado = Column(String, nullable=False)  # programado | en_proceso | finalizado | anulado
 
+    tipo_factura = Column(String, nullable=True)
+    desglose_precios = Column(JSON, nullable=True)
+    tarifas_aplicadas = Column(JSON, nullable=True)
+    moneda = Column(String, nullable=True)
+    precio_estado = Column(String, nullable=True)
+    precio_total_cop = Column(Integer, nullable=True)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

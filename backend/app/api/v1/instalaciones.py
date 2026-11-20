@@ -54,7 +54,14 @@ def preview_registro(payload: RegistroInstalacionCreate):
     preview = build_preview(payload)
     estado = get_schema_status()
     preview.guardado_habilitado = estado["save_enabled"]
-    preview.motivos = estado["reasons"]
+    preview.motivos = list(estado["reasons"])
+    cobro = preview.desglose.cobro
+    if cobro['total_cop'] is None:
+        preview.guardado_habilitado = False
+        preview.motivos.append('Hay precios pendientes de definir')
+    elif cobro['saldo_cop'] != 0:
+        preview.guardado_habilitado = False
+        preview.motivos.append(f"Falta registrar ${cobro['saldo_cop']:,} COP en medios de pago")
     return preview
 
 
@@ -86,6 +93,12 @@ def read_historial(
     db: Session = Depends(get_db),
 ):
     return crud.instalacion.get_historial(db, q=q, skip=skip, limit=limit)
+
+
+@router.get("/ventas/resumen")
+def read_ventas(anio: int = Query(ge=2000, le=2100), mes: int = Query(ge=1, le=12), corte: str = Query(default="mes", pattern="^(mes|primera|segunda)$"), db: Session = Depends(get_db)):
+    from app.services.ventas import resumen_ventas
+    return resumen_ventas(db, anio, mes, corte)
 
 
 @router.get("/{instalacion_id}/detalle", response_model=InstalacionDetalleRead)

@@ -3,7 +3,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.catalogs import label_for
-from app.core.pricing import calcular_desglose, tarifas_aplicadas
+from datetime import datetime
+from app.core.cobros import BOGOTA
+from app.core.pricing import tarifas_aplicadas
 from app.db.registro_tables import (
     clientes,
     instalacion_detalles,
@@ -12,6 +14,7 @@ from app.db.registro_tables import (
 )
 from app.schemas.registro_instalacion import (
     DetalleVidrioInput,
+    desglose_registro,
     RegistroInstalacionCreate,
     RegistroInstalacionResult,
 )
@@ -130,7 +133,7 @@ def _zonas(detalles: list[DetalleVidrioInput]) -> list[dict[str, str | None]]:
         {
             "vidrio": label_for("vidrios", detalle.vidrio_id),
             "panel": detalle.panel.title() if detalle.panel else None,
-            "tecnologia": label_for("tecnologias", detalle.tecnologia_id),
+            "tecnologia": label_for("tecnologias", detalle.tecnologia_id) + (" + película de seguridad" if detalle.pelicula_seguridad else ""),
             "opacidad": label_for("opacidades", detalle.opacidad_id),
         }
         for detalle in detalles
@@ -151,10 +154,10 @@ def _asignaciones(detalles: list[DetalleVidrioInput]) -> list[dict[str, str | No
 def _insert_instalacion(
     db: Session, payload: RegistroInstalacionCreate, vehiculo_id: int
 ) -> tuple[int, dict]:
-    desglose = calcular_desglose(payload.detalles)
+    desglose = desglose_registro(payload)
     valores = {
         "vehiculo_id": vehiculo_id,
-        "tipo_servicio": "polarizado",
+        "tipo_servicio": "ambos" if any(d.pelicula_seguridad for d in payload.detalles) else "polarizado",
         "opacidad": None,
         "zonas": _zonas(payload.detalles),
         "asignaciones_instaladores": _asignaciones(payload.detalles),
@@ -163,7 +166,7 @@ def _insert_instalacion(
         "estado": payload.estado,
         "tipo_factura": payload.tipo_factura,
         "desglose_precios": desglose,
-        "tarifas_aplicadas": tarifas_aplicadas(desglose),
+        "tarifas_aplicadas": tarifas_aplicadas(desglose, payload.detalles),
         "moneda": desglose["moneda"],
         "precio_estado": desglose["estado"],
         "precio_total_cop": desglose["total_cop"],
@@ -222,6 +225,11 @@ def _map_integrity_error(exc: IntegrityError) -> RegistroConflictError:
 def guardar_registro(
     db: Session, payload: RegistroInstalacionCreate
 ) -> RegistroInstalacionResult:
+    if payload.fecha is None:
+        payload = payload.model_copy(update={'fecha': datetime.now(BOGOTA)})
+    cobro = desglose_registro(payload)['cobro']
+    if cobro['total_cop'] is None or cobro['saldo_cop'] != 0:
+        raise RegistroConflictError('PAGO_INCOMPLETO', 'Registra el pago completo del valor final antes de guardar')
     try:
         cliente_id, cliente_reutilizado = _resolve_cliente(db, payload)
         vehiculo_id, vehiculo_reutilizado = _resolve_vehiculo(db, payload, cliente_id)

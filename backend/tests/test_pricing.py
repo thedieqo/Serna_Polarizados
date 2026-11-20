@@ -57,7 +57,7 @@ class PricingTests(TestCase):
         self.assertEqual(tarifas["moneda"], "COP")
         self.assertEqual(tarifas["incremento_seguridad_laterales_cop"], 100000)
         self.assertEqual(
-            tarifas["incremento_seguridad_laterales_unidad"], PRECIO_PENDIENTE
+            tarifas["incremento_seguridad_laterales_unidad"], "Por pareja; $200.000 por los cuatro laterales"
         )
 
     def test_seciones_confirmadas_y_pares_no_se_cobran_por_vidrio(self):

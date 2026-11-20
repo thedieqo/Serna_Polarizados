@@ -82,6 +82,8 @@ class VidrioInstaladoRead(BaseModel):
 
 class InstalacionDetalleRead(InstalacionHistorialItem):
     cliente_email: Optional[str] = None
+    cliente_telefono: Optional[str] = None
+    tipo_factura: Optional[str] = None
     detalles_vidrios: list[VidrioInstaladoRead] = Field(default_factory=list)
     retiro_material_anterior: bool
     observaciones: Optional[str] = None

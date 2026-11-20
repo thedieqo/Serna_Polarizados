@@ -13,6 +13,8 @@ from app.core.catalogs import (
     label_for,
 )
 from app.core.pricing import calcular_desglose, catalogo_tarifas
+from app.core.liquidacion import liquidar_instaladores
+from app.core.cobros import calcular_cobro, garantia_instalacion
 
 
 class InputModel(BaseModel):
@@ -77,6 +79,15 @@ class DesglosePrecios(BaseModel):
     total_cop: int | None = None
     etiqueta_total: str
     conceptos: list[DesgloseConcepto]
+    mano_obra: list[dict[str, Any]] = Field(default_factory=list)
+    cobro: dict[str, Any] | None = None
+    garantia: dict[str, Any] | None = None
+
+
+class PagoInput(InputModel):
+    medio: Literal['efectivo', 'transferencia', 'tarjeta_credito', 'sistecredito', 'addi']
+    monto_cop: int = Field(gt=0, le=1000000000, strict=True)
+    referencia: str | None = Field(default=None, max_length=120)
 
 
 class RegistroInstalacionResult(BaseModel):
@@ -140,6 +151,8 @@ class DetalleVidrioInput(InputModel):
     tecnologia_id: str
     opacidad_id: str
     instalador_id: str
+    pelicula_seguridad: bool = False
+    grupo: Literal["cuatro_laterales"] | None = None
 
     @field_validator("vidrio_id")
     @classmethod
@@ -180,6 +193,10 @@ class DetalleVidrioInput(InputModel):
 
     @model_validator(mode="after")
     def validate_panel_for_vidrio(self):
+        if self.pelicula_seguridad and self.vidrio_id not in ('laterales_delanteros', 'laterales_traseros'):
+            raise ValueError('La película de seguridad adicional solo aplica a laterales')
+        if self.grupo and self.vidrio_id not in ('laterales_delanteros', 'laterales_traseros'):
+            raise ValueError('El grupo cuatro laterales solo admite parejas laterales')
         if self.vidrio_id == "sunroof_doble" and self.panel is None:
             raise ValueError("El techo solar doble requiere panel delantero y trasero")
         if self.vidrio_id != "sunroof_doble" and self.panel is not None:
@@ -196,6 +213,9 @@ class RegistroInstalacionCreate(InputModel):
     observaciones: str | None = None
     estado: Literal["programado"] = "programado"
     detalles: list[DetalleVidrioInput] = Field(min_length=1)
+    descuento_cop: int = Field(default=0, ge=0, le=1000000000, strict=True)
+    motivo_descuento: str | None = Field(default=None, max_length=250)
+    pagos: list[PagoInput] = Field(default_factory=list, max_length=20)
 
     @field_validator("tipo_factura")
     @classmethod
@@ -220,6 +240,9 @@ class RegistroInstalacionCreate(InputModel):
                 raise ValueError("No se puede repetir un vidrio o panel")
             vistos.add(clave)
 
+        agrupados = [d for d in self.detalles if d.grupo == 'cuatro_laterales']
+        if agrupados and {d.vidrio_id for d in agrupados} != {'laterales_delanteros', 'laterales_traseros'}:
+            raise ValueError('El grupo cuatro laterales requiere ambas parejas')
         paneles_solares = {
             detalle.panel
             for detalle in self.detalles
@@ -228,6 +251,7 @@ class RegistroInstalacionCreate(InputModel):
         if paneles_solares and paneles_solares != set(PANELES_SUNROOF_DOBLE):
             raise ValueError("El techo solar doble requiere panel delantero y trasero")
 
+        calcular_cobro(calcular_desglose(self.detalles)['total_cop'], self.descuento_cop, self.motivo_descuento, self.pagos)
         return self
 
 
@@ -249,6 +273,15 @@ class RegistroInstalacionPreview(BaseModel):
     desglose: DesglosePrecios
     guardado_habilitado: bool = False
     motivos: list[str]
+
+
+def desglose_registro(payload: RegistroInstalacionCreate) -> dict:
+    desglose = calcular_desglose(payload.detalles)
+    desglose['cobro'] = calcular_cobro(desglose['total_cop'], payload.descuento_cop, payload.motivo_descuento, payload.pagos)
+    desglose['total_cop'] = desglose['cobro']['total_cop']
+    desglose['mano_obra'] = liquidar_instaladores(payload.detalles)
+    desglose['garantia'] = garantia_instalacion(payload.fecha, payload.detalles)
+    return desglose
 
 
 def build_preview(payload: RegistroInstalacionCreate) -> RegistroInstalacionPreview:
@@ -277,12 +310,12 @@ def build_preview(payload: RegistroInstalacionCreate) -> RegistroInstalacionPrev
             RegistroVidrioResumen(
                 vidrio=label_for("vidrios", item.vidrio_id),
                 panel=item.panel.title() if item.panel else None,
-                tecnologia=label_for("tecnologias", item.tecnologia_id),
+                tecnologia=label_for("tecnologias", item.tecnologia_id) + (" + película de seguridad" if item.pelicula_seguridad else ""),
                 opacidad=label_for("opacidades", item.opacidad_id),
                 instalador=label_for("instaladores", item.instalador_id),
             )
             for item in payload.detalles
         ],
-        desglose=calcular_desglose(payload.detalles),
+        desglose=desglose_registro(payload),
         motivos=["GUARDADO_PENDIENTE_DE_ESQUEMA_Y_AUTENTICACION"],
     )
