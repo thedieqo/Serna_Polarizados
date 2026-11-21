@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data } = await api.get<SessionStatus>('/auth/session')
       setEmail(data.email)
-      setAuthorized(data.authorized)
+      setAuthorized(data.authorized && Boolean(data.rol))
       setRol(data.rol)
       setError(data.authorized ? null : (data.authorization_code || 'USUARIO_NO_AUTORIZADO'))
     } catch (err) {
