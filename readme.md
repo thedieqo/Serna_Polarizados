@@ -300,3 +300,13 @@ Tarifas: lateral individual $12.500; custodia $6.250; parabrisas camión/buseta 
 Antes de desplegar este cambio, ejecutar desde `backend`: `.venv/bin/python scripts/preparar_trabajo.py`. La migración aditiva prepara las once sedes, activa RLS en las tablas nuevas y conserva movimientos anteriores. Las instalaciones anteriores no admiten reconfirmación en el nuevo flujo para evitar consumo duplicado. No se asigna automáticamente el correo de pruebas a ningún trabajador: Gerencia debe crear su asociación explícita.
 
 Validación: 104 pruebas backend y compilación frontend; comprobación concurrente en un esquema PostgreSQL temporal con dos instaladores sobre el mismo vidrio, resultado de un único consumo y remuneración. El esquema temporal se eliminó al terminar. La validación visual local utilizó datos ficticios y no creó instalaciones reales.
+
+## 16. Entrada por correo verificado (21 de noviembre de 2026)
+
+La portada muestra el logotipo, la bienvenida y un único botón de Google. Los perfiles de Gerencia, Dueño, Administración e Instalador no se muestran antes de iniciar sesión.
+
+`GET /api/v1/auth/accesos` exige identidad verificada y devuelve únicamente los perfiles y sedes de esa cuenta. Un único perfil/sede abre su interfaz automáticamente; si existen varias opciones se solicita la selección después del ingreso. Cada petición de negocio sigue validando perfil y sede en el servidor. Modificar el navegador no otorga permisos.
+
+La cuenta temporal de pruebas conserva sus cuatro perfiles; el resto conserva sus autorizaciones existentes. Los instaladores se descubren por las aprobaciones activas de Gerencia en cada sede. La selección se recuerda durante la sesión y se elimina al cambiar de cuenta.
+
+Validación: 111 pruebas backend, compilación frontend y cinco recorridos de interfaz con identidad/API simuladas (bienvenida sin roles públicos, entrada automática, selección de sede, selección de perfil y rechazo sin permisos). La revisión visual mediante captura automática no se completó por una restricción del entorno.

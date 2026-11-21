@@ -139,3 +139,30 @@ def acceso_sede(email, rol, sede, settings):
     from app.services.trabajo import trabajador
     with SessionLocal(bind=engine.execution_options(schema_translate_map={None:SEDES[sede]['schema']})) as db:
         return trabajador(db, email) is not None
+
+
+def sedes_instalador_aprobado(email):
+    """Descubre asignaciones sin confiar en roles o sedes enviados por el navegador."""
+    from sqlalchemy import MetaData, literal, select, union_all
+    from app.db.session import engine
+    from app.db.registro_tables import trabajadores
+    consultas = []
+    for sede, config in SEDES.items():
+        tabla = trabajadores.to_metadata(MetaData(), schema=config['schema'])
+        consultas.append(select(literal(sede).label('sede')).where(tabla.c.email == email.lower(), tabla.c.activo.is_(True)))
+    with engine.connect() as conn:
+        return list(conn.execute(union_all(*consultas)).scalars())
+
+
+def accesos_identidad(identity, settings):
+    if not identity.email_verified:
+        return {'email':identity.email, 'perfiles':[], 'authorization_code':'CORREO_NO_VERIFICADO'}
+    from app.core.roles import ROLES, CUENTA_PRUEBAS
+    permisos = {rol:sedes_perfil(identity.email, rol, settings) for rol in ROLES}
+    # La cuenta temporal conserva sus permisos explícitos; las demás requieren aprobación real.
+    if identity.email.lower() != CUENTA_PRUEBAS:
+        permisos['instalador'] = sedes_instalador_aprobado(identity.email)
+    perfiles = [{'rol':rol, 'sedes':[{'id':sede,'nombre':SEDES[sede]['nombre']} for sede in sedes]}
+                for rol, sedes in permisos.items() if sedes]
+    return {'email':identity.email, 'perfiles':perfiles,
+            'authorization_code':None if perfiles else 'USUARIO_NO_AUTORIZADO'}
