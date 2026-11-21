@@ -151,8 +151,8 @@ class ConsultaPublica(Documento,Mensaje):pass
 
 @router.post('/contacto/verificar',dependencies=[Depends(require_write_access),Depends(limitar_contacto)])
 def verificar_contacto(payload:Documento,db=Depends(get_soporte_db)):
-    empleado_contacto(payload.documento,db)
-    return {'puede_enviar':True}
+    empleado=empleado_contacto(payload.documento,db)
+    return {'puede_enviar':True,'primer_nombre':empleado['nombre'].strip().split()[0]}
 
 @router.post('/contacto/mensajes',dependencies=[Depends(require_write_access),Depends(limitar_contacto)])
 def enviar_contacto(payload:ConsultaPublica,db=Depends(get_soporte_db)):

@@ -314,7 +314,7 @@ Validación: 111 pruebas backend, compilación frontend y cinco recorridos de in
 
 ## Contacto y chat con Gerencia
 
-La portada permite ingresar una identificación registrada y enviar una inquietud sin iniciar sesión ni redirigir a Google. El formulario no muestra nombres, correos ni conversaciones anteriores. Se comprueba que el registro siga activo tanto al consultar como al enviar; hay límites de intentos y de mensajes e idempotencia para evitar duplicados.
+La portada permite ingresar una identificación registrada y enviar una inquietud sin iniciar sesión ni redirigir a Google. El formulario devuelve únicamente el primer nombre para personalizar el saludo; no muestra apellidos, correos ni conversaciones anteriores. Se comprueba que el registro siga activo tanto al consultar como al enviar; hay límites de intentos y de mensajes e idempotencia para evitar duplicados.
 
 Gerencia → **Mensajes del equipo** → **Empleados autorizados** gestiona los contactos. Este directorio no concede permisos operativos. Las consultas públicas se identifican como **remitente sin verificar**: la cédula identifica un registro, pero no acredita quién escribe. Gerencia conserva el mensaje en el historial. La consulta de conversaciones anteriores y las respuestas requieren una sesión autorizada.
 

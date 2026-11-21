@@ -100,7 +100,7 @@ class SoporteTests(TestCase):
         del app.dependency_overrides[get_current_identity]
         r=self.c.post('/api/v1/soporte/contacto/verificar',json={'documento':'12345678'})
         self.assertEqual(r.status_code,200,r.text)
-        self.assertEqual(r.json(),{'puede_enviar':True})
+        self.assertEqual(r.json(),{'puede_enviar':True,'primer_nombre':'Empleado'})
         payload={'documento':'12345678','texto':'Necesito ayuda','solicitud_id':str(uuid4())}
         for _ in range(2):self.assertEqual(self.c.post('/api/v1/soporte/contacto/mensajes',json=payload).status_code,200)
         self.assertEqual(self.c.get(self.ruta).status_code,401)
