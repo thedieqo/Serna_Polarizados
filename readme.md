@@ -321,3 +321,15 @@ Gerencia → **Mensajes del equipo** → **Empleados autorizados** gestiona los 
 Preparación: desde `backend`, ejecutar `.venv/bin/python scripts/preparar_soporte.py`. Crea las tablas de soporte con RLS, incluyendo límites de intentos compartidos entre procesos. No crea contactos automáticamente. Los registros personales se administran en la base de datos, no en el código fuente.
 
 Pruebas: `python -m unittest discover -s tests` desde backend cubre envío público, privacidad del historial, identidad, revocación, límites, paginación e idempotencia.
+
+## Inicio de Gerencia y directorio de prueba
+
+Entrar con la cuenta autorizada de Diego, elegir **Gerencia** y una sede. El inicio de Gerencia ofrece **Inicio**, **Sedes**, **Empleados** y **Actividad registrada**. El selector de sede cambia el contexto de instalaciones, pagos e inventario; el directorio y su auditoría son centrales para todas las sedes.
+
+El directorio inicial contiene 59 registros ficticios: Gerencia, auxiliar de gerencia, dueño e ingeniero; más administrador, dos instaladores, instalador PPF y auxiliar administrativo para cada una de las once sedes. Los correos `@serna.example.invalid` son referencias de prueba, no cuentas de Google ni nuevas autorizaciones. La cuenta actual de pruebas conserva sus perfiles existentes. Los permisos de auxiliar de gerencia, ingeniero, PPF y auxiliar administrativo están pendientes; registrar o reactivar estas fichas no habilita acceso operativo.
+
+Gerencia puede crear, editar, desactivar y reactivar las fichas. La desactivación conserva el registro. Cada cambio guarda actor, fecha, motivo, estado anterior y posterior en una transacción. La revisión evita sobrescribir cambios concurrentes. No existe un endpoint para borrar o editar auditorías. Las aprobaciones operativas de instaladores existentes siguen en **Instaladores** y el directorio de contacto sigue en **Mensajes del equipo**; son ámbitos separados durante esta etapa de pruebas.
+
+Mirolindo figura como sede con lavadero. El módulo de operaciones del lavadero, la emisión de facturas electrónicas y los gastos operativos todavía no están implementados. Los accesos del inicio abren los módulos operativos existentes; los datos de facturación se consultan en las instalaciones.
+
+Migración: desde `backend`, ejecutar `.venv/bin/python scripts/preparar_gerencia.py`. Crea tablas centrales con RLS, semillas ficticias y auditoría de configuración. El marcador de inicialización hace que repetir el comando no reponga ni reactive registros editados. No modifica la bienvenida, los datos de ventas, los accesos actuales ni el directorio de contacto.

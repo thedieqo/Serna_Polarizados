@@ -1,3 +1,4 @@
+import GerenciaPage from './pages/GerenciaPage'
 import SoporteChat, {abrirSoporte} from './components/soporte/SoporteChat'
 import MensajesPage from './pages/MensajesPage'
 import TrabajoPage from './pages/TrabajoPage'
@@ -11,9 +12,10 @@ import InstalacionesPage from './pages/InstalacionesPage'
 import LoginScreen from './components/LoginScreen'
 import { AuthProvider, useAuth } from './context/AuthContext'
 
-type Tab = 'nueva' | 'registro' | 'inventario' | 'ventas' | 'mi-trabajo' | 'instaladores' | 'mensajes'
+type Tab = 'gerencia' | 'nueva' | 'registro' | 'inventario' | 'ventas' | 'mi-trabajo' | 'instaladores' | 'mensajes'
 
 const navItems: Array<{ id: Tab; label: string }> = [
+  { id: 'gerencia', label: 'Gerencia' },
   { id: 'nueva', label: 'Nueva instalación' },
   { id: 'registro', label: 'Registro de instalaciones' },
   { id: 'ventas', label: 'Ventas y liquidación' },
@@ -24,11 +26,15 @@ const navItems: Array<{ id: Tab; label: string }> = [
 ]
 
 function AppShell() {
-  const [activeTab, setActiveTab] = useState<Tab>('nueva')
-  const { loading, authorized, email, signOut, rol } = useAuth()
+  const [activeTab, setActiveTab] = useState<Tab>('gerencia')
+  const { loading, authorized, email, signOut, rol, entrar } = useAuth()
 
-  const permitidas = rol === 'propietario' ? ['ventas'] : rol === 'instalador' ? ['mi-trabajo'] : rol === 'administrador' ? ['nueva','registro','inventario'] : ['nueva','registro','inventario','ventas','instaladores','mensajes']
+  const permitidas = rol === 'propietario' ? ['ventas'] : rol === 'instalador' ? ['mi-trabajo'] : rol === 'administrador' ? ['nueva','registro','inventario'] : ['gerencia','nueva','registro','inventario','ventas','instaladores','mensajes']
   const tab = permitidas.includes(activeTab) ? activeTab : permitidas[0]
+
+  const [cambioError,setCambioError] = useState('')
+  const [cambiando,setCambiando] = useState(false)
+  async function abrir(tab:string,sede?:string){setCambioError('');setCambiando(true);try{if(sede&&sede!==sessionStorage.getItem('serna-sede'))await entrar('gerencia',sede);setActiveTab(tab as Tab)}catch{setCambioError('No se pudo cambiar de sede. Intenta nuevamente.')}finally{setCambiando(false)}}
 
   if (loading || !authorized) {
     return <LoginScreen />
@@ -81,6 +87,10 @@ function AppShell() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {rol==='gerencia'&&<div className="flex flex-wrap items-center justify-end gap-3 mb-6"><label className="text-sm" htmlFor="gerencia-sede">Sede de trabajo</label><select id="gerencia-sede" disabled={cambiando} className="rounded-lg border px-3 py-2 text-sm" value={sessionStorage.getItem('serna-sede')||''} onChange={e=>void abrir(tab,e.target.value)}>{sedes.map(s=><option key={s.id} value={s.id}>{s.nombre}</option>)}</select></div>}
+        {cambioError&&<p role="alert">{cambioError}</p>}
+        {tab === 'gerencia' && <GerenciaPage abrir={(t,s)=>void abrir(t,s)} />}
+        <div key={sessionStorage.getItem('serna-sede')}>
         {tab === 'nueva' && <InstalacionForm />}
         {tab === 'ventas' && <VentasPage />}
         {tab === 'registro' && <InstalacionesPage />}
@@ -88,6 +98,7 @@ function AppShell() {
         {tab === 'mi-trabajo' && <TrabajoPage />}
         {tab === 'mensajes' && <MensajesPage />}
         {tab === 'instaladores' && <InstaladoresPage />}
+        </div>
         {rol === 'propietario' && <p className="mt-5 text-sm text-slate-500">Reportes disponibles: ventas, descuentos y remuneraciones. Los gastos operativos y la utilidad neta aún no están registrados en el sistema.</p>}
       </main>
     </div>
