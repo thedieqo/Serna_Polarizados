@@ -19,7 +19,7 @@ def puede_usar_ruta(rol, metodo, ruta):
     if rol == 'propietario':
         return metodo == 'GET' and ruta == '/api/v1/instalaciones/ventas/resumen'
     if rol == 'instalador':
-        return metodo == 'GET' and ruta == '/api/v1/mi-trabajo'
+        return (metodo == 'GET' and ruta in ('/api/v1/mi-trabajo','/api/v1/mi-trabajo/buscar')) or (metodo == 'POST' and ruta == '/api/v1/mi-trabajo/confirmar')
     if rol == 'administrador':
         # Operaciones actuales de registro/consulta de su sede; no habilita gestión de cuentas.
         return ruta != '/api/v1/instalaciones/ventas/resumen' and ruta.startswith(('/api/v1/instalaciones','/api/v1/clientes','/api/v1/vehiculos','/api/v1/inventario'))

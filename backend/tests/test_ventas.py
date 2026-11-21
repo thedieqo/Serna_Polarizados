@@ -13,6 +13,8 @@ class VentasTests(TestCase):
     def setUp(self):
         self.engine = create_engine('sqlite://')
         Base.metadata.create_all(self.engine)
+        from app.db.registro_tables import metadata
+        metadata.create_all(self.engine)
         self.db = Session(self.engine)
         cliente = Cliente(nombre='Prueba', documento='1', contacto='3000000000')
         self.db.add(cliente); self.db.flush()

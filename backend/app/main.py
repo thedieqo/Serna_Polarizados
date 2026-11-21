@@ -14,7 +14,7 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import auth, clientes, instalaciones, vehiculos, inventario, mi_trabajo
-from app.core.auth import require_admin_identity, require_sede, require_role_access
+from app.core.auth import require_sede, require_role_access
 from app.core.config import settings
 
 app = FastAPI(
@@ -48,9 +48,9 @@ def root():
     return {"status": "ok", "service": "Serna Polarizados API"}
 
 
-# La sesión solo devuelve la identidad propia; el resto de rutas exige administrador verificado.
+# La sesión solo devuelve la identidad propia; el resto exige identidad verificada, sede y permiso del perfil.
 app.include_router(auth.router, prefix="/api/v1")
-protegido = [Depends(require_admin_identity), Depends(require_sede), Depends(require_role_access)]
+protegido = [Depends(require_sede), Depends(require_role_access)]
 app.include_router(clientes.router, prefix="/api/v1", dependencies=protegido)
 app.include_router(vehiculos.router, prefix="/api/v1", dependencies=protegido)
 app.include_router(instalaciones.router, prefix="/api/v1", dependencies=protegido)

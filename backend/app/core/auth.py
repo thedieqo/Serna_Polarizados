@@ -94,7 +94,7 @@ async def get_session_status(
     identity: VerifiedIdentity = Depends(get_current_identity),
     settings: Settings = Depends(get_settings),
 ) -> dict:
-    authorized = identity.email_verified and x_sede in sedes_perfil(identity.email, x_rol, settings)
+    authorized = identity.email_verified and acceso_sede(identity.email, x_rol, x_sede, settings)
     return {
         "authenticated": True,
         "rol": x_rol if authorized else None,
@@ -115,13 +115,27 @@ async def require_sede(
 ) -> str:
     if x_sede not in SEDES:
         raise HTTPException(400, detail={'code':'SEDE_REQUERIDA', 'message':'Selecciona una sede válida'})
-    if not identity.email_verified or x_sede not in sedes_perfil(identity.email, x_rol, settings):
+    if not identity.email_verified or not acceso_sede(identity.email, x_rol, x_sede, settings):
         raise HTTPException(403, detail={'code':'SEDE_NO_AUTORIZADA', 'message':'Tu correo no tiene acceso a esta sede'})
     return x_sede
 
 
 async def require_role_access(request: Request, identity: VerifiedIdentity = Depends(get_current_identity), settings: Settings = Depends(get_settings)):
     rol = request.headers.get('x-rol')
-    if not identity.email_verified or rol not in roles_permitidos(identity.email, settings) or not puede_usar_ruta(rol, request.method, request.url.path):
+    if not identity.email_verified or not acceso_sede(identity.email, rol, request.headers.get('x-sede'), settings) or not puede_usar_ruta(rol, request.method, request.url.path):
         raise HTTPException(403, detail={'code':'PERFIL_NO_AUTORIZADO','message':'Este perfil no tiene permiso para realizar esta operación'})
     return rol
+
+
+def acceso_sede(email, rol, sede, settings):
+    if sede not in SEDES: return False
+    if rol != 'instalador':
+        return sede in sedes_perfil(email, rol, settings)
+    # La cuenta temporal puede entrar sin asignación, pero no confirmar trabajos.
+    from app.core.roles import CUENTA_PRUEBAS
+    if email.lower() == CUENTA_PRUEBAS:
+        return sede in sedes_perfil(email, rol, settings)
+    from app.db.session import SessionLocal, engine
+    from app.services.trabajo import trabajador
+    with SessionLocal(bind=engine.execution_options(schema_translate_map={None:SEDES[sede]['schema']})) as db:
+        return trabajador(db, email) is not None

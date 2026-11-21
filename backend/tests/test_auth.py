@@ -292,7 +292,7 @@ class SupabaseVerifierTests(TestCase):
 
 class RoutingProtectionTests(TestCase):
     def test_rutas_de_negocio_exigen_administrador(self):
-        from app.core.auth import require_admin_identity
+        from app.core.auth import require_sede, require_role_access
 
         business_routes = [
             route
@@ -305,7 +305,8 @@ class RoutingProtectionTests(TestCase):
             dependencias = [
                 dependencia.call for dependencia in route.dependant.dependencies
             ]
-            self.assertIn(require_admin_identity, dependencias, route.path)
+            self.assertIn(require_sede, dependencias, route.path)
+            self.assertIn(require_role_access, dependencias, route.path)
 
     def test_salud_no_expone_datos_personales(self):
         health_paths = {

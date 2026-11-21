@@ -349,7 +349,7 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
 
         <section className="border-t border-gray-200 pt-6">
           <div className="flex items-center justify-between gap-3 mb-3">
-            <h4 className="text-sm font-semibold text-gray-900">Vidrios, tecnologías e instaladores</h4>
+            <h4 className="text-sm font-semibold text-gray-900">Vidrios, tecnologías y asignación prevista</h4><p className="text-sm mt-2">La asignación es orientativa. El trabajo y la remuneración se registran a nombre del instalador aprobado que confirme cada vidrio.</p>
             <button
               type="button"
               onClick={agregarDetalle}
@@ -438,7 +438,7 @@ export default function InstalacionForm({ onCancel }: { onCancel?: () => void })
                       onChange={(e) => updateDetalle(indice, { instalador_id: e.target.value })}
                       className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border disabled:bg-gray-100"
                     >
-                      <option value="">Instalador</option>
+                      <option value="">Instalador previsto</option>
                       {catalogos?.instaladores.map((instalador) => (
                         <option key={instalador.id} value={instalador.id}>{instalador.label}</option>
                       ))}

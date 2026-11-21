@@ -2,6 +2,8 @@ from calendar import monthrange
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from sqlalchemy.orm import Session
+from sqlalchemy import select
+from app.db.registro_tables import confirmaciones_trabajo as confirmaciones, vidrios_realizados as realizados, trabajadores
 from app.models.instalacion import Instalacion
 
 BOGOTA = ZoneInfo('America/Bogota')
@@ -39,7 +41,7 @@ def resumen_ventas(db: Session, anio: int, mes: int, corte: str, *, acumulado=Fa
         totales['administrador_cop'] += cobro.get('comision_admin_cop') or 0
         for pago in cobro.get('pagos', []):
             medios[pago['medio']] = medios.get(pago['medio'], 0) + pago['monto_cop']
-        for item in mano_obra or []:
+        for item in ([] if desglose.get('ejecucion_version') == 1 else mano_obra or []):
             persona = instaladores.setdefault(item['instalador_id'], {'nombre': item['instalador'], 'secciones': 0, 'total_cop': 0, 'trabajos': [], 'instalaciones': 0})
             if not any(t['codigo'] == f'SP{fila.id}' for t in persona['trabajos']):
                 persona['instalaciones'] += 1
@@ -48,5 +50,18 @@ def resumen_ventas(db: Session, anio: int, mes: int, corte: str, *, acumulado=Fa
             totales['instaladores_cop'] += item['valor_cop']
             persona['trabajos'].append({'codigo': f'SP{fila.id}', 'vidrio': item['vidrio'], 'panel': item['panel'], 'valor_cop': item['valor_cop']})
         registros.append({'codigo': f'SP{fila.id}', 'fecha': fila.fecha, 'valor_cop': fila.precio_total_cop, 'administrador_cop': cobro.get('comision_admin_cop')})
+    # Nuevos trabajos se liquidan por fecha de confirmación, aunque la venta sea de otro mes.
+    q = select(realizados, confirmaciones.c.trabajador_id, trabajadores.c.nombre).select_from(
+        realizados.join(confirmaciones, realizados.c.confirmacion_id == confirmaciones.c.id).join(trabajadores, trabajadores.c.id == confirmaciones.c.trabajador_id)
+    ).where(confirmaciones.c.created_at >= inicio.astimezone(timezone.utc), confirmaciones.c.created_at < fin.astimezone(timezone.utc))
+    if acumulado: q = q.where(confirmaciones.c.created_at <= ahora.astimezone(timezone.utc))
+    for item in db.execute(q).mappings():
+        persona = instaladores.setdefault(item['trabajador_id'], {'nombre':item['nombre'],'secciones':0,'total_cop':0,'trabajos':[],'instalaciones':0})
+        codigo = f"SP{item['instalacion_id']}"
+        if not any(t['codigo'] == codigo for t in persona['trabajos']): persona['instalaciones'] += 1
+        persona['secciones'] += 1
+        persona['total_cop'] += item['valor_cop']
+        totales['instaladores_cop'] += item['valor_cop']
+        persona['trabajos'].append({'codigo':codigo,'vidrio':item['vidrio'],'panel':None,'valor_cop':item['valor_cop']})
     fecha_hasta = min(datetime(anio, mes, hasta).date(), ahora.astimezone(BOGOTA).date()) if acumulado else datetime(anio, mes, hasta).date()
     return {'actualizado_en': ahora, 'desde': inicio.date(), 'hasta': fecha_hasta, 'cantidad': len(filas), 'totales': totales, 'instaladores': list(instaladores.values()), 'medios': medios, 'registros': registros, 'sin_precio': sin_precio, 'sin_liquidacion': sin_liquidacion}

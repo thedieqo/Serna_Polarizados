@@ -184,5 +184,42 @@ inventario_movimientos = Table(
     Column('cantidad_cm', Integer, nullable=False),
     Column('motivo', String, nullable=False),
     Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
-    UniqueConstraint('instalacion_id', 'sku', name='inventario_consumo_instalacion_unico'),
+    Column('confirmacion_id', String, nullable=True),
+    UniqueConstraint('confirmacion_id', 'sku', name='inventario_consumo_confirmacion_unico'),
+)
+
+# Registros de ejecución y aprobación separados por sede, como las ventas.
+trabajadores = Table('trabajadores', metadata,
+    Column('id', String, primary_key=True),
+    Column('nombre', String, nullable=False),
+    Column('email', String, nullable=False, unique=True),
+    Column('activo', Boolean, nullable=False),
+    Column('aprobado_por', String, nullable=False),
+    Column('updated_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
+)
+trabajador_auditoria = Table('trabajador_auditoria', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('trabajador_id', String, ForeignKey('trabajadores.id'), nullable=False),
+    Column('actor', String, nullable=False),
+    Column('accion', String, nullable=False),
+    Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
+)
+confirmaciones_trabajo = Table('confirmaciones_trabajo', metadata,
+    Column('id', String, primary_key=True),
+    Column('instalacion_id', Integer, ForeignKey('instalaciones.id'), nullable=False, index=True),
+    Column('trabajador_id', String, ForeignKey('trabajadores.id'), nullable=False, index=True),
+    Column('solicitud_hash', String, nullable=False),
+    Column('created_at', DateTime(timezone=True), server_default=func.now(), nullable=False),
+)
+vidrios_realizados = Table('vidrios_realizados', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('confirmacion_id', String, ForeignKey('confirmaciones_trabajo.id'), nullable=False),
+    Column('instalacion_id', Integer, ForeignKey('instalaciones.id'), nullable=False),
+    Column('slot', String, nullable=False),
+    Column('vidrio', String, nullable=False),
+    Column('sku', String, ForeignKey('inventario.sku'), nullable=False),
+    Column('cortado_cm', Integer, nullable=False),
+    Column('valor_cop', Integer, nullable=False),
+    CheckConstraint('cortado_cm > 0', name='corte_positivo'),
+    UniqueConstraint('instalacion_id', 'slot', name='vidrio_realizado_unico'),
 )

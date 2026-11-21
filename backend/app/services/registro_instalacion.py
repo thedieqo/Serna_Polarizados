@@ -1,5 +1,4 @@
 from sqlalchemy import insert, select
-from app.services.inventario import descontar, InventarioError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -156,6 +155,10 @@ def _insert_instalacion(
     db: Session, payload: RegistroInstalacionCreate, vehiculo_id: int, referido=None
 ) -> tuple[int, dict]:
     desglose = desglose_registro(payload)
+    desglose['ejecucion_version'] = 1
+    desglose['plan_vidrios'] = [d.model_dump() for d in payload.detalles]
+    desglose['mano_obra_estimada'] = desglose.get('mano_obra', [])
+    desglose['mano_obra'] = []
     if referido:
         desglose['cobro']['referido'] = referido
     valores = {
@@ -245,11 +248,7 @@ def guardar_registro(
         vehiculo_id, vehiculo_reutilizado = _resolve_vehiculo(db, payload, cliente_id)
         instalacion_id, desglose = _insert_instalacion(db, payload, vehiculo_id, referido)
         detalles_guardados = _insert_detalles(db, instalacion_id, payload.detalles)
-        descontar(db, instalacion_id, payload.detalles)
         db.flush()
-    except InventarioError as exc:
-        db.rollback()
-        raise RegistroConflictError('MATERIAL_INSUFICIENTE', str(exc)) from exc
     except RegistroConflictError:
         db.rollback()
         raise

@@ -283,3 +283,20 @@ La distribución de tareas se acordará entre ambos y se reflejará en la planif
 Este repositorio contiene documentación de análisis, diseño y una implementación parcial de clientes, vehículos e instalaciones.
 
 No contiene todavía el inventario, la autenticación, las migraciones ni evidencia de pruebas de funcionamiento. Los criterios escritos describen cómo se comprobarán las funciones durante el desarrollo; su existencia no acredita que hayan sido ejecutados.
+
+
+## 15. Actualización operativa: confirmación de trabajo (21 de noviembre de 2026)
+
+Esta sección actualiza el alcance histórico descrito arriba. La aplicación incluye autenticación, separación por sede, ventas, inventario y control de trabajo.
+
+1. Gerencia entra en la sede y abre **Instaladores**. Crea/aprueba el nombre y correo Google del trabajador; puede desactivar el acceso. La acción queda en `trabajador_auditoria` de esa sede.
+2. Administración guarda la venta totalmente pagada. Las nuevas ventas no descuentan material ni generan honorarios al guardarse; la asignación en el formulario es orientativa.
+3. El instalador aprobado entra en **Mi trabajo**, busca la placa, selecciona la venta y los vidrios realizados y registra metros lineales reales (dos decimales).
+4. Confirmar guarda simultáneamente trabajo, remuneración y consumo. Un vidrio no se confirma dos veces. La falta de material revierte toda la operación. La tecnología, opacidad y tipo de material se toman de la venta.
+5. El instalador consulta solo sus ganancias y trabajos de la sede. Los cortes son 1–15 y 16–último día del mes. Los nuevos honorarios se contabilizan por fecha de confirmación, incluso si la venta corresponde a otro mes. Son importes ganados, no comprobantes de pago de nómina.
+
+Tarifas: lateral individual $12.500; custodia $6.250; parabrisas camión/buseta $35.000; parabrisas normal, luneta, sunroof sencillo y cada panel de sunroof doble $25.000. Las custodias son opcionales. Con película de seguridad se consume únicamente el rollo de película.
+
+Antes de desplegar este cambio, ejecutar desde `backend`: `.venv/bin/python scripts/preparar_trabajo.py`. La migración aditiva prepara las once sedes, activa RLS en las tablas nuevas y conserva movimientos anteriores. Las instalaciones anteriores no admiten reconfirmación en el nuevo flujo para evitar consumo duplicado. No se asigna automáticamente el correo de pruebas a ningún trabajador: Gerencia debe crear su asociación explícita.
+
+Validación: 104 pruebas backend y compilación frontend; comprobación concurrente en un esquema PostgreSQL temporal con dos instaladores sobre el mismo vidrio, resultado de un único consumo y remuneración. El esquema temporal se eliminó al terminar. La validación visual local utilizó datos ficticios y no creó instalaciones reales.

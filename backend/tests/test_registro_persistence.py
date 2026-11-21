@@ -159,21 +159,16 @@ class RegistroPersistenceTests(TestCase):
         with self.Session() as db:
             return db.execute(select(func.count()).select_from(tabla)).scalar_one()
 
-    def test_material_insuficiente_revierte_instalacion_y_cliente(self):
+    def test_venta_no_descontara_material_ni_devenga_mano_obra(self):
         from sqlalchemy import update
-        from app.db.registro_tables import inventario, inventario_movimientos
+        from app.db.registro_tables import inventario
         with self.Session() as db:
-            db.execute(update(inventario).where(inventario.c.sku == 'ultra_hd:35:polarizado').values(disponible_cm=1))
+            db.execute(update(inventario).values(disponible_cm=1))
             db.commit()
-        with self.assertRaises(RegistroConflictError) as exc:
-            self._guardar()
-        self.assertEqual(exc.exception.code, 'MATERIAL_INSUFICIENTE')
-        self.assertEqual(self._count(instalaciones), 0)
-        self.assertEqual(self._count(clientes), 0)
-        self.assertEqual(self._count(vehiculos), 0)
+        resultado = self._guardar()
+        self.assertEqual(resultado.desglose.mano_obra, [])
         with self.Session() as db:
-            self.assertEqual(db.execute(select(inventario.c.disponible_cm).where(inventario.c.sku == 'ceramic_ir:20:polarizado')).scalar_one(), 20000)
-            self.assertEqual(db.execute(select(func.count()).select_from(inventario_movimientos).where(inventario_movimientos.c.instalacion_id.is_not(None))).scalar_one(), 0)
+            self.assertEqual(set(db.execute(select(inventario.c.disponible_cm)).scalars()), {1})
 
     def test_pago_y_detalle_se_conservan_al_volver_a_consultar(self):
         from app.crud.instalacion import get_detalle
@@ -195,7 +190,7 @@ class RegistroPersistenceTests(TestCase):
             reporte = resumen_ventas(db, 2026, 11, 'segunda')
             self.assertEqual(reporte['totales']['ventas_cop'], 1305000)
             self.assertEqual(reporte['totales']['administrador_cop'], 26100)
-            self.assertEqual(reporte['totales']['instaladores_cop'], 75000)
+            self.assertEqual(reporte['totales']['instaladores_cop'], 0)
 
     def test_pago_parcial_no_crea_cliente_vehiculo_ni_instalacion(self):
         data = _payload()
@@ -214,7 +209,7 @@ class RegistroPersistenceTests(TestCase):
         resultado = self._guardar(data)
         self.assertEqual(resultado.desglose.total_cop, 700000)
         self.assertEqual(resultado.detalles_guardados, 2)
-        self.assertEqual(sum(m['valor_cop'] for m in resultado.desglose.mano_obra),50000)
+        self.assertEqual(sum(m['valor_cop'] for m in resultado.desglose.mano_obra),0)
 
     def test_guarda_registro_completo_y_respeta_columnas_historicas(self):
         resultado = self._guardar()

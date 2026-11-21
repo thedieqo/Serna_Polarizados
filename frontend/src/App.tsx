@@ -1,20 +1,22 @@
-import api from './services/api'
+import TrabajoPage from './pages/TrabajoPage'
+import InstaladoresPage from './pages/InstaladoresPage'
 import { sedes } from './lib/sedes'
 import InventarioPage from './pages/InventarioPage'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import InstalacionForm from './components/InstalacionForm'
 import VentasPage from './pages/VentasPage'
 import InstalacionesPage from './pages/InstalacionesPage'
 import LoginScreen from './components/LoginScreen'
 import { AuthProvider, useAuth } from './context/AuthContext'
 
-type Tab = 'nueva' | 'registro' | 'inventario' | 'ventas' | 'mi-trabajo'
+type Tab = 'nueva' | 'registro' | 'inventario' | 'ventas' | 'mi-trabajo' | 'instaladores'
 
 const navItems: Array<{ id: Tab; label: string }> = [
   { id: 'nueva', label: 'Nueva instalación' },
   { id: 'registro', label: 'Registro de instalaciones' },
   { id: 'ventas', label: 'Ventas y liquidación' },
   { id: 'inventario', label: 'Inventario' },
+  { id: 'instaladores', label: 'Instaladores' },
   { id: 'mi-trabajo', label: 'Mi trabajo' },
 ]
 
@@ -22,7 +24,7 @@ function AppShell() {
   const [activeTab, setActiveTab] = useState<Tab>('nueva')
   const { loading, authorized, email, signOut, rol } = useAuth()
 
-  const permitidas = rol === 'propietario' ? ['ventas'] : rol === 'instalador' ? ['mi-trabajo'] : rol === 'administrador' ? ['nueva','registro','inventario'] : ['nueva','registro','inventario','ventas']
+  const permitidas = rol === 'propietario' ? ['ventas'] : rol === 'instalador' ? ['mi-trabajo'] : rol === 'administrador' ? ['nueva','registro','inventario'] : ['nueva','registro','inventario','ventas','instaladores']
   const tab = permitidas.includes(activeTab) ? activeTab : permitidas[0]
 
   if (loading || !authorized) {
@@ -80,17 +82,12 @@ function AppShell() {
         {tab === 'ventas' && <VentasPage />}
         {tab === 'registro' && <InstalacionesPage />}
         {tab === 'inventario' && <InventarioPage />}
-        {tab === 'mi-trabajo' && <MiTrabajo />}
+        {tab === 'mi-trabajo' && <TrabajoPage />}
+        {tab === 'instaladores' && <InstaladoresPage />}
         {rol === 'propietario' && <p className="mt-5 text-sm text-slate-500">Reportes disponibles: ventas, descuentos y remuneraciones. Los gastos operativos y la utilidad neta aún no están registrados en el sistema.</p>}
       </main>
     </div>
   )
-}
-
-function MiTrabajo() {
-  const [mensaje,setMensaje]=useState('Consultando tu asignación…')
-  useEffect(()=>{let activo=true;api.get('/mi-trabajo').then(r=>{if(activo)setMensaje(r.data.mensaje)}).catch(()=>{if(activo)setMensaje('No se pudo consultar tu asignación.')});return ()=>{activo=false}},[])
-  return <section className="bg-white p-8 rounded-lg"><h2 className="text-xl font-semibold mb-3">Mi trabajo</h2><p>{mensaje}</p></section>
 }
 
 export default function App() {

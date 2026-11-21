@@ -20,8 +20,8 @@ export default function CobroResumen({ desglose }: { desglose?: DesglosePrecios 
       <p className="mt-3">Comisión del administrador (2 % del valor final): {cop(cobro.comision_admin_cop)}</p>
     </section>}
     {!!desglose.mano_obra?.length && <section className="border-t border-gray-200 pt-4">
-      <h4 className="font-semibold text-gray-900 mb-3">Liquidación de instaladores</h4>
-      <ul className="space-y-2">{desglose.mano_obra.map((m, i) => <li key={i}>{m.instalador} · {m.vidrio}{m.panel && ` (${m.panel})`}: <strong>{cop(m.valor_cop)}</strong></li>)}</ul>
+      <h4 className="font-semibold text-gray-900 mb-3">Mano de obra por vidrio</h4>
+      <p className="mb-3">La vista previa es estimada. En el historial se muestra únicamente la mano de obra confirmada.</p><ul className="space-y-2">{desglose.mano_obra.map((m, i) => <li key={i}>{m.instalador} · {m.vidrio}{m.panel && ` (${m.panel})`}: <strong>{cop(m.valor_cop)}</strong></li>)}</ul>
     </section>}
     {garantia && <section className="border-t border-gray-200 pt-4"><h4 className="font-semibold text-gray-900">Garantía de las tecnologías instaladas</h4><p>{garantia.anos} años · Desde {garantia.desde} hasta {garantia.hasta}</p></section>}
   </div>
