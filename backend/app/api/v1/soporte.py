@@ -120,3 +120,54 @@ def escribir(ident:UUID,payload:Mensaje,identity=Depends(identidad_soporte),sett
     except IntegrityError as exc:
         db.rollback();raise HTTPException(409,detail='El envío ya está registrado. Actualiza la conversación.') from exc
     return {'enviado':True,'id':ident_mensaje}
+
+# La recepción pública no autentica al remitente ni concede acceso al historial.
+from datetime import datetime, timedelta, timezone
+from hashlib import sha256
+from fastapi import Request
+from sqlalchemy import delete
+from app.db.soporte_tables import intentos
+
+def limitar_contacto(request:Request,db=Depends(get_soporte_db)):
+    origen=sha256((request.client.host if request.client else 'desconocido').encode()).hexdigest()
+    desde=datetime.now(timezone.utc)-timedelta(minutes=10)
+    # Serializar límites entre procesos en PostgreSQL; SQLite se usa en pruebas.
+    if db.bind.dialect.name=='postgresql':
+        from sqlalchemy import text
+        db.execute(text('SELECT pg_advisory_xact_lock(:clave)'),{'clave':int(origen[:15],16)})
+    db.execute(delete(intentos).where(intentos.c.created_at<desde))
+    n=db.scalar(select(func.count()).select_from(intentos).where(intentos.c.origen==origen))
+    if n>=30: raise HTTPException(429,detail='Has realizado varios intentos. Espera unos minutos para continuar.')
+    db.execute(insert(intentos).values(origen=origen));db.commit()
+
+def empleado_contacto(documento,db,bloquear=False):
+    q=select(empleados).where(empleados.c.documento==documento,empleados.c.activo.is_(True))
+    if bloquear:q=q.with_for_update()
+    e=db.execute(q).mappings().first()
+    if not e:raise HTTPException(404,detail='No encontramos esta identificación registrada. Revisa el número.')
+    return e
+
+class ConsultaPublica(Documento,Mensaje):pass
+
+@router.post('/contacto/verificar',dependencies=[Depends(require_write_access),Depends(limitar_contacto)])
+def verificar_contacto(payload:Documento,db=Depends(get_soporte_db)):
+    empleado_contacto(payload.documento,db)
+    return {'puede_enviar':True}
+
+@router.post('/contacto/mensajes',dependencies=[Depends(require_write_access),Depends(limitar_contacto)])
+def enviar_contacto(payload:ConsultaPublica,db=Depends(get_soporte_db)):
+    e=empleado_contacto(payload.documento,db,bloquear=True)
+    previo=db.execute(select(mensajes).where(mensajes.c.solicitud_id==str(payload.solicitud_id))).mappings().first()
+    if previo:
+        if previo['empleado_id']!=e['id'] or previo['autor_tipo']!='consulta' or previo['texto']!=payload.texto:
+            raise HTTPException(409,detail='No se pudo repetir este envío. Abre nuevamente el contacto.')
+        return {'enviado':True}
+    desde=datetime.now(timezone.utc)-timedelta(minutes=10)
+    n=db.scalar(select(func.count()).select_from(mensajes).where(mensajes.c.empleado_id==e['id'],mensajes.c.autor_tipo=='consulta',mensajes.c.created_at>=desde))
+    if n>=5:raise HTTPException(429,detail='Ya recibimos varias consultas. Espera unos minutos antes de enviar otra.')
+    try:
+        db.execute(insert(mensajes).values(solicitud_id=str(payload.solicitud_id),empleado_id=e['id'],autor_email='',autor_tipo='consulta',texto=payload.texto))
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback();raise HTTPException(409,detail='El envío ya fue procesado. Revisa antes de repetirlo.') from exc
+    return {'enviado':True}

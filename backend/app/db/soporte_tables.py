@@ -28,3 +28,9 @@ auditoria = Table('soporte_auditoria', metadata,
     Column('accion', String, nullable=False),
     Column('created_at', DateTime(timezone=True), nullable=False, server_default=func.now()),
 )
+
+intentos = Table('soporte_intentos', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('origen', String(64), nullable=False, index=True),
+    Column('created_at', DateTime(timezone=True), nullable=False, server_default=func.now()),
+)

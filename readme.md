@@ -312,14 +312,12 @@ La cuenta temporal de pruebas conserva sus cuatro perfiles; el resto conserva su
 Validación: 111 pruebas backend, compilación frontend y cinco recorridos de interfaz con identidad/API simuladas (bienvenida sin roles públicos, entrada automática, selección de sede, selección de perfil y rechazo sin permisos). La revisión visual mediante captura automática no se completó por una restricción del entorno.
 
 
-## Chat interno con Gerencia
+## Contacto y chat con Gerencia
 
-En la portada, «¿Necesitas acceso? Contáctate aquí» abre la caja de cédula. El empleado verifica su cuenta de Google y la cédula debe coincidir con el correo autorizado; conocer una cédula no permite leer conversaciones ajenas. La intención de contacto se conserva durante la redirección por un máximo de 10 minutos y se elimina al cerrar o verificar.
+La portada permite ingresar una identificación registrada y enviar una inquietud sin iniciar sesión ni redirigir a Google. El formulario no muestra nombres, correos ni conversaciones anteriores. Se comprueba que el registro siga activo tanto al consultar como al enviar; hay límites de intentos y de mensajes e idempotencia para evitar duplicados.
 
-Gerencia → **Mensajes del equipo** → **Empleados autorizados** permite registrar nombre, cédula, correo y sede, y activar/desactivar el acceso al chat. Este directorio no concede permisos operativos ni se rellena con datos de clientes. Es necesario registrar los empleados antes del primer contacto.
+Gerencia → **Mensajes del equipo** → **Empleados autorizados** gestiona los contactos. Este directorio no concede permisos operativos. Las consultas públicas se identifican como **remitente sin verificar**: la cédula identifica un registro, pero no acredita quién escribe. Gerencia conserva el mensaje en el historial. La consulta de conversaciones anteriores y las respuestas requieren una sesión autorizada.
 
-La pestaña **Conversaciones** permite responder y consultar el historial. El chat actualiza cada 5 segundos y la bandeja cada 7 mientras la página está visible. El historial se pagina y los reintentos de envío no duplican mensajes. Los mensajes se almacenan en la nube; la desactivación bloquea el acceso del empleado y conserva el historial para Gerencia.
+Preparación: desde `backend`, ejecutar `.venv/bin/python scripts/preparar_soporte.py`. Crea las tablas de soporte con RLS, incluyendo límites de intentos compartidos entre procesos. No crea contactos automáticamente. Los registros personales se administran en la base de datos, no en el código fuente.
 
-Preparación de base de datos: desde `backend`, ejecutar `.venv/bin/python scripts/preparar_soporte.py`. Crea tres tablas centrales en `public` (directorio, mensajes y auditoría de autorizaciones), con RLS habilitado y sin políticas públicas. El servidor valida identidad y permisos en cada consulta. No crea empleados ni conversaciones de ejemplo.
-
-Verificación: `python -m unittest discover -s tests` desde backend incluye pruebas de acceso, cédula/correo, revocación, historial, paginación e idempotencia.
+Pruebas: `python -m unittest discover -s tests` desde backend cubre envío público, privacidad del historial, identidad, revocación, límites, paginación e idempotencia.

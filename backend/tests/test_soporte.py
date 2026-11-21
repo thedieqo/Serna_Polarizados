@@ -95,3 +95,25 @@ class SoporteTests(TestCase):
     def test_validacion_de_mensajes(self):
         self.email='uno@example.test'
         for texto in ['   ','x'*2001]: self.assertEqual(self.enviar(texto).status_code,422)
+
+    def test_contacto_publico_sin_login_no_expone_historial(self):
+        del app.dependency_overrides[get_current_identity]
+        r=self.c.post('/api/v1/soporte/contacto/verificar',json={'documento':'12345678'})
+        self.assertEqual(r.status_code,200,r.text)
+        self.assertEqual(r.json(),{'puede_enviar':True})
+        payload={'documento':'12345678','texto':'Necesito ayuda','solicitud_id':str(uuid4())}
+        for _ in range(2):self.assertEqual(self.c.post('/api/v1/soporte/contacto/mensajes',json=payload).status_code,200)
+        self.assertEqual(self.c.get(self.ruta).status_code,401)
+        with Session(self.bind) as db:
+            rows=db.execute(select(mensajes)).mappings().all()
+            self.assertEqual(len(rows),1)
+            self.assertEqual(rows[0]['autor_tipo'],'consulta')
+            self.assertEqual(rows[0]['autor_email'],'')
+
+    def test_contacto_publico_revalida_empleado_y_limita_intentos(self):
+        self.assertEqual(self.c.post('/api/v1/soporte/contacto/verificar',json={'documento':'99999999'}).status_code,404)
+        self.c.put(f'/api/v1/soporte/gerencia/empleados/{self.ident}',headers=self.headers,json={'activo':False})
+        r=self.c.post('/api/v1/soporte/contacto/mensajes',json={'documento':'12345678','texto':'Consulta','solicitud_id':str(uuid4())})
+        self.assertEqual(r.status_code,404)
+        for _ in range(28):self.c.post('/api/v1/soporte/contacto/verificar',json={'documento':'99999999'})
+        self.assertEqual(self.c.post('/api/v1/soporte/contacto/verificar',json={'documento':'99999999'}).status_code,429)
