@@ -1,3 +1,4 @@
+import {accesoInicial} from '../lib/accesoInicial'
 import {createContext,useCallback,useContext,useEffect,useMemo,useRef,useState,type ReactNode} from 'react'
 import type {Session} from '@supabase/supabase-js'
 import api from '../services/api'
@@ -24,10 +25,9 @@ export function AuthProvider({children}:{children:ReactNode}){
    if(actual!==revision.current)return
    setEmail(data.email);setPerfiles(data.perfiles);setAuthorized(false);setRol(null)
    if(!data.perfiles.length){setError(data.authorization_code==='CORREO_NO_VERIFICADO'?'Tu correo aún no está verificado.':'Tu cuenta no tiene acceso asignado. Contacta a Gerencia.');return}
-   let r=sessionStorage.getItem('serna-rol'),s=sessionStorage.getItem('serna-sede')
-   if(data.perfiles.length===1&&data.perfiles[0].sedes.length===1){r=data.perfiles[0].rol;s=data.perfiles[0].sedes[0].id}
-   const permitido=data.perfiles.some(p=>p.rol===r&&p.sedes.some(v=>v.id===s))
-   if(!permitido){sessionStorage.removeItem('serna-rol');sessionStorage.removeItem('serna-sede');return}
+   const inicial=accesoInicial(data.email,data.perfiles,sessionStorage.getItem('serna-rol'),sessionStorage.getItem('serna-sede'))
+   if(!inicial){sessionStorage.removeItem('serna-rol');sessionStorage.removeItem('serna-sede');return}
+   const {rol:r,sede:s}=inicial
    sessionStorage.setItem('serna-rol',r!);sessionStorage.setItem('serna-sede',s!)
    const respuesta=await api.get<SessionStatus>('/auth/session')
    if(actual!==revision.current)return

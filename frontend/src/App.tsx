@@ -27,14 +27,14 @@ const navItems: Array<{ id: Tab; label: string }> = [
 
 function AppShell() {
   const [activeTab, setActiveTab] = useState<Tab>('gerencia')
-  const { loading, authorized, email, signOut, rol, entrar } = useAuth()
+  const { loading, authorized, email, signOut, rol, entrar, perfiles } = useAuth()
 
   const permitidas = rol === 'propietario' ? ['ventas'] : rol === 'instalador' ? ['mi-trabajo'] : rol === 'administrador' ? ['nueva','registro','inventario'] : ['gerencia','nueva','registro','inventario','ventas','instaladores','mensajes']
   const tab = permitidas.includes(activeTab) ? activeTab : permitidas[0]
 
   const [cambioError,setCambioError] = useState('')
   const [cambiando,setCambiando] = useState(false)
-  async function abrir(tab:string,sede?:string){setCambioError('');setCambiando(true);try{if(sede&&sede!==sessionStorage.getItem('serna-sede'))await entrar('gerencia',sede);setActiveTab(tab as Tab)}catch{setCambioError('No se pudo cambiar de sede. Intenta nuevamente.')}finally{setCambiando(false)}}
+  async function abrir(tab:string,sede?:string){setCambioError('');setCambiando(true);try{if(sede&&sede!==sessionStorage.getItem('serna-sede'))await entrar(rol!,sede);setActiveTab(tab as Tab)}catch{setCambioError('No se pudo cambiar de sede. Intenta nuevamente.')}finally{setCambiando(false)}}
 
   if (loading || !authorized) {
     return <LoginScreen />
@@ -87,7 +87,7 @@ function AppShell() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {rol==='gerencia'&&<div className="flex flex-wrap items-center justify-end gap-3 mb-6"><label className="text-sm" htmlFor="gerencia-sede">Sede de trabajo</label><select id="gerencia-sede" disabled={cambiando} className="rounded-lg border px-3 py-2 text-sm" value={sessionStorage.getItem('serna-sede')||''} onChange={e=>void abrir(tab,e.target.value)}>{sedes.map(s=><option key={s.id} value={s.id}>{s.nombre}</option>)}</select></div>}
+        {perfiles.find(p=>p.rol===rol)?.sedes.length!>1&&<div className="flex flex-wrap items-center justify-end gap-3 mb-6"><label className="text-sm" htmlFor="gerencia-sede">Sede de trabajo</label><select id="gerencia-sede" disabled={cambiando} className="rounded-lg border px-3 py-2 text-sm" value={sessionStorage.getItem('serna-sede')||''} onChange={e=>void abrir(tab,e.target.value)}>{perfiles.find(p=>p.rol===rol)?.sedes.map(s=><option key={s.id} value={s.id}>{s.nombre}</option>)}</select></div>}
         {cambioError&&<p role="alert">{cambioError}</p>}
         {tab === 'gerencia' && <GerenciaPage abrir={(t,s)=>void abrir(t,s)} />}
         <div key={sessionStorage.getItem('serna-sede')}>

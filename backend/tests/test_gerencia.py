@@ -58,7 +58,7 @@ class GerenciaTests(TestCase):
    self.assertEqual(self.c.post(self.base+'/empleados',headers=self.h,json=datos).status_code,422)
  def test_catalogo_y_filtros(self):
   self.crear();r=self.c.get(self.base+'/resumen',headers=self.h).json()
-  self.assertEqual(len(r['sedes']),11);self.assertEqual(r['total_empleados'],1)
+  self.assertEqual(len(r['sedes']),14);self.assertEqual(r['total_empleados'],1)
   self.assertEqual([x['id'] for x in r['sedes'] if x['lavadero']],['mirolindo'])
   self.assertEqual(self.c.get(self.base+'/empleados',headers=self.h,params={'sede':'cali'}).json()['empleados'],[])
   self.assertEqual(len(self.c.get(self.base+'/empleados',headers=self.h,params={'q':'QA'}).json()['empleados']),1)

@@ -33,7 +33,7 @@ class AccesosTests(TestCase):
     def test_cuenta_pruebas_conserva_roles_sin_elevar_otras_cuentas(self):
         r=accesos_identidad(self.identidad(CUENTA_PRUEBAS),self.settings)
         self.assertEqual(len(r['perfiles']),4)
-        self.assertEqual(len(r['perfiles'][0]['sedes']),11)
+        self.assertEqual(len(r['perfiles'][0]['sedes']),14)
     def test_http_headers_no_deciden_los_roles_descubiertos(self):
         app.dependency_overrides[get_current_identity]=lambda:self.identidad('calisp@gmail.com')
         app.dependency_overrides[get_settings]=lambda:self.settings

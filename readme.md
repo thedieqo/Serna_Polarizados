@@ -333,3 +333,13 @@ Gerencia puede crear, editar, desactivar y reactivar las fichas. La desactivaci�
 Mirolindo figura como sede con lavadero. El módulo de operaciones del lavadero, la emisión de facturas electrónicas y los gastos operativos todavía no están implementados. Los accesos del inicio abren los módulos operativos existentes; los datos de facturación se consultan en las instalaciones.
 
 Migración: desde `backend`, ejecutar `.venv/bin/python scripts/preparar_gerencia.py`. Crea tablas centrales con RLS, semillas ficticias y auditoría de configuración. El marcador de inicialización hace que repetir el comando no reponga ni reactive registros editados. No modifica la bienvenida, los datos de ventas, los accesos actuales ni el directorio de contacto.
+
+## Acceso directo y ampliación a catorce sedes
+
+Después de Google, los correos autorizados entran directamente a un perfil y sede permitidos por el servidor. Se conserva la última selección si sigue autorizada; en caso contrario se usa la primera asignación disponible. Las cuentas con varias sedes pueden cambiarla dentro de su área. Las cuentas sin permisos siguen bloqueadas.
+
+La excepción es `diegonangumaw@gmail.com`: después de iniciar sesión muestra cuatro botones, **Soy Serna**, **Gerencia**, **Administrador** e **Instalador**. Los botones usan únicamente las asignaciones recibidas del servidor, sin conceder privilegios desde el navegador. El aspecto de la bienvenida pública permanece igual.
+
+Se incorporan **7 de Agosto (Bogotá)**, **Porvenir (Villavicencio)** y **Santo Tomás (Villavicencio)**. `backend/scripts/ampliar_sedes.py` verifica el plan sin modificar datos; `--apply` crea únicamente esas tres sedes, con RLS, catálogos, inventario inicial acordado y quince fichas ficticias. No copia clientes/instalaciones, no habilita correos nuevos y no reinicia inventarios existentes. El directorio pasa a 74 registros de prueba si no ha habido modificaciones manuales.
+
+La creación de empleados y las aprobaciones de instaladores continúan reservadas a Gerencia. La creación arbitraria de nuevas sedes desde la interfaz todavía no está habilitada: requiere convertir el catálogo cerrado en un catálogo persistente y probar la autorización y separación de datos para cada sede nueva. Esta parte no forma parte de la ampliación acotada anterior.

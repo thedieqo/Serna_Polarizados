@@ -10,7 +10,7 @@ class RolesTests(TestCase):
         self.settings=Settings(ADMIN_EMAILS=CUENTA_PRUEBAS+',admin@example.com')
     def test_cuenta_pruebas_y_accesos(self):
         self.assertEqual(len(roles_permitidos(CUENTA_PRUEBAS,self.settings)),4)
-        self.assertEqual(len(sedes_perfil(CUENTA_PRUEBAS,'gerencia',self.settings)),11)
+        self.assertEqual(len(sedes_perfil(CUENTA_PRUEBAS,'gerencia',self.settings)),14)
         self.assertEqual(sedes_perfil('admin@example.com','gerencia',self.settings),[])
     def test_propietario_solo_lectura(self):
         self.assertTrue(puede_usar_ruta('propietario','GET','/api/v1/instalaciones/ventas/resumen'))

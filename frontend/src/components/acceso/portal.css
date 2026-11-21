@@ -7,3 +7,5 @@
 @media(hover:hover) and (pointer:fine){.welcome-signin:hover:not(:disabled){transform:scale(1.025);box-shadow:0 8px 24px #0003}}
 .welcome-signin:active:not(:disabled){transform:scale(.99)}
 @media(prefers-reduced-motion:reduce){.welcome-signin,.welcome-signin:hover:not(:disabled),.welcome-signin:active:not(:disabled){transition:none;transform:none}}
+
+.welcome-profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}.welcome-profile-grid button{min-height:76px;padding:16px;border:1px solid #39465b;border-radius:12px;background:#151d2c;color:#edf0f6;font-weight:500;transition:background .15s}.welcome-profile-grid button:hover{background:#25334a}.welcome-profile-grid button:focus-visible{outline:2px solid #b8cff3;outline-offset:3px}@media(max-width:360px){.welcome-profile-grid{grid-template-columns:1fr}}
