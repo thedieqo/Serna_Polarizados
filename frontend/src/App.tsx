@@ -1,3 +1,5 @@
+import SoporteChat, {abrirSoporte} from './components/soporte/SoporteChat'
+import MensajesPage from './pages/MensajesPage'
 import TrabajoPage from './pages/TrabajoPage'
 import InstaladoresPage from './pages/InstaladoresPage'
 import { sedes } from './lib/sedes'
@@ -9,13 +11,14 @@ import InstalacionesPage from './pages/InstalacionesPage'
 import LoginScreen from './components/LoginScreen'
 import { AuthProvider, useAuth } from './context/AuthContext'
 
-type Tab = 'nueva' | 'registro' | 'inventario' | 'ventas' | 'mi-trabajo' | 'instaladores'
+type Tab = 'nueva' | 'registro' | 'inventario' | 'ventas' | 'mi-trabajo' | 'instaladores' | 'mensajes'
 
 const navItems: Array<{ id: Tab; label: string }> = [
   { id: 'nueva', label: 'Nueva instalación' },
   { id: 'registro', label: 'Registro de instalaciones' },
   { id: 'ventas', label: 'Ventas y liquidación' },
   { id: 'inventario', label: 'Inventario' },
+  { id: 'mensajes', label: 'Mensajes del equipo' },
   { id: 'instaladores', label: 'Instaladores' },
   { id: 'mi-trabajo', label: 'Mi trabajo' },
 ]
@@ -24,7 +27,7 @@ function AppShell() {
   const [activeTab, setActiveTab] = useState<Tab>('nueva')
   const { loading, authorized, email, signOut, rol } = useAuth()
 
-  const permitidas = rol === 'propietario' ? ['ventas'] : rol === 'instalador' ? ['mi-trabajo'] : rol === 'administrador' ? ['nueva','registro','inventario'] : ['nueva','registro','inventario','ventas','instaladores']
+  const permitidas = rol === 'propietario' ? ['ventas'] : rol === 'instalador' ? ['mi-trabajo'] : rol === 'administrador' ? ['nueva','registro','inventario'] : ['nueva','registro','inventario','ventas','instaladores','mensajes']
   const tab = permitidas.includes(activeTab) ? activeTab : permitidas[0]
 
   if (loading || !authorized) {
@@ -44,7 +47,7 @@ function AppShell() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-xs text-slate-600">{email}</span>
+              <span className="text-xs text-slate-600">{email}</span>{rol!=='gerencia'&&<button className="text-xs text-blue-700" onClick={abrirSoporte}>Contacta a Gerencia</button>}
               <button
                 type="button"
                 onClick={() => void signOut()}
@@ -83,6 +86,7 @@ function AppShell() {
         {tab === 'registro' && <InstalacionesPage />}
         {tab === 'inventario' && <InventarioPage />}
         {tab === 'mi-trabajo' && <TrabajoPage />}
+        {tab === 'mensajes' && <MensajesPage />}
         {tab === 'instaladores' && <InstaladoresPage />}
         {rol === 'propietario' && <p className="mt-5 text-sm text-slate-500">Reportes disponibles: ventas, descuentos y remuneraciones. Los gastos operativos y la utilidad neta aún no están registrados en el sistema.</p>}
       </main>
@@ -94,6 +98,7 @@ export default function App() {
   return (
     <AuthProvider>
       <AppShell />
+      <SoporteChat />
     </AuthProvider>
   )
 }

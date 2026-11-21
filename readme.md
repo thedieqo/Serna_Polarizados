@@ -310,3 +310,16 @@ La portada muestra el logotipo, la bienvenida y un único botón de Google. Los 
 La cuenta temporal de pruebas conserva sus cuatro perfiles; el resto conserva sus autorizaciones existentes. Los instaladores se descubren por las aprobaciones activas de Gerencia en cada sede. La selección se recuerda durante la sesión y se elimina al cambiar de cuenta.
 
 Validación: 111 pruebas backend, compilación frontend y cinco recorridos de interfaz con identidad/API simuladas (bienvenida sin roles públicos, entrada automática, selección de sede, selección de perfil y rechazo sin permisos). La revisión visual mediante captura automática no se completó por una restricción del entorno.
+
+
+## Chat interno con Gerencia
+
+En la portada, «¿Necesitas acceso? Contáctate aquí» abre la caja de cédula. El empleado verifica su cuenta de Google y la cédula debe coincidir con el correo autorizado; conocer una cédula no permite leer conversaciones ajenas. La intención de contacto se conserva durante la redirección por un máximo de 10 minutos y se elimina al cerrar o verificar.
+
+Gerencia → **Mensajes del equipo** → **Empleados autorizados** permite registrar nombre, cédula, correo y sede, y activar/desactivar el acceso al chat. Este directorio no concede permisos operativos ni se rellena con datos de clientes. Es necesario registrar los empleados antes del primer contacto.
+
+La pestaña **Conversaciones** permite responder y consultar el historial. El chat actualiza cada 5 segundos y la bandeja cada 7 mientras la página está visible. El historial se pagina y los reintentos de envío no duplican mensajes. Los mensajes se almacenan en la nube; la desactivación bloquea el acceso del empleado y conserva el historial para Gerencia.
+
+Preparación de base de datos: desde `backend`, ejecutar `.venv/bin/python scripts/preparar_soporte.py`. Crea tres tablas centrales en `public` (directorio, mensajes y auditoría de autorizaciones), con RLS habilitado y sin políticas públicas. El servidor valida identidad y permisos en cada consulta. No crea empleados ni conversaciones de ejemplo.
+
+Verificación: `python -m unittest discover -s tests` desde backend incluye pruebas de acceso, cédula/correo, revocación, historial, paginación e idempotencia.
