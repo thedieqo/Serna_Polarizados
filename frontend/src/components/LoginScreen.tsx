@@ -1,81 +1,20 @@
 import { useState } from 'react'
 import { sedes } from '../lib/sedes'
 import { useAuth } from '../context/AuthContext'
+import PortalAcceso, { type RolAcceso } from './acceso/PortalAcceso'
 
 export default function LoginScreen() {
-  const { loading, configured, session, email, authorized, error, signIn, signOut } = useAuth()
-
-  const [sede, setSede] = useState(sessionStorage.getItem('serna-sede') || '')
-
-  return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white border border-slate-200 shadow-sm rounded-lg p-8">
-        <div className="flex items-center gap-3 mb-6">
-          <img src="/serna-logo.jpg" alt="Logotipo Serna Polarizados" className="h-10 w-10 rounded-lg object-contain shrink-0" />
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">Serna Polarizados</h1>
-            <p className="text-xs text-slate-500">Acceso de administradores</p>
-          </div>
-        </div>
-
-        {loading ? (
-          <p className="text-sm text-slate-600">Verificando sesión…</p>
-        ) : (
-          <>
-            {!configured && (
-              <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-                Configura VITE_SUPABASE_URL y VITE_SUPABASE_PUBLISHABLE_KEY para habilitar el acceso.
-              </div>
-            )}
-
-            {session && !authorized && (
-              <div className="mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-900">
-                <p className="font-semibold">Acceso denegado</p>
-                <p className="mt-1">
-                  {email || 'Tu cuenta'} no tiene autorización para este sistema.
-                </p>
-              </div>
-            )}
-
-            {error && (
-              <div className="mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-900">
-                {error}
-              </div>
-            )}
-
-            <label className="block text-sm mb-4">Sede
-              <select className="mt-2 w-full rounded-md border p-3 bg-white" value={sede}
-                onChange={e => { setSede(e.target.value); sessionStorage.setItem('serna-sede', e.target.value); if (session) window.location.reload() }}>
-                <option value="">Selecciona tu sede</option>
-                {sedes.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
-              </select>
-            </label>
-            {session ? (
-              <div className="space-y-4">
-                <p className="text-sm text-slate-600">
-                  Sesión activa: <span className="font-medium text-slate-900">{email || 'Cuenta Google'}</span>
-                </p>
-                <button
-                  type="button"
-                  onClick={() => void signOut()}
-                  className="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                >
-                  Cerrar sesión
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => void signIn()}
-                disabled={!configured || !sede}
-                className="w-full rounded-md bg-blue-800 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-900 disabled:cursor-not-allowed disabled:bg-slate-400"
-              >
-                Continuar con Google
-              </button>
-            )}
-          </>
-        )}
-      </div>
-    </div>
-  )
+  const { loading, configured, session, email, error, signIn, signOut } = useAuth()
+  const [sede,setSede] = useState(sessionStorage.getItem('serna-sede')||'')
+  const [rol,setRol] = useState<RolAcceso|null>((sessionStorage.getItem('serna-rol') as RolAcceso)||null)
+  return <PortalAcceso rol={rol} onSeleccionar={r=>{setRol(r);sessionStorage.setItem('serna-rol',r)}}>
+    {loading?<p role="status">Verificando acceso…</p>:<>
+      {!rol?<p className="text-sm">Selecciona un perfil para iniciar sesión.</p>:<>
+      <label className="block text-sm">Sede<select className="block w-full mt-2 mb-4 rounded-md p-3 border" value={sede} onChange={e=>{setSede(e.target.value);sessionStorage.setItem('serna-sede',e.target.value)}}><option value="">Selecciona una sede</option>{sedes.map(s=><option key={s.id} value={s.id}>{s.nombre}</option>)}</select></label>
+      {error&&<p role="alert" className="text-sm text-red-800 mb-3">No se pudo autorizar el acceso. Comprueba el perfil, la sede y la cuenta seleccionados.</p>}
+      {!configured&&<p className="text-sm mb-3">El acceso no está disponible en este momento.</p>}
+      {session?<><p className="text-sm mb-3">Cuenta: {email||'Google'}</p><button type="button" disabled={!sede} onClick={()=>window.location.reload()} className="w-full bg-blue-700 rounded-md p-3 text-white disabled:opacity-40">Entrar con este perfil</button><button type="button" onClick={()=>void signOut()} className="w-full mt-2 p-2 text-sm">Usar otra cuenta</button></>:<button type="button" disabled={!sede||!configured} onClick={()=>void signIn()} className="w-full bg-blue-700 rounded-md p-3 text-white disabled:opacity-40">Continuar con Google</button>}
+      </>}
+    </>}
+  </PortalAcceso>
 }

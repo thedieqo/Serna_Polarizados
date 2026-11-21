@@ -14,6 +14,7 @@ import api from '../services/api'
 import { supabase, supabaseConfigured } from '../lib/supabase'
 
 type SessionStatus = {
+  rol: string | null
   authenticated: boolean
   email: string
   email_verified: boolean
@@ -22,6 +23,7 @@ type SessionStatus = {
 }
 
 type AuthContextValue = {
+  rol: string | null
   loading: boolean
   configured: boolean
   session: Session | null
@@ -45,6 +47,7 @@ function describeError(error: unknown): string {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const [rol, setRol] = useState<string|null>(null)
   const [loading, setLoading] = useState(true)
   const [session, setSession] = useState<Session | null>(null)
   const [email, setEmail] = useState<string | null>(null)
@@ -59,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data } = await api.get<SessionStatus>('/auth/session')
       setEmail(data.email)
       setAuthorized(data.authorized)
+      setRol(data.rol)
       setError(data.authorized ? null : (data.authorization_code || 'USUARIO_NO_AUTORIZADO'))
     } catch (err) {
       setAuthorized(false)
@@ -143,6 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       loading,
       configured: supabaseConfigured,
+      rol,
       session,
       email,
       authorized,
@@ -150,7 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn,
       signOut,
     }),
-    [loading, session, email, authorized, error, signIn, signOut]
+    [loading, session, email, authorized, error, signIn, signOut, rol]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

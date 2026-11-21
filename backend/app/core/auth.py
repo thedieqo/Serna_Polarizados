@@ -1,7 +1,9 @@
-from fastapi import Depends, Header, HTTPException, status
+from typing import Annotated
+from fastapi import Depends, Header, HTTPException, Request, status
 
 from app.core.config import Settings, get_settings
 from app.core.sedes import SEDES, permitidas
+from app.core.roles import roles_permitidos, sedes_perfil, puede_usar_ruta
 from app.core.token_verifier import (
     TokenVerificationError,
     VerifiedIdentity,
@@ -78,7 +80,7 @@ async def require_admin_identity(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": "CORREO_NO_VERIFICADO", "message": "El correo de la sesión no está verificado"},
         )
-    if not permitidas(identity.email, settings):
+    if not roles_permitidos(identity.email, settings):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"code": "USUARIO_NO_AUTORIZADO", "message": "Esta identidad no está autorizada"},
@@ -87,13 +89,15 @@ async def require_admin_identity(
 
 
 async def get_session_status(
+    x_rol: str | None = Header(default=None),
     x_sede: str | None = Header(default=None),
     identity: VerifiedIdentity = Depends(get_current_identity),
     settings: Settings = Depends(get_settings),
 ) -> dict:
-    authorized = identity.email_verified and x_sede in permitidas(identity.email, settings)
+    authorized = identity.email_verified and x_sede in sedes_perfil(identity.email, x_rol, settings)
     return {
         "authenticated": True,
+        "rol": x_rol if authorized else None,
         "email": identity.email,
         "email_verified": identity.email_verified,
         "authorized": authorized,
@@ -107,9 +111,17 @@ async def require_sede(
     x_sede: str | None = Header(default=None),
     identity: VerifiedIdentity = Depends(get_current_identity),
     settings: Settings = Depends(get_settings),
+    x_rol: Annotated[str, Header()] = "administrador",
 ) -> str:
     if x_sede not in SEDES:
         raise HTTPException(400, detail={'code':'SEDE_REQUERIDA', 'message':'Selecciona una sede válida'})
-    if not identity.email_verified or x_sede not in permitidas(identity.email, settings):
+    if not identity.email_verified or x_sede not in sedes_perfil(identity.email, x_rol, settings):
         raise HTTPException(403, detail={'code':'SEDE_NO_AUTORIZADA', 'message':'Tu correo no tiene acceso a esta sede'})
     return x_sede
+
+
+async def require_role_access(request: Request, identity: VerifiedIdentity = Depends(get_current_identity), settings: Settings = Depends(get_settings)):
+    rol = request.headers.get('x-rol')
+    if not identity.email_verified or rol not in roles_permitidos(identity.email, settings) or not puede_usar_ruta(rol, request.method, request.url.path):
+        raise HTTPException(403, detail={'code':'PERFIL_NO_AUTORIZADO','message':'Este perfil no tiene permiso para realizar esta operación'})
+    return rol
