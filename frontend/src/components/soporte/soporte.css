@@ -22,3 +22,12 @@
 .soporte-chat-abierto .soporte-conversacion{padding:14px}
 .soporte-chat-abierto .soporte-mensajes{height:250px;max-height:32dvh}
 @media(max-width:480px){.soporte-flotante{right:16px;bottom:24px;max-height:calc(100dvh - 48px)}.soporte-compacto .soporte-capsula input{font-size:16px}}
+
+.soporte-flotante{width:min(420px,calc(100vw - 32px))}
+.soporte-chat-abierto .soporte-sin-mensajes .soporte-mensajes{height:auto;max-height:none;padding:0 4px 12px}
+.soporte-chat-abierto .soporte-redactar textarea{background:#faf9f6;color:#272b35;border:0;border-radius:22px;padding:16px 18px;min-height:112px;font-size:14px;line-height:1.6}
+.soporte-chat-abierto .soporte-redactar textarea::placeholder{color:#777a82;opacity:1}
+.soporte-chat-abierto .soporte-redactar{border-top:0;padding-top:0}
+.soporte-chat-abierto .soporte-redactar label{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.soporte-chat-abierto .soporte-primary{border-radius:999px;background:#eceef3;color:#272b35;font-weight:500;padding:10px 18px}
+@media(max-width:480px){.soporte-chat-abierto .soporte-redactar textarea{font-size:16px}}
