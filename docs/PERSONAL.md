@@ -27,3 +27,9 @@ Pruebas: `python -m unittest discover -s tests`; frontend: `npm run build --pref
 El inicio saluda a Milena y conduce a Sedes. Solo Gerencia y Mensajes del equipo aparecen en la navegación principal de ese rol. Empleados y consulta de instalaciones están dentro de cada sede existente; Gerencia no puede crear instalaciones, tampoco mediante las rutas de registro del servidor.
 
 Crear sede registra una ficha administrativa de nombre y ciudad, con auditoría y prevención de duplicados. No crea esquemas operativos, inventario, cuentas ni permisos: la tarjeta lo indica como funciones pendientes de configuración. Ejecutar `scripts/preparar_sedes_gerencia.py --apply` desde backend antes de desplegar esta versión. Los catorce espacios operativos existentes se conservan.
+
+## Resumen de sede
+
+Cada sede operativa tiene dirección editable por Gerencia, enlace opcional de Google Maps, indicadores y tarjetas para ventas, inventario, empleados, garantías, pendientes e instalaciones. Las ventas se suman desde el inicio del mes en Colombia hasta el momento actual, excluyendo anuladas, y se informa si faltan precios. Las garantías son atenciones registradas según fecha de atención: no se presupone estado abierto/resuelto porque el registro actual no lo tiene.
+
+Pendientes significa asuntos administrativos (contrato, luz, agua, internet u otros), no instalaciones sin terminar. Gerencia registra cada vencimiento, completa o reabre el pendiente. No hay recurrencia automática; cada obligación mensual se registra individualmente. Las consultas y cambios están limitados a la sede autorizada y conservan auditoría. Las tablas de direcciones y pendientes son centrales con RLS; preparar con `scripts/preparar_direcciones.py --apply` antes de desplegar.

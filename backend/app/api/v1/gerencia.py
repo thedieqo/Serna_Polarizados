@@ -131,3 +131,35 @@ def crear_sede(payload:NuevaSede,identity=Depends(require_gerencia),db=Depends(g
  except IntegrityError as exc:
   db.rollback();raise HTTPException(409,detail='Esta sede ya está registrada.') from exc
  return {'id':ident,'nombre':etiqueta,'operativa':False,'lavadero':False}
+
+class DireccionSede(BaseModel):
+ model_config=ConfigDict(extra='forbid',str_strip_whitespace=True)
+ direccion:str=Field(min_length=5,max_length=250)
+ ubicacion:str=Field(default='',max_length=500,pattern=r'^(|https://maps\.app\.goo\.gl/[^\s]+|https://(?:www\.)?google\.com/maps[^\s]*)$')
+ revision:int=Field(ge=0)
+
+def verificar_sede(db,sede):
+ if sede not in SEDES and not db.scalar(select(sedes_nuevas.c.id).where(sedes_nuevas.c.id==sede)):
+  raise HTTPException(404,detail='Sede no encontrada.')
+
+@router.get('/sedes/{sede}/direccion')
+def direccion_sede(sede:str,db=Depends(get_soporte_db)):
+ from app.db.gerencia_tables import sedes_datos
+ verificar_sede(db,sede)
+ r=db.execute(select(sedes_datos).where(sedes_datos.c.sede==sede)).mappings().first()
+ return dict(r) if r else {'sede':sede,'direccion':'','ubicacion':'','revision':0}
+
+@router.put('/sedes/{sede}/direccion',dependencies=[Depends(require_write_access)])
+def guardar_direccion(sede:str,payload:DireccionSede,identity=Depends(require_gerencia),db=Depends(get_soporte_db)):
+ from app.db.gerencia_tables import sedes_datos
+ verificar_sede(db,sede)
+ r=db.execute(select(sedes_datos).where(sedes_datos.c.sede==sede).with_for_update()).mappings().first()
+ if (r['revision'] if r else 0)!=payload.revision:raise HTTPException(409,detail='La dirección cambió. Actualiza antes de guardar.')
+ valores={'direccion':payload.direccion,'ubicacion':payload.ubicacion,'revision':payload.revision+1}
+ try:
+  if r:db.execute(update(sedes_datos).where(sedes_datos.c.sede==sede).values(**valores))
+  else:db.execute(insert(sedes_datos).values(sede=sede,**valores))
+  auditar(db,sede,identity.email,'direccion_actualizada','Actualización de dirección de sede',{'direccion':r['direccion'] if r else None},valores);db.commit()
+ except IntegrityError as exc:
+  db.rollback();raise HTTPException(409,detail='La dirección cambió. Actualiza antes de guardar.') from exc
+ return {'sede':sede,**valores}

@@ -20,3 +20,17 @@ sedes_nuevas=Table('gerencia_sedes_nuevas',metadata,
  Column('ciudad',String(100),nullable=False),Column('clave',String(220),nullable=False,unique=True),
  Column('creado_por',String(254),nullable=False),
  Column('created_at',DateTime(timezone=True),nullable=False,server_default=func.now()))
+
+sedes_datos=Table('gerencia_sedes_datos',metadata,
+ Column('sede',String,primary_key=True),Column('direccion',String(250),nullable=False),
+ Column('ubicacion',String(500),nullable=False,default=''),
+ Column('revision',Integer,nullable=False,default=1))
+
+
+from sqlalchemy import Date
+pendientes_sede=Table('gerencia_pendientes_sede',metadata,
+ Column('id',String,primary_key=True),Column('sede',String(40),nullable=False,index=True),
+ Column('titulo',String(150),nullable=False),Column('categoria',String(30),nullable=False),
+ Column('vencimiento',Date,nullable=False),Column('completado',Boolean,nullable=False,default=False),
+ Column('revision',Integer,nullable=False,default=1),Column('creado_por',String(254),nullable=False),
+ Column('created_at',DateTime(timezone=True),nullable=False,server_default=func.now()))
