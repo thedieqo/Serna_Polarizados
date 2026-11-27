@@ -8,14 +8,15 @@ from sqlalchemy.exc import IntegrityError
 from app.api.v1.soporte import get_soporte_db,require_gerencia
 from app.core.auth import require_write_access
 from app.core.sedes import SEDES
-from app.db.gerencia_tables import equipo,actividad
+from app.db.gerencia_tables import equipo,actividad,sedes_nuevas
+import unicodedata
 
 router=APIRouter(prefix='/gerencia/gestion',tags=['gerencia'],dependencies=[Depends(require_gerencia)])
 PERFILES={'gerencia':'Gerencia','auxiliar_gerencia':'Auxiliar de gerencia','propietario':'Dueño','ingeniero':'Ingeniero de pruebas','administrador':'Administrador de sede','instalador':'Instalador','instalador_ppf':'Instalador de PPF','auxiliar_administrativo':'Auxiliar administrativo'}
 GLOBALES={'gerencia','auxiliar_gerencia','propietario','ingeniero'}
 
 def sedes_catalogo():
- return [{'id':k,'nombre':v['nombre'],'lavadero':k=='mirolindo'} for k,v in SEDES.items()]
+ return [{'id':k,'nombre':v['nombre'],'lavadero':k=='mirolindo','operativa':True} for k,v in SEDES.items()]
 
 def resumen_empleado(row):
  return {k:row[k] for k in ('id','nombre','email','perfil','sede','activo','es_prueba','revision')}
@@ -52,7 +53,9 @@ class Estado(BaseModel):
 def resumen(db=Depends(get_soporte_db)):
  from app.db.personal_tables import fichas
  conteos=db.execute(select(equipo.c.sede,func.count().label('total'),func.sum(case(((equipo.c.activo.is_(True)) & (fichas.c.estado=='activo'),1),else_=0)).label('activos')).select_from(equipo.outerjoin(fichas,fichas.c.empleado_id==equipo.c.id)).group_by(equipo.c.sede)).mappings().all()
- return {'sedes':sedes_catalogo(),'perfiles':PERFILES,'equipo_por_sede':[dict(x) for x in conteos], 'total_empleados':sum(x['total'] for x in conteos),'activos':sum(x['activos'] or 0 for x in conteos),'modo':'pruebas'}
+ nuevas=db.execute(select(sedes_nuevas).order_by(sedes_nuevas.c.created_at)).mappings().all()
+ catalogo=sedes_catalogo()+[{'id':r['id'],'nombre':r['nombre']+' ('+r['ciudad']+')','lavadero':False,'operativa':False} for r in nuevas]
+ return {'sedes':catalogo,'perfiles':PERFILES,'equipo_por_sede':[dict(x) for x in conteos], 'total_empleados':sum(x['total'] for x in conteos),'activos':sum(x['activos'] or 0 for x in conteos),'modo':'pruebas'}
 
 @router.get('/empleados')
 def listar(q:str=Query('',max_length=120),sede:str|None=None,perfil:str|None=None,offset:int=Query(0,ge=0),db=Depends(get_soporte_db)):
@@ -106,3 +109,25 @@ def historial(empleado_id:UUID|None=None,offset:int=Query(0,ge=0),db=Depends(get
  if empleado_id:q=q.where(actividad.c.empleado_id==str(empleado_id))
  filas=db.execute(q.order_by(actividad.c.id.desc()).offset(offset).limit(51)).mappings().all()
  return {'actividad':[dict(r) for r in filas[:50]],'hay_mas':len(filas)>50}
+
+
+class NuevaSede(BaseModel):
+ model_config=ConfigDict(extra='forbid',str_strip_whitespace=True)
+ nombre:str=Field(min_length=2,max_length=100)
+ ciudad:str=Field(min_length=2,max_length=100)
+
+def clave_sede(nombre):
+ return ''.join(c for c in unicodedata.normalize('NFKD',nombre.casefold()) if c.isalnum())
+
+@router.post('/sedes',dependencies=[Depends(require_write_access)])
+def crear_sede(payload:NuevaSede,identity=Depends(require_gerencia),db=Depends(get_soporte_db)):
+ etiqueta=payload.nombre+' ('+payload.ciudad+')';clave=clave_sede(etiqueta)
+ if any(clave_sede(s['nombre'])==clave for s in SEDES.values()):
+  raise HTTPException(409,detail='Esta sede ya está registrada.')
+ ident=str(uuid4())
+ try:
+  db.execute(insert(sedes_nuevas).values(id=ident,nombre=payload.nombre,ciudad=payload.ciudad,clave=clave,creado_por=identity.email))
+  auditar(db,ident,identity.email,'sede_creada','Registro de sede; funciones operativas pendientes',None,{'nombre':etiqueta,'operativa':False});db.commit()
+ except IntegrityError as exc:
+  db.rollback();raise HTTPException(409,detail='Esta sede ya está registrada.') from exc
+ return {'id':ident,'nombre':etiqueta,'operativa':False,'lavadero':False}

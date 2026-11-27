@@ -28,3 +28,8 @@ class RolesTests(TestCase):
                 self.assertEqual(client.get('/api/v1/auth/session',headers={'X-Rol':'propietario','X-Sede':'cali'}).json()['authorized'],True)
                 self.assertEqual(client.get('/api/v1/auth/session',headers={'X-Rol':'inventado','X-Sede':'cali'}).json()['authorized'],False)
         finally: app.dependency_overrides.clear()
+    def test_gerencia_no_crea_instalaciones(self):
+        for path in ['/api/v1/instalaciones/registro','/api/v1/instalaciones/','/api/v1/instalaciones/preview']:
+            self.assertFalse(puede_usar_ruta('gerencia','POST',path))
+        self.assertTrue(puede_usar_ruta('gerencia','GET','/api/v1/instalaciones/historial'))
+        self.assertTrue(puede_usar_ruta('administrador','POST','/api/v1/instalaciones/registro'))

@@ -21,3 +21,9 @@ Almacenados en PostgreSQL con RLS, sin URL pública. Solo Gerencia carga y desca
 Desde backend: `.venv/bin/python scripts/preparar_personal.py` muestra el plan; agregar `--apply` crea las tres tablas faltantes y habilita RLS. Migración aditiva e idempotente, sin modificar empleados ni permisos existentes. Aplicar antes del despliegue.
 
 Pruebas: `python -m unittest discover -s tests`; frontend: `npm run build --prefix frontend` y pruebas de pagos existentes. Cobertura de privacidad por rol/sede, archivos, requisitos de activación, cédula duplicada, revisión obsoleta, aprobación/rechazo, decisiones repetidas y conservación de identificadores. La comprobación adicional de interacción utiliza React con DOM simulado, no un navegador real.
+
+## Inicio de Gerencia
+
+El inicio saluda a Milena y conduce a Sedes. Solo Gerencia y Mensajes del equipo aparecen en la navegación principal de ese rol. Empleados y consulta de instalaciones están dentro de cada sede existente; Gerencia no puede crear instalaciones, tampoco mediante las rutas de registro del servidor.
+
+Crear sede registra una ficha administrativa de nombre y ciudad, con auditoría y prevención de duplicados. No crea esquemas operativos, inventario, cuentas ni permisos: la tarjeta lo indica como funciones pendientes de configuración. Ejecutar `scripts/preparar_sedes_gerencia.py --apply` desde backend antes de desplegar esta versión. Los catorce espacios operativos existentes se conservan.

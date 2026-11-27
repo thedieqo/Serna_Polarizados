@@ -15,7 +15,9 @@ def sedes_perfil(email, rol, settings):
 
 
 def puede_usar_ruta(rol, metodo, ruta):
-    if rol == 'gerencia': return True
+    if rol == 'gerencia':
+        # Gerencia consulta instalaciones por sede; su registro corresponde al administrador.
+        return not (metodo == 'POST' and ruta.rstrip('/') in ('/api/v1/instalaciones','/api/v1/instalaciones/registro','/api/v1/instalaciones/preview'))
     if rol == 'propietario':
         return metodo == 'GET' and ruta == '/api/v1/instalaciones/ventas/resumen'
     if rol == 'instalador':

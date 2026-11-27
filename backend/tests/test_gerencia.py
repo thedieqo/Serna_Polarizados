@@ -64,3 +64,16 @@ class GerenciaTests(TestCase):
   self.assertEqual([x['id'] for x in r['sedes'] if x['lavadero']],['mirolindo'])
   self.assertEqual(self.c.get(self.base+'/empleados',headers=self.h,params={'sede':'cali'}).json()['empleados'],[])
   self.assertEqual(len(self.c.get(self.base+'/empleados',headers=self.h,params={'q':'QA'}).json()['empleados']),1)
+ def test_crear_sede_solo_gerencia_sin_habilitar_operaciones(self):
+  from app.db.gerencia_tables import sedes_nuevas
+  datos={'nombre':'Centro de prueba','ciudad':'Ciudad de prueba'}
+  self.assertEqual(self.c.post(self.base+'/sedes',headers={'X-Rol':'administrador'},json=datos).status_code,403)
+  r=self.c.post(self.base+'/sedes',headers=self.h,json=datos)
+  self.assertEqual(r.status_code,200,r.text);self.assertFalse(r.json()['operativa'])
+  self.assertEqual(self.c.post(self.base+'/sedes',headers=self.h,json=datos|{'nombre':'CENTRO DE PRUEBA'}).status_code,409)
+  self.assertEqual(self.c.post(self.base+'/sedes',headers=self.h,json={'nombre':'El Carmen','ciudad':'Ibagué'}).status_code,409)
+  result=self.c.get(self.base+'/resumen',headers=self.h).json()
+  self.assertEqual(len(result['sedes']),15)
+  with Session(self.bind) as db:
+   self.assertEqual(db.scalar(select(func.count()).select_from(sedes_nuevas)),1)
+   self.assertEqual(db.scalar(select(actividad.c.actor).where(actividad.c.accion=='sede_creada')),CUENTA_PRUEBAS)

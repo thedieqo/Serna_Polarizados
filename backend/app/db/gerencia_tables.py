@@ -13,3 +13,10 @@ actividad=Table('gerencia_actividad',metadata,
  Column('actor',String(254),nullable=False),Column('accion',String(40),nullable=False),
  Column('motivo',String(300),nullable=False),Column('antes',JSON),Column('despues',JSON),
  Column('created_at',DateTime(timezone=True),nullable=False,server_default=func.now()))
+
+# Fichas de sedes nuevas; su configuración operativa se realiza por separado.
+sedes_nuevas=Table('gerencia_sedes_nuevas',metadata,
+ Column('id',String,primary_key=True),Column('nombre',String(100),nullable=False),
+ Column('ciudad',String(100),nullable=False),Column('clave',String(220),nullable=False,unique=True),
+ Column('creado_por',String(254),nullable=False),
+ Column('created_at',DateTime(timezone=True),nullable=False,server_default=func.now()))
