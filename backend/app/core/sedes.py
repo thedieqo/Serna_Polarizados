@@ -3,6 +3,10 @@ SEDES = {'el-carmen': {'nombre': 'El Carmen (Ibagué)', 'correo': None, 'schema'
 
 SEDES.update({'7-de-agosto': {'nombre':'7 de Agosto (Bogotá)','correo':'','schema':'sede_7_de_agosto'}, 'porvenir': {'nombre':'Porvenir (Villavicencio)','correo':'','schema':'sede_porvenir'}, 'santo-tomas': {'nombre':'Santo Tomás (Villavicencio)','correo':'','schema':'sede_santo_tomas'}})
 
+CORREO_EL_CARMEN = 'sernapolarizadosibague.1@gmail.com'
+
 def permitidas(email, settings):
     email = email.strip().lower()
+    if email == CORREO_EL_CARMEN:
+        return ['el-carmen'] if email in settings.admin_emails else []
     return [k for k,v in SEDES.items() if (email in settings.admin_emails if v['correo'] is None else email == v['correo'])]

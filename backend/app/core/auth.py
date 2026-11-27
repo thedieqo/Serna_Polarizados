@@ -2,7 +2,7 @@ from typing import Annotated
 from fastapi import Depends, Header, HTTPException, Request, status
 
 from app.core.config import Settings, get_settings
-from app.core.sedes import SEDES, permitidas
+from app.core.sedes import SEDES, permitidas, CORREO_EL_CARMEN
 from app.core.roles import roles_permitidos, sedes_perfil, puede_usar_ruta
 from app.core.token_verifier import (
     TokenVerificationError,
@@ -128,6 +128,7 @@ async def require_role_access(request: Request, identity: VerifiedIdentity = Dep
 
 
 def acceso_sede(email, rol, sede, settings):
+    if email.strip().lower() == CORREO_EL_CARMEN and sede != 'el-carmen': return False
     if sede not in SEDES: return False
     if rol != 'instalador':
         return sede in sedes_perfil(email, rol, settings)
@@ -162,6 +163,8 @@ def accesos_identidad(identity, settings):
     # La cuenta temporal conserva sus permisos explícitos; las demás requieren aprobación real.
     if identity.email.lower() != CUENTA_PRUEBAS:
         permisos['instalador'] = sedes_instalador_aprobado(identity.email)
+    if identity.email.strip().lower() == CORREO_EL_CARMEN:
+        permisos = {rol:[s for s in sedes if s == 'el-carmen'] for rol,sedes in permisos.items()}
     perfiles = [{'rol':rol, 'sedes':[{'id':sede,'nombre':SEDES[sede]['nombre']} for sede in sedes]}
                 for rol, sedes in permisos.items() if sedes]
     return {'email':identity.email, 'perfiles':perfiles,

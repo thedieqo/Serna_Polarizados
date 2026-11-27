@@ -68,3 +68,36 @@ class SedesTests(TestCase):
                 self.assertEqual(cliente.get('/api/v1/instalaciones/historial').status_code,400)
         finally:
             app.dependency_overrides.clear()
+
+    def test_correo_el_carmen_exclusivo_y_revocable(self):
+        email='sernapolarizadosibague.1@gmail.com'
+        settings=Settings(ADMIN_EMAILS=email+',uno@example.com')
+        self.assertEqual(permitidas(email.upper(),settings),['el-carmen'])
+        self.assertEqual(permitidas(email,self.settings),[])
+        self.assertEqual(permitidas('uno@example.com',settings),['el-carmen','mirolindo'])
+        from app.core.auth import acceso_sede,accesos_identidad
+        from unittest.mock import patch
+        self.assertTrue(acceso_sede(email,'administrador','el-carmen',settings))
+        for rol in ['administrador','instalador','gerencia','propietario']:
+            self.assertFalse(acceso_sede(email,rol,'mirolindo',settings))
+        with patch('app.core.auth.sedes_instalador_aprobado',return_value=['mirolindo']):
+            r=accesos_identidad(self.identity(email),settings)
+        self.assertEqual(r['perfiles'],[{'rol':'administrador','sedes':[{'id':'el-carmen','nombre':'El Carmen (Ibagué)'}]}])
+
+    def test_api_el_carmen_no_puede_cambiar_a_mirolindo(self):
+        from fastapi.testclient import TestClient
+        from app.main import app
+        from app.core.auth import get_current_identity
+        from app.core.config import get_settings
+        email='sernapolarizadosibague.1@gmail.com'
+        app.dependency_overrides[get_current_identity]=lambda:self.identity(email)
+        app.dependency_overrides[get_settings]=lambda:Settings(ADMIN_EMAILS=email)
+        try:
+            with TestClient(app) as cliente:
+                h={'X-Rol':'administrador','X-Sede':'el-carmen'}
+                self.assertTrue(cliente.get('/api/v1/auth/session',headers=h).json()['authorized'])
+                h['X-Sede']='mirolindo'
+                self.assertFalse(cliente.get('/api/v1/auth/session',headers=h).json()['authorized'])
+                for ruta in ['/api/v1/instalaciones/historial','/api/v1/clientes/','/api/v1/inventario']:
+                    self.assertEqual(cliente.get(ruta,headers=h).status_code,403)
+        finally:app.dependency_overrides.clear()
