@@ -3,7 +3,7 @@ from datetime import datetime,timezone
 from uuid import UUID,uuid4
 from fastapi import APIRouter,Depends,HTTPException,Query
 from pydantic import BaseModel,ConfigDict,Field,model_validator
-from sqlalchemy import select,insert,update,func,Integer
+from sqlalchemy import select,insert,update,func,Integer,case
 from sqlalchemy.exc import IntegrityError
 from app.api.v1.soporte import get_soporte_db,require_gerencia
 from app.core.auth import require_write_access
@@ -50,7 +50,8 @@ class Estado(BaseModel):
 
 @router.get('/resumen')
 def resumen(db=Depends(get_soporte_db)):
- conteos=db.execute(select(equipo.c.sede,func.count().label('total'),func.sum(equipo.c.activo.cast(Integer)).label('activos')).group_by(equipo.c.sede)).mappings().all()
+ from app.db.personal_tables import fichas
+ conteos=db.execute(select(equipo.c.sede,func.count().label('total'),func.sum(case(((equipo.c.activo.is_(True)) & (fichas.c.estado=='activo'),1),else_=0)).label('activos')).select_from(equipo.outerjoin(fichas,fichas.c.empleado_id==equipo.c.id)).group_by(equipo.c.sede)).mappings().all()
  return {'sedes':sedes_catalogo(),'perfiles':PERFILES,'equipo_por_sede':[dict(x) for x in conteos], 'total_empleados':sum(x['total'] for x in conteos),'activos':sum(x['activos'] or 0 for x in conteos),'modo':'pruebas'}
 
 @router.get('/empleados')
@@ -64,7 +65,7 @@ def listar(q:str=Query('',max_length=120),sede:str|None=None,perfil:str|None=Non
 
 @router.post('/empleados',dependencies=[Depends(require_write_access)])
 def crear(payload:Datos,identity=Depends(require_gerencia),db=Depends(get_soporte_db)):
- ident=str(uuid4());datos=payload.model_dump()|{'id':ident,'activo':True,'es_prueba':True,'revision':1}
+ ident=str(uuid4());datos=payload.model_dump()|{'id':ident,'activo':False,'es_prueba':True,'revision':1}
  try:
   db.execute(insert(equipo).values(**datos));auditar(db,ident,identity.email,'creado','Registro de prueba',None,datos);db.commit()
  except IntegrityError as exc:
@@ -79,7 +80,14 @@ def obtener(db,ident,revision):
 
 @router.put('/empleados/{ident}',dependencies=[Depends(require_write_access)])
 def editar(ident:UUID,payload:Edicion,identity=Depends(require_gerencia),db=Depends(get_soporte_db)):
- antes=obtener(db,ident,payload.revision);datos=payload.model_dump(exclude={'revision','motivo'});despues=antes|datos|{'revision':antes['revision']+1}
+ antes=obtener(db,ident,payload.revision)
+ from app.api.v1.personal import ficha
+ f=ficha(db,ident)
+ if f['estado']=='activo' and any(getattr(payload,k)!=antes[k] for k in ('email','perfil','sede')):
+  raise HTTPException(409,detail='Desactiva primero para cambiar correo o cargo. Para cambiar de sede utiliza Traslados.')
+ if f['estado']=='activo' and payload.nombre!=antes['nombre']:
+  raise HTTPException(409,detail='Actualiza el nombre desde la ficha del empleado.')
+ datos=payload.model_dump(exclude={'revision','motivo'});despues=antes|datos|{'revision':antes['revision']+1}
  try:
   db.execute(update(equipo).where(equipo.c.id==str(ident)).values(**datos,revision=despues['revision'],updated_at=datetime.now(timezone.utc)))
   auditar(db,str(ident),identity.email,'modificado',payload.motivo,antes,despues);db.commit()
@@ -89,16 +97,12 @@ def editar(ident:UUID,payload:Edicion,identity=Depends(require_gerencia),db=Depe
 
 @router.put('/empleados/{ident}/estado',dependencies=[Depends(require_write_access)])
 def estado(ident:UUID,payload:Estado,identity=Depends(require_gerencia),db=Depends(get_soporte_db)):
- antes=obtener(db,ident,payload.revision)
- if antes['activo']==payload.activo:return antes
- despues=antes|{'activo':payload.activo,'revision':antes['revision']+1}
- db.execute(update(equipo).where(equipo.c.id==str(ident)).values(activo=payload.activo,revision=despues['revision'],updated_at=datetime.now(timezone.utc)))
- auditar(db,str(ident),identity.email,'reactivado' if payload.activo else 'desactivado',payload.motivo,antes,despues);db.commit()
- return despues
+ from app.api.v1.personal import estado as cambiar, Estado as EstadoPersonal
+ return cambiar(ident,EstadoPersonal(**payload.model_dump()),{'email':identity.email,'gerente':True},db)
 
 @router.get('/actividad')
 def historial(empleado_id:UUID|None=None,offset:int=Query(0,ge=0),db=Depends(get_soporte_db)):
- q=select(actividad)
+ q=select(actividad,equipo.c.nombre.label('empleado_nombre')).outerjoin(equipo,equipo.c.id==actividad.c.empleado_id)
  if empleado_id:q=q.where(actividad.c.empleado_id==str(empleado_id))
  filas=db.execute(q.order_by(actividad.c.id.desc()).offset(offset).limit(51)).mappings().all()
  return {'actividad':[dict(r) for r in filas[:50]],'hay_mas':len(filas)>50}

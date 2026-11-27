@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select, insert, update
 from sqlalchemy.exc import IntegrityError
-from app.core.auth import get_current_identity, require_write_access
+from app.core.auth import get_current_identity, require_write_access, require_sede
 from app.db.session import get_db
 from app.db.registro_tables import trabajadores, trabajador_auditoria
 from app.services import trabajo
@@ -56,15 +56,26 @@ def listar(db=Depends(get_db)):
     return {'instaladores':[dict(r) for r in db.execute(select(trabajadores).order_by(trabajadores.c.nombre)).mappings()]}
 
 @router.post('/gerencia/instaladores', dependencies=[Depends(require_write_access)])
-def aprobar(payload: Aprobacion, identity=Depends(get_current_identity), db=Depends(get_db)):
+def aprobar(payload: Aprobacion, identity=Depends(get_current_identity), db=Depends(get_db), sede=Depends(require_sede)):
     email = payload.email.lower()
+    from app.db.gerencia_tables import equipo
+    from app.api.v1.personal import ficha, faltantes
+    from app.services.personal import sincronizar_instalador
+    persona = db.execute(select(equipo).where(equipo.c.email == email).with_for_update()).mappings().first()
+    if payload.activo:
+        if not persona:
+            raise HTTPException(422, detail='Crea y completa primero la ficha en Gerencia → Empleados.')
+        f = ficha(db, persona['id'])
+        if not persona['activo'] or f['estado'] != 'activo' or persona['sede'] != sede or persona['perfil'] not in ('instalador', 'instalador_ppf') or faltantes(db, persona, f['datos']):
+            raise HTTPException(422, detail='La ficha debe estar completa, activa y asignada como instalador a esta sede.')
     actual = db.execute(select(trabajadores).where(trabajadores.c.email == email).with_for_update()).mappings().first()
     ident = actual['id'] if actual else str(uuid4())
-    valores = {'nombre':payload.nombre,'email':email,'activo':payload.activo,'aprobado_por':identity.email,'updated_at':datetime.now(timezone.utc)}
+    valores = {'nombre':persona['nombre'] if persona else payload.nombre,'email':email,'activo':payload.activo,'aprobado_por':identity.email,'updated_at':datetime.now(timezone.utc)}
     try:
         if actual: db.execute(update(trabajadores).where(trabajadores.c.id == ident).values(**valores))
         else: db.execute(insert(trabajadores).values(id=ident,**valores))
         db.execute(insert(trabajador_auditoria).values(trabajador_id=ident,actor=identity.email,accion='aprobado' if payload.activo else 'desactivado'))
+        if persona: sincronizar_instalador(db,persona,sede,payload.activo,identity.email)
         db.commit()
     except IntegrityError as exc:
         db.rollback()

@@ -298,7 +298,7 @@ class RoutingProtectionTests(TestCase):
             route
             for route in app.routes
             if getattr(route, "path", "").startswith("/api/v1/")
-            and not getattr(route, "path", "").startswith(("/api/v1/auth/", "/api/v1/soporte/", "/api/v1/gerencia/gestion/"))
+            and not getattr(route, "path", "").startswith(("/api/v1/auth/", "/api/v1/soporte/", "/api/v1/gerencia/gestion/", "/api/v1/personal/"))
         ]
         self.assertTrue(business_routes)
         for route in business_routes:

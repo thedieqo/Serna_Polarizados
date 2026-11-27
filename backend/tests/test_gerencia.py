@@ -1,4 +1,5 @@
 from unittest import TestCase
+from unittest.mock import patch
 from sqlalchemy import create_engine,select,func
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
@@ -13,6 +14,7 @@ from app.db.gerencia_tables import metadata,equipo,actividad
 
 class GerenciaTests(TestCase):
  def setUp(self):
+  sync=patch("app.api.v1.personal.sincronizar_instalador");sync.start();self.addCleanup(sync.stop)
   self.engine=create_engine('sqlite://',connect_args={'check_same_thread':False},poolclass=StaticPool)
   self.bind=self.engine.execution_options(schema_translate_map={'public':None});metadata.create_all(self.bind)
   self.email=CUENTA_PRUEBAS;self.verificada=True
@@ -34,7 +36,7 @@ class GerenciaTests(TestCase):
   with Session(self.bind) as db:
    e=db.execute(select(equipo)).mappings().one();self.assertFalse(e['activo']);self.assertTrue(e['es_prueba'])
    eventos=db.execute(select(actividad).order_by(actividad.c.id)).mappings().all()
-   self.assertEqual([x['accion'] for x in eventos],['creado','modificado','desactivado'])
+   self.assertEqual([x['accion'] for x in eventos],['creado','modificado','personal_inactivo'])
    self.assertEqual(eventos[1]['antes']['nombre'],'Empleado QA');self.assertEqual(eventos[1]['despues']['nombre'],'Empleado actualizado')
    self.assertTrue(all(x['actor']==CUENTA_PRUEBAS for x in eventos))
   self.assertEqual(self.c.delete(ruta,headers=self.h).status_code,405)

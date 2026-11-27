@@ -13,7 +13,7 @@ No se ejecutan servidores ni se instalan dependencias en esta tarea.
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1 import auth, clientes, instalaciones, vehiculos, inventario, mi_trabajo, soporte, gerencia
+from app.api.v1 import auth, clientes, instalaciones, vehiculos, inventario, mi_trabajo, soporte, gerencia, personal
 from app.core.auth import require_sede, require_role_access
 from app.core.config import settings
 
@@ -63,3 +63,5 @@ app.include_router(mi_trabajo.router, prefix="/api/v1", dependencies=protegido)
 app.include_router(soporte.router, prefix="/api/v1")
 
 app.include_router(gerencia.router, prefix="/api/v1")
+
+app.include_router(personal.router, prefix="/api/v1")
