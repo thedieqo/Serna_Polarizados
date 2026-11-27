@@ -6,9 +6,10 @@ import {errorSoporte} from '../components/soporte/Conversacion'
 import './gerencia.css'
 type Sede={id:string;nombre:string;lavadero:boolean;operativa:boolean}
 type Resumen={sedes:Sede[];equipo_por_sede:{sede:string|null;total:number;activos:number}[]}
-export default function GerenciaPage({seleccionarSede}:{seleccionarSede:(sede:string)=>Promise<void>}){
+export default function GerenciaPage({seleccionarSede,sedeInicial=null}:{seleccionarSede:(sede:string)=>Promise<void>;sedeInicial?:string|null}){
  const [vista,setVista]=useState('inicio'),[resumen,setResumen]=useState<Resumen|null>(null),[sede,setSede]=useState<Sede|null>(null),[seccion,setSeccion]=useState('inicio'),[error,setError]=useState(''),[busy,setBusy]=useState(false),[revision,setRevision]=useState(0),[formulario,setFormulario]=useState(false),[nombre,setNombre]=useState(''),[ciudad,setCiudad]=useState('')
  useEffect(()=>{let vigente=true;void api.get('/gerencia/gestion/resumen').then(r=>{if(vigente)setResumen(r.data)}).catch(e=>{if(vigente)setError(errorSoporte(e))});return()=>{vigente=false}},[revision])
+ useEffect(()=>{if(sedeInicial&&resumen&&!sede){const destino=resumen.sedes.find(s=>s.id===sedeInicial);if(destino){setSede(destino);setVista('sedes')}}},[sedeInicial,!!resumen])
  function irSedes(){setVista('sedes');setSede(null);setSeccion('inicio');setError('')}
  async function entrar(s:Sede){setBusy(true);setError('');try{if(s.operativa)await seleccionarSede(s.id);setSede(s);setSeccion('inicio')}catch(e){setError(errorSoporte(e))}finally{setBusy(false)}}
  async function crear(){setBusy(true);setError('');try{const r=await api.post('/gerencia/gestion/sedes',{nombre,ciudad});setFormulario(false);setNombre('');setCiudad('');setRevision(v=>v+1);setSede(r.data);setSeccion('inicio')}catch(e){setError(errorSoporte(e))}finally{setBusy(false)}}
