@@ -1,3 +1,4 @@
+import {useNavigation} from './lib/useNavigation'
 import PersonalPage from './pages/PersonalPage'
 import GerenciaPage from './pages/GerenciaPage'
 import SoporteChat, {abrirSoporte} from './components/soporte/SoporteChat'
@@ -27,9 +28,14 @@ const navItems: Array<{ id: Tab; label: string }> = [
   { id: 'mi-trabajo', label: 'Mi trabajo' },
 ]
 
-function AppShell() {
-  const [activeTab, setActiveTab] = useState<Tab>('gerencia')
-  const [sedeGerencia,setSedeGerencia] = useState<string|null>(null)
+function AppShell(){
+ const {loading,authorized,email,rol}=useAuth()
+ if(loading||!authorized)return <LoginScreen/>
+ return <Workspace key={`${email}:${rol}`}/>
+}
+
+function Workspace() {
+  const [activeTab, setActiveTab] = useNavigation('tab','gerencia')
   const { loading, authorized, email, signOut, rol, entrar, perfiles } = useAuth()
 
   const permitidas = rol === 'propietario' ? ['ventas'] : rol === 'instalador' ? ['mi-trabajo'] : rol === 'administrador' ? ['nueva','registro','inventario','personal'] : ['gerencia','mensajes']
@@ -92,7 +98,7 @@ function AppShell() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {rol!=='gerencia'&&perfiles.find(p=>p.rol===rol)?.sedes.length!>1&&<div className="flex flex-wrap items-center justify-end gap-3 mb-6"><label className="text-sm" htmlFor="gerencia-sede">Sede de trabajo</label><select id="gerencia-sede" disabled={cambiando} className="rounded-lg border px-3 py-2 text-sm" value={sessionStorage.getItem('serna-sede')||''} onChange={e=>void abrir(tab,e.target.value)}>{perfiles.find(p=>p.rol===rol)?.sedes.map(s=><option key={s.id} value={s.id}>{s.nombre}</option>)}</select></div>}
         {cambioError&&<p role="alert">{cambioError}</p>}
-        {tab === 'gerencia' && <GerenciaPage sedeInicial={sedeGerencia} seleccionarSede={async s=>{if(sessionStorage.getItem('serna-sede')!==s)await entrar('gerencia',s);setSedeGerencia(s)}} />}
+        {tab === 'gerencia' && <GerenciaPage seleccionarSede={async s=>{if(sessionStorage.getItem('serna-sede')!==s)await entrar('gerencia',s)}} />}
         <div key={sessionStorage.getItem('serna-sede')}>
         {tab === 'personal' && <PersonalPage sedeInicial={sessionStorage.getItem('serna-sede')||''} />}
         {tab === 'nueva' && <InstalacionForm />}

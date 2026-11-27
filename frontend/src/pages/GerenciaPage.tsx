@@ -1,3 +1,4 @@
+import {useNavigation} from '../lib/useNavigation'
 import {useEffect,useState} from 'react'
 import PanelSede from './PanelSede'
 import api from '../services/api'
@@ -6,12 +7,14 @@ import './gerencia.css'
 type Sede={id:string;nombre:string;lavadero:boolean;operativa:boolean}
 type Resumen={sedes:Sede[];equipo_por_sede:{sede:string|null;total:number;activos:number}[]}
 export default function GerenciaPage({seleccionarSede,sedeInicial=null}:{seleccionarSede:(sede:string)=>Promise<void>;sedeInicial?:string|null}){
- const [vista,setVista]=useState('inicio'),[resumen,setResumen]=useState<Resumen|null>(null),[sede,setSede]=useState<Sede|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[revision,setRevision]=useState(0),[formulario,setFormulario]=useState(false),[nombre,setNombre]=useState(''),[ciudad,setCiudad]=useState('')
+ const [vista,setVista]=useNavigation('gerencia-vista','inicio')
+ const [sedeGuardada,guardarSede]=useNavigation('gerencia-sede','')
+ const [resumen,setResumen]=useState<Resumen|null>(null),[sede,setSede]=useState<Sede|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[revision,setRevision]=useState(0),[formulario,setFormulario]=useState(false),[nombre,setNombre]=useState(''),[ciudad,setCiudad]=useState('')
  useEffect(()=>{let vigente=true;void api.get('/gerencia/gestion/resumen').then(r=>{if(vigente)setResumen(r.data)}).catch(e=>{if(vigente)setError(errorSoporte(e))});return()=>{vigente=false}},[revision])
- useEffect(()=>{if(sedeInicial&&resumen&&!sede){const destino=resumen.sedes.find(s=>s.id===sedeInicial);if(destino){setSede(destino);setVista('sedes')}}},[sedeInicial,!!resumen])
- function irSedes(){setVista('sedes');setSede(null);setError('')}
- async function entrar(s:Sede){setBusy(true);setError('');try{if(s.operativa)await seleccionarSede(s.id);setSede(s)}catch(e){setError(errorSoporte(e))}finally{setBusy(false)}}
- async function crear(){setBusy(true);setError('');try{const r=await api.post('/gerencia/gestion/sedes',{nombre,ciudad});setFormulario(false);setNombre('');setCiudad('');setRevision(v=>v+1);setSede(r.data)}catch(e){setError(errorSoporte(e))}finally{setBusy(false)}}
+ useEffect(()=>{if((sedeGuardada||sedeInicial)&&resumen&&!sede){const destino=resumen.sedes.find(s=>s.id===(sedeGuardada||sedeInicial)&&(!s.operativa||s.id===sessionStorage.getItem('serna-sede')));if(destino){setSede(destino);setVista('sedes')}}},[sedeInicial,!!resumen])
+ function irSedes(){setVista('sedes');guardarSede('');setSede(null);setError('')}
+ async function entrar(s:Sede){setBusy(true);setError('');try{guardarSede(s.id);if(s.operativa)await seleccionarSede(s.id);setSede(s)}catch(e){setError(errorSoporte(e))}finally{setBusy(false)}}
+ async function crear(){setBusy(true);setError('');try{const r=await api.post('/gerencia/gestion/sedes',{nombre,ciudad});setFormulario(false);setNombre('');setCiudad('');setRevision(v=>v+1);guardarSede(r.data.id);setSede(r.data)}catch(e){setError(errorSoporte(e))}finally{setBusy(false)}}
  return <div className="gerencia gerencia-simple">
  {error&&<p className="gerencia-error" role="alert">{error}</p>}
  {vista==='inicio'&&<section className="gerencia-bienvenida"><h2>Buen día, Milena</h2><p>Bienvenida a tu espacio de Gerencia.</p><button className="gerencia-entrada" onClick={irSedes}><span>Sedes</span><small>Encuentra cada sede y accede a su equipo.</small><strong>Ver sedes</strong></button></section>}

@@ -41,13 +41,23 @@ export function AuthProvider({children}:{children:ReactNode}){
   let active=true
   const client=supabase
   const reset=()=>{revision.current++;setSession(null);setEmail(null);setRol(null);setPerfiles([]);setAuthorized(false);setLoading(false);setError(null)}
-  void client.auth.getSession().then(({data,error:e})=>{if(!active)return;if(e){setLoading(false);setError('No pudimos recuperar tu sesión. Intenta iniciar sesión nuevamente.');return}setSession(data.session);if(data.session)void loadAccesses();else setLoading(false)})
+  let identity:string|null=null
+  let eventReceived=false
+  const receive=(next:Session|null)=>{
+   setSession(next)
+   if(!next){identity=null;reset();return}
+   // Supabase emite SIGNED_IN también al recuperar el foco. Un token nuevo
+   // no cambia el usuario ni debe desmontar su espacio de trabajo.
+   if(identity===next.user.id)return
+   identity=next.user.id
+   setAuthorized(false);setRol(null);setPerfiles([])
+   setTimeout(()=>{if(active&&identity===next.user.id)void loadAccesses()},0)
+  }
+  void client.auth.getSession().then(({data,error:e})=>{if(!active||eventReceived)return;if(e){setLoading(false);setError('No pudimos recuperar tu sesión. Intenta iniciar sesión nuevamente.');return}receive(data.session)})
   const {data}=client.auth.onAuthStateChange((_event,next)=>{
    if(!active)return
-   setSession(next)
-   if(!next){reset();return}
-   // Consultar fuera del callback evita bloquear la renovación de la sesión de Google.
-   setTimeout(()=>{if(active)void loadAccesses()},0)
+   eventReceived=true
+   receive(next)
   })
   const expired=()=>{reset();setError('La sesión expiró. Inicia sesión nuevamente.')}
   window.addEventListener('auth:expired',expired)

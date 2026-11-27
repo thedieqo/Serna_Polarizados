@@ -1,3 +1,4 @@
+import {useNavigation} from '../lib/useNavigation'
 import {useEffect,useState} from 'react'
 import api from '../services/api'
 import {errorSoporte} from '../components/soporte/Conversacion'
@@ -13,7 +14,9 @@ type Registro={id:string;titulo?:string;categoria?:string;vencimiento?:string;co
 const categorias:Record<string,string>={contrato:'Renovación de contrato',luz:'Servicio de luz',agua:'Servicio de agua',internet:'Servicio de internet',otro:'Otro pendiente'}
 const accesos=[['ventas','Ventas','Ventas del mes y liquidaciones.'],['inventario','Inventario','Material disponible en esta sede.'],['empleados','Empleados','Personas y capacidades del equipo.'],['garantias','Garantías','Consulta las atenciones registradas.'],['pendientes','Pendientes','Contratos, servicios y vencimientos.'],['registro','Instalaciones','Historial de instalaciones de la sede.']]
 export default function PanelSede({sede,alCambiar}:{sede:Sede;alCambiar:()=>void}){
- const [vista,setVista]=useState('inicio'),[direccion,setDireccion]=useState<Direccion|null>(null),[editando,setEditando]=useState(false),[calle,setCalle]=useState(''),[mapa,setMapa]=useState(''),[indicadores,setIndicadores]=useState<Indicadores|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[revision,setRevision]=useState(0)
+ const [savedVista,setVista]=useNavigation(`sede:${sede.id}:vista`,'inicio')
+ const vista=['inicio',...accesos.map(a=>a[0])].includes(savedVista)?savedVista:'inicio'
+ const [direccion,setDireccion]=useState<Direccion|null>(null),[editando,setEditando]=useState(false),[calle,setCalle]=useState(''),[mapa,setMapa]=useState(''),[indicadores,setIndicadores]=useState<Indicadores|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[revision,setRevision]=useState(0)
  const [lista,setLista]=useState<Registro[]>([]),[pagina,setPagina]=useState(0),[hayMas,setHayMas]=useState(false),[cargando,setCargando]=useState(false),[completados,setCompletados]=useState(false),[nuevo,setNuevo]=useState(false),[titulo,setTitulo]=useState(''),[categoria,setCategoria]=useState('contrato'),[vencimiento,setVencimiento]=useState('')
  useEffect(()=>{let activo=true;void api.get(`/gerencia/gestion/sedes/${sede.id}/direccion`).then(r=>{if(activo){setDireccion(r.data);setCalle(r.data.direccion);setMapa(r.data.ubicacion||'')}}).catch(e=>{if(activo)setError(errorSoporte(e))});return()=>{activo=false}},[sede.id])
  useEffect(()=>{if(!sede.operativa)return;let activo=true;setIndicadores(null);void api.get('/sede/resumen').then(r=>{if(activo)setIndicadores(r.data)}).catch(e=>{if(activo)setError(errorSoporte(e))});return()=>{activo=false}},[sede.id,sede.operativa,revision])
