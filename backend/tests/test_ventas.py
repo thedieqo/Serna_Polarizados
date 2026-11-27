@@ -88,3 +88,24 @@ class VentasTests(TestCase):
         self.assertEqual(reporte['sin_liquidacion'],1)
         self.assertEqual(reporte['totales']['administrador_cop'],0)
         self.assertEqual(reporte['instaladores'],[])
+
+    def test_pagos_por_fila_concuerdan_con_totales_y_no_estiman_historicos(self):
+        self.venta('2026-11-20T12:00:00')
+        self.venta('2026-11-21T12:00:00', historica=True)
+        fila = self.db.query(Instalacion).order_by(Instalacion.id).first()
+        datos = dict(fila.desglose_precios)
+        datos['cobro'] = {**datos['cobro'], 'pagos': [
+            {'medio': 'efectivo', 'monto_cop': 50000},
+            {'medio': 'transferencia', 'monto_cop': 150000}]}
+        fila.desglose_precios = datos
+        self.db.commit()
+        reporte = resumen_ventas(self.db, 2026, 11, 'mes')
+        mixta, historica = reporte['registros']
+        self.assertEqual(mixta['id'], fila.id)
+        self.assertEqual(mixta['pagos'], datos['cobro']['pagos'])
+        self.assertEqual(sum(p['monto_cop'] for p in mixta['pagos']), mixta['pagado_cop'])
+        self.assertEqual(mixta['saldo_cop'], 0)
+        self.assertEqual(reporte['medios'], {'efectivo': 50000, 'transferencia': 150000})
+        self.assertEqual(historica['pagos'], [])
+        self.assertIsNone(historica['pagado_cop'])
+        self.assertIsNone(historica['saldo_cop'])

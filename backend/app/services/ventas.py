@@ -49,7 +49,7 @@ def resumen_ventas(db: Session, anio: int, mes: int, corte: str, *, acumulado=Fa
             persona['total_cop'] += item['valor_cop']
             totales['instaladores_cop'] += item['valor_cop']
             persona['trabajos'].append({'codigo': f'SP{fila.id}', 'vidrio': item['vidrio'], 'panel': item['panel'], 'valor_cop': item['valor_cop']})
-        registros.append({'codigo': f'SP{fila.id}', 'fecha': fila.fecha, 'valor_cop': fila.precio_total_cop, 'administrador_cop': cobro.get('comision_admin_cop')})
+        registros.append({'id': fila.id, 'pagos': cobro.get('pagos', []), 'pagado_cop': cobro.get('pagado_cop'), 'saldo_cop': cobro.get('saldo_cop'), 'codigo': f'SP{fila.id}', 'fecha': fila.fecha, 'valor_cop': fila.precio_total_cop, 'administrador_cop': cobro.get('comision_admin_cop')})
     # Nuevos trabajos se liquidan por fecha de confirmación, aunque la venta sea de otro mes.
     q = select(realizados, confirmaciones.c.trabajador_id, trabajadores.c.nombre).select_from(
         realizados.join(confirmaciones, realizados.c.confirmacion_id == confirmaciones.c.id).join(trabajadores, trabajadores.c.id == confirmaciones.c.trabajador_id)
