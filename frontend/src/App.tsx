@@ -30,7 +30,8 @@ const navItems: Array<{ id: Tab; label: string }> = [
 
 function AppShell(){
  const {loading,authorized,email,rol}=useAuth()
- if(loading||!authorized)return <LoginScreen/>
+ if(loading)return <div className="min-h-screen bg-slate-50" aria-busy="true"><header className="bg-white border-b border-slate-200"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6"><h1 className="text-xl font-bold">Serna Polarizados</h1></div></header><main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><p role="status" className="text-sm text-slate-500">Recuperando tu espacio…</p></main></div>
+ if(!authorized)return <LoginScreen/>
  return <Workspace key={`${email}:${rol}`}/>
 }
 
@@ -98,7 +99,7 @@ function Workspace() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {rol!=='gerencia'&&perfiles.find(p=>p.rol===rol)?.sedes.length!>1&&<div className="flex flex-wrap items-center justify-end gap-3 mb-6"><label className="text-sm" htmlFor="gerencia-sede">Sede de trabajo</label><select id="gerencia-sede" disabled={cambiando} className="rounded-lg border px-3 py-2 text-sm" value={sessionStorage.getItem('serna-sede')||''} onChange={e=>void abrir(tab,e.target.value)}>{perfiles.find(p=>p.rol===rol)?.sedes.map(s=><option key={s.id} value={s.id}>{s.nombre}</option>)}</select></div>}
         {cambioError&&<p role="alert">{cambioError}</p>}
-        {tab === 'gerencia' && <GerenciaPage seleccionarSede={async s=>{if(sessionStorage.getItem('serna-sede')!==s)await entrar('gerencia',s)}} />}
+        {rol === 'gerencia' && <div hidden={tab!=='gerencia'}><GerenciaPage seleccionarSede={async s=>{if(sessionStorage.getItem('serna-sede')!==s)await entrar('gerencia',s)}} /></div>}
         <div key={sessionStorage.getItem('serna-sede')}>
         {tab === 'personal' && <PersonalPage sedeInicial={sessionStorage.getItem('serna-sede')||''} />}
         {tab === 'nueva' && <InstalacionForm />}

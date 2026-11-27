@@ -50,6 +50,7 @@ export function AuthProvider({children}:{children:ReactNode}){
    // no cambia el usuario ni debe desmontar su espacio de trabajo.
    if(identity===next.user.id)return
    identity=next.user.id
+   revision.current++
    setAuthorized(false);setRol(null);setPerfiles([])
    setTimeout(()=>{if(active&&identity===next.user.id)void loadAccesses()},0)
   }
@@ -77,9 +78,16 @@ export function AuthProvider({children}:{children:ReactNode}){
   setSession(null);setEmail(null);setRol(null);setPerfiles([]);setAuthorized(false);setError(null)
  },[])
  const entrar=useCallback(async(r:string,s:string)=>{
-  if(!perfiles.some(p=>p.rol===r&&p.sedes.some(v=>v.id===s)))return
-  sessionStorage.setItem('serna-rol',r);sessionStorage.setItem('serna-sede',s);await loadAccesses()
- },[perfiles,loadAccesses])
+  if(!perfiles.some(p=>p.rol===r&&p.sedes.some(v=>v.id===s)))throw new Error('Acceso no disponible')
+  // Validar el destino antes de cambiar el contexto global. La pantalla actual
+  // permanece montada y un error no la devuelve al inicio.
+  const actual=++revision.current
+  const {data}=await api.get<SessionStatus>('/auth/session',{headers:{'X-Rol':r,'X-Sede':s}})
+  if(actual!==revision.current)throw new Error('La sesión cambió')
+  if(!data.authorized||data.rol!==r)throw new Error('Acceso no disponible')
+  sessionStorage.setItem('serna-rol',r);sessionStorage.setItem('serna-sede',s)
+  setRol(r);setAuthorized(true);setError(null)
+ },[perfiles])
  const value=useMemo(()=>({rol,loading,configured:supabaseConfigured,session,email,authorized,error,perfiles,signIn,signOut,entrar,reintentar:loadAccesses}),[rol,loading,session,email,authorized,error,perfiles,signIn,signOut,entrar,loadAccesses])
  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
